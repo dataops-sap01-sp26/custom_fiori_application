@@ -1,0 +1,715 @@
+<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
+    <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml">
+        <edmx:Include Namespace="com.sap.vocabularies.Common.v1" Alias="Common"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/UI.xml">
+        <edmx:Include Namespace="com.sap.vocabularies.UI.v1" Alias="UI"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Communication.xml">
+        <edmx:Include Namespace="com.sap.vocabularies.Communication.v1" Alias="Communication"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata4/sap/zui_drs_main_o4/srvd/sap/zsd_drs_main_o4/0001/$metadata">
+        <edmx:Include Namespace="com.sap.gateway.srvd.zsd_drs_main_o4.v0001" Alias="SAP__self"/>
+    </edmx:Reference>
+    <edmx:DataServices>
+        <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="local">
+            <Annotations Target="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsJobConfigType">
+                <!-- ═══ LINE ITEM: Columns ═══ -->
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="JobId"/>
+                            <PropertyValue Property="Label" String="Job ID"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="JobText"/>
+                            <PropertyValue Property="Label" String="Description"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="RunType"/>
+                            <PropertyValue Property="Label" String="Run Type"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="SubscrId"/>
+                            <PropertyValue Property="Label" String="Subscription ID"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="JobName"/>
+                            <PropertyValue Property="Label" String="Job Name"/>
+                        </Record>
+                        <!-- Status với badge màu: JobStatusCriticality -->
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="JobStatus"/>
+                            <PropertyValue Property="Label" String="Status"/>
+                            <PropertyValue Property="Criticality" Path="JobStatusCriticality"/>
+                            <PropertyValue Property="CriticalityRepresentation" EnumMember="UI.CriticalityRepresentationType/WithIcon"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="JobStatusText"/>
+                            <PropertyValue Property="Label" String="Status Text"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="CreatedAt"/>
+                            <PropertyValue Property="Label" String="Created At"/>
+                        </Record>
+                        <!-- ═══ ACTION BUTTONS trên Toolbar ═══ -->
+                        <Record Type="UI.DataFieldForAction">
+                            <PropertyValue Property="Action" String="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.scheduleJob"/>
+                            <PropertyValue Property="Label" String="Schedule Job"/>
+                            <PropertyValue Property="InvocationGrouping" EnumMember="UI.OperationGroupingType/Isolated"/>
+                        </Record>
+                        <Record Type="UI.DataFieldForAction">
+                            <PropertyValue Property="Action" String="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.cancelJob"/>
+                            <PropertyValue Property="Label" String="Cancel Job"/>
+                            <PropertyValue Property="InvocationGrouping" EnumMember="UI.OperationGroupingType/Isolated"/>
+                        </Record>
+                        <Record Type="UI.DataFieldForAction">
+                            <PropertyValue Property="Action" String="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.refreshStatus"/>
+                            <PropertyValue Property="Label" String="Refresh Status"/>
+                            <PropertyValue Property="InvocationGrouping" EnumMember="UI.OperationGroupingType/Isolated"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+
+                <!-- ═══ SELECTION FIELDS: Filter Bar ═══ -->
+                <Annotation Term="UI.SelectionFields">
+                    <Collection>
+                        <PropertyPath>JobDate</PropertyPath>
+                        <PropertyPath>CreatedBy</PropertyPath>
+                        <PropertyPath>SubscrId</PropertyPath>
+                        <PropertyPath>JobId</PropertyPath>
+                        <PropertyPath>JobStatus</PropertyPath>
+                    </Collection>
+                </Annotation>
+
+                <!-- ═══ HEADER INFO ═══ -->
+                <Annotation Term="UI.HeaderInfo">
+                    <Record Type="UI.HeaderInfoType">
+                        <PropertyValue Property="TypeName" String="Job Config"/>
+                        <PropertyValue Property="TypeNamePlural" String="Job Configs"/>
+                        <PropertyValue Property="Title">
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="JobId"/>
+                            </Record>
+                        </PropertyValue>
+                        <PropertyValue Property="Description">
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="JobText"/>
+                            </Record>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+
+                <!-- ═══ FACETS for OBJECT PAGE ═══ -->
+                <Annotation Term="UI.Facets">
+                    <Collection>
+                        <Record Type="UI.ReferenceFacet">
+                            <PropertyValue Property="ID" String="GeneralSettings"/>
+                            <PropertyValue Property="Label" String="General Settings"/>
+                            <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#GeneralSettings"/>
+                        </Record>
+                        <Record Type="UI.ReferenceFacet">
+                            <PropertyValue Property="ID" String="ScheduleSettings"/>
+                            <PropertyValue Property="Label" String="Schedule Settings"/>
+                            <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#ScheduleSettings"/>
+                        </Record>
+                        <Record Type="UI.ReferenceFacet">
+                            <PropertyValue Property="ID" String="PeriodicSettings"/>
+                            <PropertyValue Property="Label" String="Periodic Settings"/>
+                            <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#PeriodicSettings"/>
+                        </Record>
+                        <Record Type="UI.ReferenceFacet">
+                            <PropertyValue Property="ID" String="WeekdaySettings"/>
+                            <PropertyValue Property="Label" String="Weekday &amp; Week-of-Month"/>
+                            <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#WeekdaySettings"/>
+                        </Record>
+                        <Record Type="UI.ReferenceFacet">
+                            <PropertyValue Property="ID" String="MonthlySettings"/>
+                            <PropertyValue Property="Label" String="Monthly Day"/>
+                            <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#MonthlySettings"/>
+                        </Record>
+                        <Record Type="UI.ReferenceFacet">
+                            <PropertyValue Property="ID" String="JobStatus"/>
+                            <PropertyValue Property="Label" String="Job Status"/>
+                            <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#JobStatus"/>
+                        </Record>
+                        <Record Type="UI.ReferenceFacet">
+                            <PropertyValue Property="ID" String="ReportFiles"/>
+                            <PropertyValue Property="Label" String="Report Files"/>
+                            <!-- Navigation to File entity LineItem -->
+                            <PropertyValue Property="Target" AnnotationPath="_File/@UI.LineItem"/>
+                        </Record>
+                        <Record Type="UI.ReferenceFacet">
+                            <PropertyValue Property="ID" String="AdminData"/>
+                            <PropertyValue Property="Label" String="Administrative Data"/>
+                            <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#AdminData"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+
+                <!-- ═══ FIELD GROUPS ═══ -->
+                <Annotation Term="UI.FieldGroup" Qualifier="GeneralSettings">
+                    <Record Type="UI.FieldGroupType">
+                        <PropertyValue Property="Data">
+                            <Collection>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="JobText"/>
+                                    <PropertyValue Property="Label" String="Description"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="RunType"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="SubscrId"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+
+                <Annotation Term="UI.FieldGroup" Qualifier="ScheduleSettings">
+                    <Record Type="UI.FieldGroupType">
+                        <PropertyValue Property="Data">
+                            <Collection>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="StartTimestamp"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="Tmzone"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+
+                <Annotation Term="UI.FieldGroup" Qualifier="PeriodicSettings">
+                    <Record Type="UI.FieldGroupType">
+                        <PropertyValue Property="Data">
+                            <Collection>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="PeriodicGranularity"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="PeriodicValue"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="EndTimestamp"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="MaxIterations"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="ExceptionCalendarId"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="ExceptionRestrictionCode"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+
+                <Annotation Term="UI.FieldGroup" Qualifier="WeekdaySettings">
+                    <Record Type="UI.FieldGroupType">
+                        <PropertyValue Property="Data">
+                            <Collection>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="OnMonday"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="OnTuesday"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="OnWednesday"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="OnThursday"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="OnFriday"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="OnSaturday"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="OnSunday"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="MonthWeekNumber"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+
+                <Annotation Term="UI.FieldGroup" Qualifier="MonthlySettings">
+                    <Record Type="UI.FieldGroupType">
+                        <PropertyValue Property="Data">
+                            <Collection>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="MonthDay"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="UseWorkingDays"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="ShiftDirection"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+
+                <Annotation Term="UI.FieldGroup" Qualifier="JobStatus">
+                    <Record Type="UI.FieldGroupType">
+                        <PropertyValue Property="Data">
+                            <Collection>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="JobName"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="JobCount"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="JobStatus"/>
+                                    <PropertyValue Property="Criticality" Path="JobStatusCriticality"/>
+                                    <PropertyValue Property="CriticalityRepresentation" EnumMember="UI.CriticalityRepresentationType/WithIcon"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="JobStatusText"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="Message"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+
+                <Annotation Term="UI.FieldGroup" Qualifier="AdminData">
+                    <Record Type="UI.FieldGroupType">
+                        <PropertyValue Property="Data">
+                            <Collection>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="CreatedBy"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="CreatedAt"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="LastChangedBy"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="LastChangedAt"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="LocalLastChangedAt"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+            </Annotations>
+
+            <Annotations Target="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.JobHistoryAnalyticsType">
+                <!-- ═══ LINE ITEM: Columns ═══ -->
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="JobDate"/>
+                            <PropertyValue Property="Label" String="Job Date"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="ReportId"/>
+                            <PropertyValue Property="Label" String="Report ID"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="JobText"/>
+                            <PropertyValue Property="Label" String="Job Description"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="JobName"/>
+                            <PropertyValue Property="Label" String="Job Name"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="StartTimestamp"/>
+                            <PropertyValue Property="Label" String="Start Time"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="EndTimestamp"/>
+                            <PropertyValue Property="Label" String="End Time"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="DurationMs"/>
+                            <PropertyValue Property="Label" String="Duration (ms)"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="JobStatus"/>
+                            <PropertyValue Property="Label" String="Status"/>
+                            <PropertyValue Property="Criticality" Path="JobStatusCriticality"/>
+                            <PropertyValue Property="CriticalityRepresentation" EnumMember="UI.CriticalityRepresentationType/WithIcon"/>
+                        </Record>
+                        <Record Type="UI.DataFieldWithUrl">
+                            <PropertyValue Property="Value" Path="FileName"/>
+                            <PropertyValue Property="Label" String="File Name"/>
+                            <PropertyValue Property="Url" Path="FileDownloadUrl"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Message"/>
+                            <PropertyValue Property="Label" String="Message"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+
+                <!-- ═══ SELECTION FIELDS: Filter Bar ═══ -->
+                <Annotation Term="UI.SelectionFields">
+                    <Collection>
+                        <PropertyPath>JobDate</PropertyPath>
+                        <PropertyPath>CreatedBy</PropertyPath>
+                        <PropertyPath>SubscrId</PropertyPath>
+                        <PropertyPath>ReportId</PropertyPath>
+                        <PropertyPath>JobId</PropertyPath>
+                        <PropertyPath>JobStatus</PropertyPath>
+                    </Collection>
+                </Annotation>
+
+                <!-- ═══ CHART: Analytical Chart ═══ -->
+                <Annotation Term="UI.Chart">
+                    <Record Type="UI.ChartDefinitionType">
+                        <PropertyValue Property="ChartType" EnumMember="UI.ChartType/Column" />
+                        <PropertyValue Property="Title" String="Job Execution Statistics" />
+                        <PropertyValue Property="Dimensions">
+                            <Collection>
+                                <PropertyPath>JobDate</PropertyPath>
+                                <PropertyPath>JobStatus</PropertyPath>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="Measures">
+                            <Collection>
+                                <PropertyPath>JobCount</PropertyPath>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="MeasureAttributes">
+                            <Collection>
+                                <Record Type="UI.ChartMeasureAttributeType">
+                                    <PropertyValue Property="Measure" PropertyPath="JobCount" />
+                                    <PropertyValue Property="Role" EnumMember="UI.ChartMeasureRoleType/Axis1" />
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="DimensionAttributes">
+                            <Collection>
+                                <Record Type="UI.ChartDimensionAttributeType">
+                                    <PropertyValue Property="Dimension" PropertyPath="JobDate" />
+                                    <PropertyValue Property="Role" EnumMember="UI.ChartDimensionRoleType/Category" />
+                                </Record>
+                                <Record Type="UI.ChartDimensionAttributeType">
+                                    <PropertyValue Property="Dimension" PropertyPath="JobStatus" />
+                                    <PropertyValue Property="Role" EnumMember="UI.ChartDimensionRoleType/Series" />
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+
+                <!-- ═══ HEADER INFO: Tiêu đề Object Page ═══ -->
+                <Annotation Term="UI.HeaderInfo">
+                    <Record Type="UI.HeaderInfoType">
+                        <PropertyValue Property="TypeName" String="Job Execution"/>
+                        <PropertyValue Property="TypeNamePlural" String="Job Executions"/>
+                        <PropertyValue Property="Title">
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="JobText"/>
+                            </Record>
+                        </PropertyValue>
+                        <PropertyValue Property="Description">
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="Message"/>
+                            </Record>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+
+                <!-- ═══ FACETS: Cấu trúc Object Page ═══ -->
+                <Annotation Term="UI.Facets">
+                    <Collection>
+                        <Record Type="UI.ReferenceFacet">
+                            <PropertyValue Property="ID" String="GeneralInfo"/>
+                            <PropertyValue Property="Label" String="General Information"/>
+                            <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#GeneralInfo"/>
+                        </Record>
+                        <Record Type="UI.ReferenceFacet">
+                            <PropertyValue Property="ID" String="ExecutionDetails"/>
+                            <PropertyValue Property="Label" String="Execution Details"/>
+                            <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#ExecutionDetails"/>
+                        </Record>
+                        <Record Type="UI.ReferenceFacet">
+                            <PropertyValue Property="ID" String="ReportFileDetails"/>
+                            <PropertyValue Property="Label" String="Report File"/>
+                            <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#ReportFileDetails"/>
+                        </Record>
+                        <Record Type="UI.ReferenceFacet">
+                            <PropertyValue Property="ID" String="AdminData"/>
+                            <PropertyValue Property="Label" String="Administrative Data"/>
+                            <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#AdminData"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+
+                <!-- ═══ FIELD GROUPS ═══ -->
+                <Annotation Term="UI.FieldGroup" Qualifier="GeneralInfo">
+                    <Record Type="UI.FieldGroupType">
+                        <PropertyValue Property="Data">
+                            <Collection>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="ReportId"/>
+                                    <PropertyValue Property="Label" String="Report ID"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="SubscrId"/>
+                                    <PropertyValue Property="Label" String="Subscription ID"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="JobId"/>
+                                    <PropertyValue Property="Label" String="Job ID"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="RunType"/>
+                                    <PropertyValue Property="Label" String="Run Type"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="JobName"/>
+                                    <PropertyValue Property="Label" String="Job Name"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="JobText"/>
+                                    <PropertyValue Property="Label" String="Description"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="JobCount"/>
+                                    <PropertyValue Property="Label" String="Job Count"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+
+                <Annotation Term="UI.FieldGroup" Qualifier="ExecutionDetails">
+                    <Record Type="UI.FieldGroupType">
+                        <PropertyValue Property="Data">
+                            <Collection>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="OutputFormat"/>
+                                    <PropertyValue Property="Label" String="Output Format"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="DurationMs"/>
+                                    <PropertyValue Property="Label" String="Duration (ms)"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="StartTimestamp"/>
+                                    <PropertyValue Property="Label" String="Start Time"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="EndTimestamp"/>
+                                    <PropertyValue Property="Label" String="End Time"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="JobStatus"/>
+                                    <PropertyValue Property="Label" String="Status"/>
+                                    <PropertyValue Property="Criticality" Path="JobStatusCriticality"/>
+                                    <PropertyValue Property="CriticalityRepresentation" EnumMember="UI.CriticalityRepresentationType/WithIcon"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="Message"/>
+                                    <PropertyValue Property="Label" String="Message"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="RetryCount"/>
+                                    <PropertyValue Property="Label" String="Retry Count"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+
+                <Annotation Term="UI.FieldGroup" Qualifier="ReportFileDetails">
+                    <Record Type="UI.FieldGroupType">
+                        <PropertyValue Property="Data">
+                            <Collection>
+                                <Record Type="UI.DataFieldWithUrl">
+                                    <PropertyValue Property="Value" Path="FileName"/>
+                                    <PropertyValue Property="Label" String="File Name"/>
+                                    <PropertyValue Property="Url" Path="FileDownloadUrl"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="FileSizeDisplay"/>
+                                    <PropertyValue Property="Label" String="File Size"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="FileCreatedBy"/>
+                                    <PropertyValue Property="Label" String="Generated By"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="FileCreatedAt"/>
+                                    <PropertyValue Property="Label" String="Generated At"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+
+                <Annotation Term="UI.FieldGroup" Qualifier="AdminData">
+                    <Record Type="UI.FieldGroupType">
+                        <PropertyValue Property="Data">
+                            <Collection>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="CreatedBy"/>
+                                    <PropertyValue Property="Label" String="Created By"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="CreatedAt"/>
+                                    <PropertyValue Property="Label" String="Created At"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="LastChangedBy"/>
+                                    <PropertyValue Property="Label" String="Last Changed By"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="LastChangedAt"/>
+                                    <PropertyValue Property="Label" String="Last Changed At"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="LocalLastChangedAt"/>
+                                    <PropertyValue Property="Label" String="Local Last Changed At"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+            </Annotations>
+
+
+        <!-- ═══════════════════════════════════════════════════════
+             DRS FILE — My Exports / Report Files
+        ════════════════════════════════════════════════════════ -->
+        <Annotations Target="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsFileType">
+
+            <!-- ═══ LINE ITEM: Cột hiển thị trên bảng My Exports ═══ -->
+            <Annotation Term="UI.LineItem">
+                <Collection>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="FileName"/>
+                        <PropertyValue Property="Label" String="File Name"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="FileContent"/>
+                        <PropertyValue Property="Label" String="Download"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="FileSizeDisplay"/>
+                        <PropertyValue Property="Label" String="File Size"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="CreatedBy"/>
+                        <PropertyValue Property="Label" String="Created By"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="CreatedAt"/>
+                        <PropertyValue Property="Label" String="Created At"/>
+                    </Record>
+                </Collection>
+            </Annotation>
+
+            <!-- ═══ SELECTION FIELDS: Filter Bar ═══ -->
+            <Annotation Term="UI.SelectionFields">
+                <Collection>
+                    <PropertyPath>FileName</PropertyPath>
+                    <PropertyPath>CreatedBy</PropertyPath>
+                    <PropertyPath>CreatedAt</PropertyPath>
+                </Collection>
+            </Annotation>
+
+            <!-- ═══ HEADER INFO: Tiêu đề Object Page ═══ -->
+            <Annotation Term="UI.HeaderInfo">
+                <Record Type="UI.HeaderInfoType">
+                    <PropertyValue Property="TypeName" String="Report File"/>
+                    <PropertyValue Property="TypeNamePlural" String="Report Files"/>
+                    <PropertyValue Property="Title">
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="FileName"/>
+                        </Record>
+                    </PropertyValue>
+                    <PropertyValue Property="Description">
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="MimeType"/>
+                        </Record>
+                    </PropertyValue>
+                </Record>
+            </Annotation>
+
+            <!-- ═══ FACETS: Bố cục Object Page ═══ -->
+            <Annotation Term="UI.Facets">
+                <Collection>
+                    <Record Type="UI.ReferenceFacet">
+                        <PropertyValue Property="Label" String="File Details"/>
+                        <PropertyValue Property="ID" String="FileDetails"/>
+                        <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#FileDetails"/>
+                    </Record>
+                    <Record Type="UI.ReferenceFacet">
+                        <PropertyValue Property="Label" String="Administrative Data"/>
+                        <PropertyValue Property="ID" String="AdminData"/>
+                        <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#AdminData"/>
+                    </Record>
+                </Collection>
+            </Annotation>
+
+            <!-- ═══ FIELD GROUP: File Details Panel ═══ -->
+            <Annotation Term="UI.FieldGroup" Qualifier="FileDetails">
+                <Record Type="UI.FieldGroupType">
+                    <PropertyValue Property="Data">
+                        <Collection>
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="FileName"/>
+                                <PropertyValue Property="Label" String="File Name"/>
+                            </Record>
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="FileContent"/>
+                                <PropertyValue Property="Label" String="Download"/>
+                            </Record>
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="FileSizeDisplay"/>
+                                <PropertyValue Property="Label" String="File Size"/>
+                            </Record>
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="MimeType"/>
+                                <PropertyValue Property="Label" String="MIME Type"/>
+                            </Record>
+                        </Collection>
+                    </PropertyValue>
+                </Record>
+            </Annotation>
+
+            <!-- ═══ FIELD GROUP: Administrative Data Panel ═══ -->
+            <Annotation Term="UI.FieldGroup" Qualifier="AdminData">
+                <Record Type="UI.FieldGroupType">
+                    <PropertyValue Property="Data">
+                        <Collection>
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="CreatedBy"/>
+                                <PropertyValue Property="Label" String="Created By"/>
+                            </Record>
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="CreatedAt"/>
+                                <PropertyValue Property="Label" String="Created At"/>
+                            </Record>
+                        </Collection>
+                    </PropertyValue>
+                </Record>
+            </Annotation>
+
+        </Annotations>
+
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>

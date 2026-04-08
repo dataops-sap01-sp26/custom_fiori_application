@@ -1,0 +1,29 @@
+{
+  "generationParameters": {
+    "generationDate": "Mon Apr 06 2026 22:37:47 GMT+0700 (Indochina Time)",
+    "generatorPlatform": "Visual Studio Code",
+    "serviceType": "SAP System (ABAP On-Premise)",
+    "metadataFilename": "",
+    "serviceUrl": "https://s40lp1.ucc.cit.tum.de/sap/opu/odata4/sap/zui_drs_main_o4/srvd/sap/zsd_drs_main_o4/0001/",
+    "appName": "customfioriapplication",
+    "appTitle": "Custom Fiori Application",
+    "appDescription": "An SAP Fiori application.",
+    "appNamespace": "cfa",
+    "ui5Theme": "sap_horizon",
+    "ui5Version": "1.108.33",
+    "enableEslint": true,
+    "enableTypeScript": false,
+    "showMockDataInfo": true,
+    "generatorVersion": "1.22.0",
+    "template": "Custom Page V4",
+    "generatorName": "SAP Fiori Application Generator",
+    "entityRelatedConfig": [
+      {
+        "type": "Main Entity",
+        "value": "DrsJobConfig"
+      }
+    ],
+    "launchText": "To launch the generated application, run the following from the generated application root folder:\n\n```\n    npm start\n```",
+    "valueHelpDownloaded": true
+  }
+}

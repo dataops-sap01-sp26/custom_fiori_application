@@ -1,0 +1,321 @@
+{
+  "_version": "1.48.0",
+  "sap.app": {
+    "id": "cfa.customfioriapplication",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:fpm",
+      "version": "1.22.0",
+      "toolsId": "75a04990-402f-45fb-ad80-8399edaa93ed"
+    },
+    "dataSources": {
+      "annotation": {
+        "type": "ODataAnnotation",
+        "uri": "annotations/annotation.xml",
+        "settings": {
+          "localUri": "annotations/annotation.xml"
+        }
+      },
+      "mainService": {
+        "uri": "/sap/opu/odata4/sap/zui_drs_main_o4/srvd/sap/zsd_drs_main_o4/0001/",
+        "type": "OData",
+        "settings": {
+          "annotations": [
+            "annotation"
+          ],
+          "localUri": "localService/mainService/metadata.xml",
+          "odataVersion": "4.0"
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.108.33",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.fe.core": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "cfa.customfioriapplication.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "@i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "uri": "i18n/i18n.properties"
+      }
+    },
+    "resources": {
+      "css": []
+    },
+    "routing": {
+      "config": {},
+      "routes": [
+        {
+          "name": "DashboardMainPage",
+          "pattern": ":?query:",
+          "target": "DashboardMainPage"
+        },
+        {
+          "name": "DrsJobConfigObjectPage",
+          "pattern": "DrsJobConfig({JobUuid}):?query:",
+          "target": "DrsJobConfigObjectPage"
+        },
+        {
+          "name": "JobHistoryObjectPage",
+          "pattern": "JobHistoryAnalytics({JobHistUuid}):?query:",
+          "target": "JobHistoryObjectPage"
+        },
+        {
+          "name": "DrsFileObjectPage",
+          "pattern": "DrsFile({FileUuid}):?query:",
+          "target": "DrsFileObjectPage"
+        },
+        {
+          "name": "GL01ObjectPage",
+          "pattern": "GL01_GLAccountBalances(Ledger={Ledger},SourceLedger={SourceLedger},FiscalYear={FiscalYear},Period={Period},CompanyCode={CompanyCode},GLAccount={GLAccount}):?query:",
+          "target": "GL01ObjectPage"
+        },
+        {
+          "name": "AR01ObjectPage",
+          "pattern": "AR01_CustomerOpenItems(Ledger={Ledger},SourceLedger={SourceLedger},CompanyCode={CompanyCode},Customer={Customer}):?query:",
+          "target": "AR01ObjectPage"
+        },
+        {
+          "name": "AR02ObjectPage",
+          "pattern": "AR02_CustomerBalances(CompanyCode={CompanyCode},Customer={Customer},FiscalYear={FiscalYear},PostingDate={PostingDate}):?query:",
+          "target": "AR02ObjectPage"
+        },
+        {
+          "name": "AR03ObjectPage",
+          "pattern": "AR03_ARAgingReport(CompanyCode={CompanyCode},Customer={Customer},LocalCurrency={LocalCurrency}):?query:",
+          "target": "AR03ObjectPage"
+        },
+        {
+          "name": "AP01ObjectPage",
+          "pattern": "AP01_VendorOpenItems(Ledger={Ledger},SourceLedger={SourceLedger},CompanyCode={CompanyCode},Supplier={Supplier}):?query:",
+          "target": "AP01ObjectPage"
+        },
+        {
+          "name": "AP02ObjectPage",
+          "pattern": "AP02_VendorBalances(CompanyCode={CompanyCode},Supplier={Supplier},FiscalYear={FiscalYear},PostingDate={PostingDate}):?query:",
+          "target": "AP02ObjectPage"
+        },
+        {
+          "name": "AP03ObjectPage",
+          "pattern": "AP03_APAgingReport(CompanyCode={CompanyCode},Supplier={Supplier},LocalCurrency={LocalCurrency}):?query:",
+          "target": "AP03ObjectPage"
+        }
+      ],
+      "targets": {
+        "DashboardMainPage": {
+          "type": "Component",
+          "id": "DashboardMainPage",
+          "name": "sap.fe.core.fpm",
+          "options": {
+            "settings": {
+              "navigation": {
+                "DrsJobConfig": {
+                  "detail": {
+                    "route": "DrsJobConfigObjectPage"
+                  }
+                },
+                "JobHistoryAnalytics": {
+                  "detail": {
+                    "route": "JobHistoryObjectPage"
+                  }
+                },
+                "DrsFile": {
+                  "detail": {
+                    "route": "DrsFileObjectPage"
+                  }
+                },
+                "GL01_GLAccountBalances": {
+                  "detail": { "route": "GL01ObjectPage" }
+                },
+                "AR01_CustomerOpenItems": {
+                  "detail": { "route": "AR01ObjectPage" }
+                },
+                "AR02_CustomerBalances": {
+                  "detail": { "route": "AR02ObjectPage" }
+                },
+                "AR03_ARAgingReport": {
+                  "detail": { "route": "AR03ObjectPage" }
+                },
+                "AP01_VendorOpenItems": {
+                  "detail": { "route": "AP01ObjectPage" }
+                },
+                "AP02_VendorBalances": {
+                  "detail": { "route": "AP02ObjectPage" }
+                },
+                "AP03_APAgingReport": {
+                  "detail": { "route": "AP03ObjectPage" }
+                }
+              },
+              "contextPath": "/DrsJobConfig",
+              "viewName": "cfa.customfioriapplication.ext.view.Main"
+            }
+          }
+        },
+        "DrsJobConfigObjectPage": {
+          "type": "Component",
+          "id": "DrsJobConfigObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/DrsJobConfig",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "JobHistoryObjectPage": {
+          "type": "Component",
+          "id": "JobHistoryObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/JobHistoryAnalytics",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "DrsFileObjectPage": {
+          "type": "Component",
+          "id": "DrsFileObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/DrsFile",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "GL01ObjectPage": {
+          "type": "Component",
+          "id": "GL01ObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/GL01_GLAccountBalances",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "AR01ObjectPage": {
+          "type": "Component",
+          "id": "AR01ObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/AR01_CustomerOpenItems",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "AR02ObjectPage": {
+          "type": "Component",
+          "id": "AR02ObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/AR02_CustomerBalances",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "AR03ObjectPage": {
+          "type": "Component",
+          "id": "AR03ObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/AR03_ARAgingReport",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "AP01ObjectPage": {
+          "type": "Component",
+          "id": "AP01ObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/AP01_VendorOpenItems",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "AP02ObjectPage": {
+          "type": "Component",
+          "id": "AP02ObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/AP02_VendorBalances",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "AP03ObjectPage": {
+          "type": "Component",
+          "id": "AP03ObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/AP03_APAgingReport",
+              "editableHeaderContent": false
+            }
+          }
+        }
+      }
+    }
+  },
+  "sap.fe": {
+    "app": {
+      "enableLazyLoading": true
+    }
+  }
+}

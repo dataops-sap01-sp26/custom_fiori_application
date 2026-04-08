@@ -1,0 +1,319 @@
+<mvc:View xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:macros="sap.fe.macros"
+    xmlns:tnt="sap.tnt" xmlns:html="http://www.w3.org/1999/xhtml"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:viz.data="sap.viz.ui5.data"
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
+    controllerName="cfa.customfioriapplication.ext.view.Main">
+    <tnt:ToolPage id="toolPage">
+        <!-- HEADER -->
+        <tnt:header>
+            <tnt:ToolHeader>
+                <Button id="sideNavigationToggleButton" icon="sap-icon://menu2" type="Transparent" press=".onMenuButtonPress" />
+                <Title text="SAP Job Operations Dashboard" />
+                <ToolbarSpacer />
+                <Button icon="sap-icon://bell" type="Transparent" />
+                <Button icon="sap-icon://customer" type="Transparent" />
+            </tnt:ToolHeader>
+        </tnt:header>
+        
+        <!-- SIDEBAR MENU -->
+        <tnt:sideContent>
+            <tnt:SideNavigation expanded="true" itemSelect=".onItemSelect">
+                <tnt:NavigationList>
+                    <!-- Nhóm 1: Overview & Analytics -->
+                    <tnt:NavigationListItem text="Dashboard Home" icon="sap-icon://home" key="dashboard" />
+                    <!-- <tnt:NavigationListItem text="Analytics &amp; Charts" icon="sap-icon://business-objects-experience" key="analytics" /> -->
+                    
+                    <!-- Nhóm 2: Core Master Data -->
+                    <tnt:NavigationListItem text="Master Data" icon="sap-icon://database">
+                        <tnt:NavigationListItem text="Report Catalog" icon="sap-icon://education" key="catalog" />
+                        <tnt:NavigationListItem text="Subscriptions" icon="sap-icon://form" key="subscriptions" />
+                    </tnt:NavigationListItem>
+
+                    <!-- Nhóm 3: Operations & Monitoring -->
+                    <tnt:NavigationListItem text="Job Operations" icon="sap-icon://process">
+                        <tnt:NavigationListItem text="Job Configurations" icon="sap-icon://action-settings" key="jobconfigs" />
+                        <tnt:NavigationListItem text="Job History &amp; Logs" icon="sap-icon://history" key="history" />
+                    </tnt:NavigationListItem>
+
+                    <!-- Nhóm 4: Outputs -->
+                    <tnt:NavigationListItem text="Output &amp; Deliverables" icon="sap-icon://documents">
+                        <tnt:NavigationListItem text="My Exports (Files)" icon="sap-icon://download" key="exports" />
+                    </tnt:NavigationListItem>
+
+                    <!-- Nhóm 5: Reports -->
+                    <tnt:NavigationListItem text="Reports" icon="sap-icon://manager-insight">
+                        <tnt:NavigationListItem text="Report AP-01" icon="sap-icon://money-bills" key="report_ap01" />
+                        <tnt:NavigationListItem text="Report AP-02" icon="sap-icon://supplier" key="report_ap02" />
+                        <tnt:NavigationListItem text="Report AP-03" icon="sap-icon://payment-approval" key="report_ap03" />
+                        <tnt:NavigationListItem text="Report AR-01" icon="sap-icon://customer-financial-fact-sheet" key="report_ar01" />
+                        <tnt:NavigationListItem text="Report AR-02" icon="sap-icon://receipt" key="report_ar02" />
+                        <tnt:NavigationListItem text="Report AR-03" icon="sap-icon://sales-document" key="report_ar03" />
+                        <tnt:NavigationListItem text="Report GL-01" icon="sap-icon://accounting-document-verification" key="report_gl01" />
+                    </tnt:NavigationListItem>
+                </tnt:NavigationList>
+                
+                <!-- Fixed Bottom Item -->
+                <tnt:fixedItem>
+                    <tnt:NavigationList>
+                        <tnt:NavigationListItem text="Settings &amp; Parameters" icon="sap-icon://settings" key="settings" />
+                    </tnt:NavigationList>
+                </tnt:fixedItem>
+            </tnt:SideNavigation>
+        </tnt:sideContent>
+        
+        <!-- MAIN CONTENT ÁP VỚI TỪNG MENU BÊN TRÁI -->
+        <tnt:mainContents>
+            <NavContainer id="pageContainer">
+                <pages>
+                    <ScrollContainer id="dashboard" horizontal="false" vertical="true">
+                        <Title text="Dashboard Overview" class="sapUiMediumMargin"/>
+                    </ScrollContainer>
+                    <!-- <ScrollContainer id="analytics" horizontal="false" vertical="true">
+                        <Title text="Job History Analytics" class="sapUiMediumMargin"/>
+                    </ScrollContainer> -->
+                    
+                    <ScrollContainer id="catalog" horizontal="false" vertical="true">
+                        <Title text="Report Catalog Management" class="sapUiMediumMargin"/>
+                    </ScrollContainer>
+                    <ScrollContainer id="subscriptions" horizontal="false" vertical="true">
+                        <Title text="Subscriptions List" class="sapUiMediumMargin"/>
+                    </ScrollContainer>
+                    
+                    <ScrollContainer id="jobconfigs" horizontal="false" vertical="true" height="100%">
+                        <macros:FilterBar
+                            id="jobConfigFilterBar"
+                            metaPath="/DrsJobConfig/@com.sap.vocabularies.UI.v1.SelectionFields"
+                            liveMode="false"/>
+                        <macros:Table
+                            id="jobConfigTable"
+                            metaPath="/DrsJobConfig/@com.sap.vocabularies.UI.v1.LineItem"
+                            readOnly="true"
+                            enableExport="true"
+                            enableAutoColumnWidth="true"
+                            variantManagement="Control"
+                            p13nMode="Column,Sort,Filter"
+                            headerText="Job Configurations"
+                            filterBar="jobConfigFilterBar"
+                            growingThreshold="20">
+                            <macros:actions>
+                                <macros:Action key="customCreate" text="Create" press=".onCreateJobConfig" requiresSelection="false" />
+                                <macros:Action key="customDelete" text="Delete" press=".onDeleteJobConfig" requiresSelection="true" />
+                            </macros:actions>
+                        </macros:Table>
+                    </ScrollContainer>
+
+                    <ScrollContainer id="history" horizontal="false" vertical="true" height="100%">
+                        <macros:FilterBar
+                            id="jobHistoryFilterBar"
+                            metaPath="/JobHistoryAnalytics/@com.sap.vocabularies.UI.v1.SelectionFields"
+                            liveMode="false"
+                            search=".onJobHistoryFilterSearch"/>
+
+                        <!-- Chart Section — VizFrame thuần, không dùng macros:Chart -->
+                        <Panel id="jobHistoryChartPanel" headerText="Job Execution Statistics" class="sapUiResponsiveMargin">
+                            <viz:VizFrame
+                                id="jobTrendChart"
+                                vizType="stacked_column"
+                                height="350px"
+                                width="100%">
+                                <viz:dataset>
+                                    <viz.data:FlattenedDataset data="{chartModel>/chartData}">
+                                        <viz.data:dimensions>
+                                            <viz.data:DimensionDefinition name="Date"   value="{chartModel>JobDate}"/>
+                                            <viz.data:DimensionDefinition name="Status" value="{chartModel>JobStatus}"/>
+                                        </viz.data:dimensions>
+                                        <viz.data:measures>
+                                            <viz.data:MeasureDefinition name="Count" value="{chartModel>JobCountTotal}"/>
+                                        </viz.data:measures>
+                                    </viz.data:FlattenedDataset>
+                                </viz:dataset>
+                                <viz:feeds>
+                                    <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Date"/>
+                                    <viz.feeds:FeedItem uid="valueAxis"    type="Measure"   values="Count"/>
+                                    <viz.feeds:FeedItem uid="color"        type="Dimension" values="Status"/>
+                                </viz:feeds>
+                            </viz:VizFrame>
+                        </Panel>
+
+                        <macros:Table
+                            id="jobHistoryTable"
+                            metaPath="/JobHistoryAnalytics/@com.sap.vocabularies.UI.v1.LineItem"
+                            readOnly="true"
+                            enableExport="true"
+                            enableAutoColumnWidth="true"
+                            variantManagement="Control"
+                            p13nMode="Column,Sort,Filter"
+                            headerText="Global Job History"
+                            filterBar="jobHistoryFilterBar"
+                            growingThreshold="20">
+                        </macros:Table>
+                    </ScrollContainer>
+
+                    <ScrollContainer id="exports" horizontal="false" vertical="true" height="100%">
+                        <macros:FilterBar
+                            id="drsFileFilterBar"
+                            metaPath="/DrsFile/@com.sap.vocabularies.UI.v1.SelectionFields"
+                            liveMode="false"/>
+                        <macros:Table
+                            id="drsFileTable"
+                            metaPath="/DrsFile/@com.sap.vocabularies.UI.v1.LineItem"
+                            readOnly="true"
+                            enableExport="true"
+                            enableAutoColumnWidth="true"
+                            variantManagement="Control"
+                            p13nMode="Column,Sort,Filter"
+                            headerText="My Exports (Report Files)"
+                            filterBar="drsFileFilterBar"
+                            growingThreshold="20">
+                        </macros:Table>
+                    </ScrollContainer>
+
+                    <!-- ── AP-01: Vendor Open Items ── -->
+                    <ScrollContainer id="report_ap01" horizontal="false" vertical="true" height="100%">
+                        <macros:FilterBar
+                            id="ap01FilterBar"
+                            metaPath="/AP01_VendorOpenItems/@com.sap.vocabularies.UI.v1.SelectionFields"
+                            liveMode="false"/>
+                        <macros:Table
+                            id="ap01Table"
+                            metaPath="/AP01_VendorOpenItems/@com.sap.vocabularies.UI.v1.LineItem"
+                            readOnly="true"
+                            enableExport="true"
+                            enableAutoColumnWidth="true"
+                            variantManagement="Control"
+                            p13nMode="Column,Sort,Filter"
+                            headerText="AP-01: Vendor Open Items"
+                            filterBar="ap01FilterBar"
+                            growingThreshold="20">
+                        </macros:Table>
+                    </ScrollContainer>
+
+                    <!-- ── AP-02: Vendor Balances ── -->
+                    <ScrollContainer id="report_ap02" horizontal="false" vertical="true" height="100%">
+                        <macros:FilterBar
+                            id="ap02FilterBar"
+                            metaPath="/AP02_VendorBalances/@com.sap.vocabularies.UI.v1.SelectionFields"
+                            liveMode="false"/>
+                        <macros:Table
+                            id="ap02Table"
+                            metaPath="/AP02_VendorBalances/@com.sap.vocabularies.UI.v1.LineItem"
+                            readOnly="true"
+                            enableExport="true"
+                            enableAutoColumnWidth="true"
+                            variantManagement="Control"
+                            p13nMode="Column,Sort,Filter"
+                            headerText="AP-02: Vendor Balances"
+                            filterBar="ap02FilterBar"
+                            growingThreshold="20">
+                        </macros:Table>
+                    </ScrollContainer>
+
+                    <!-- ── AP-03: AP Aging Report ── -->
+                    <ScrollContainer id="report_ap03" horizontal="false" vertical="true" height="100%">
+                        <macros:FilterBar
+                            id="ap03FilterBar"
+                            metaPath="/AP03_APAgingReport/@com.sap.vocabularies.UI.v1.SelectionFields"
+                            liveMode="false"/>
+                        <macros:Table
+                            id="ap03Table"
+                            metaPath="/AP03_APAgingReport/@com.sap.vocabularies.UI.v1.LineItem"
+                            readOnly="true"
+                            enableExport="true"
+                            enableAutoColumnWidth="true"
+                            variantManagement="Control"
+                            p13nMode="Column,Sort,Filter"
+                            headerText="AP-03: AP Aging Report"
+                            filterBar="ap03FilterBar"
+                            growingThreshold="20">
+                        </macros:Table>
+                    </ScrollContainer>
+
+                    <!-- ── AR-01: Customer Open Items ── -->
+                    <ScrollContainer id="report_ar01" horizontal="false" vertical="true" height="100%">
+                        <macros:FilterBar
+                            id="ar01FilterBar"
+                            metaPath="/AR01_CustomerOpenItems/@com.sap.vocabularies.UI.v1.SelectionFields"
+                            liveMode="false"/>
+                        <macros:Table
+                            id="ar01Table"
+                            metaPath="/AR01_CustomerOpenItems/@com.sap.vocabularies.UI.v1.LineItem"
+                            readOnly="true"
+                            enableExport="true"
+                            enableAutoColumnWidth="true"
+                            variantManagement="Control"
+                            p13nMode="Column,Sort,Filter"
+                            headerText="AR-01: Customer Open Items"
+                            filterBar="ar01FilterBar"
+                            growingThreshold="20">
+                        </macros:Table>
+                    </ScrollContainer>
+
+                    <!-- ── AR-02: Customer Balances ── -->
+                    <ScrollContainer id="report_ar02" horizontal="false" vertical="true" height="100%">
+                        <macros:FilterBar
+                            id="ar02FilterBar"
+                            metaPath="/AR02_CustomerBalances/@com.sap.vocabularies.UI.v1.SelectionFields"
+                            liveMode="false"/>
+                        <macros:Table
+                            id="ar02Table"
+                            metaPath="/AR02_CustomerBalances/@com.sap.vocabularies.UI.v1.LineItem"
+                            readOnly="true"
+                            enableExport="true"
+                            enableAutoColumnWidth="true"
+                            variantManagement="Control"
+                            p13nMode="Column,Sort,Filter"
+                            headerText="AR-02: Customer Balances"
+                            filterBar="ar02FilterBar"
+                            growingThreshold="20">
+                        </macros:Table>
+                    </ScrollContainer>
+
+                    <!-- ── AR-03: AR Aging Report ── -->
+                    <ScrollContainer id="report_ar03" horizontal="false" vertical="true" height="100%">
+                        <macros:FilterBar
+                            id="ar03FilterBar"
+                            metaPath="/AR03_ARAgingReport/@com.sap.vocabularies.UI.v1.SelectionFields"
+                            liveMode="false"/>
+                        <macros:Table
+                            id="ar03Table"
+                            metaPath="/AR03_ARAgingReport/@com.sap.vocabularies.UI.v1.LineItem"
+                            readOnly="true"
+                            enableExport="true"
+                            enableAutoColumnWidth="true"
+                            variantManagement="Control"
+                            p13nMode="Column,Sort,Filter"
+                            headerText="AR-03: AR Aging Report"
+                            filterBar="ar03FilterBar"
+                            growingThreshold="20">
+                        </macros:Table>
+                    </ScrollContainer>
+
+                    <!-- ── GL-01: GL Account Balances ── -->
+                    <ScrollContainer id="report_gl01" horizontal="false" vertical="true" height="100%">
+                        <macros:FilterBar
+                            id="gl01FilterBar"
+                            metaPath="/GL01_GLAccountBalances/@com.sap.vocabularies.UI.v1.SelectionFields"
+                            liveMode="false"/>
+                        <macros:Table
+                            id="gl01Table"
+                            metaPath="/GL01_GLAccountBalances/@com.sap.vocabularies.UI.v1.LineItem"
+                            readOnly="true"
+                            enableExport="true"
+                            enableAutoColumnWidth="true"
+                            variantManagement="Control"
+                            p13nMode="Column,Sort,Filter"
+                            headerText="GL-01: GL Account Balances"
+                            filterBar="gl01FilterBar"
+                            growingThreshold="20">
+                        </macros:Table>
+                    </ScrollContainer>
+
+                    <ScrollContainer id="settings" horizontal="false" vertical="true">
+                        <Title text="System Configuration &amp; Value Helps" class="sapUiMediumMargin"/>
+                    </ScrollContainer>
+                </pages>
+            </NavContainer>
+        </tnt:mainContents>
+    </tnt:ToolPage>
+</mvc:View>
