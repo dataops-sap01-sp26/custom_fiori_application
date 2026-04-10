@@ -70,7 +70,9 @@
       "i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
         "settings": {
-          "bundleName": "cfa.customfioriapplication.i18n.i18n"
+          "bundleName": "cfa.customfioriapplication.i18n.i18n",
+          "supportedLocales": ["en", ""],
+          "fallbackLocale": "en"
         }
       },
       "": {
@@ -85,14 +87,21 @@
       },
       "@i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
-        "uri": "i18n/i18n.properties"
+        "uri": "i18n/i18n.properties",
+        "settings": {
+          "supportedLocales": ["en", ""],
+          "fallbackLocale": "en"
+        }
       }
     },
     "resources": {
       "css": []
     },
     "routing": {
-      "config": {},
+      "config": {
+        "async": true,
+        "routerClass": "sap.m.routing.Router"
+      },
       "routes": [
         {
           "name": "DashboardMainPage",
@@ -148,6 +157,11 @@
           "name": "AP03ObjectPage",
           "pattern": "AP03_APAgingReport(CompanyCode={CompanyCode},Supplier={Supplier},LocalCurrency={LocalCurrency}):?query:",
           "target": "AP03ObjectPage"
+        },
+        {
+          "name": "DrsSubscriptionObjectPage",
+          "pattern": "DrsSubscription({key}):?query:",
+          "target": "DrsSubscriptionObjectPage"
         }
       ],
       "targets": {
@@ -193,6 +207,9 @@
                 },
                 "AP03_APAgingReport": {
                   "detail": { "route": "AP03ObjectPage" }
+                },
+                "DrsSubscription": {
+                  "detail": { "route": "DrsSubscriptionObjectPage" }
                 }
               },
               "contextPath": "/DrsJobConfig",
@@ -306,6 +323,17 @@
           "options": {
             "settings": {
               "contextPath": "/AP03_APAgingReport",
+              "editableHeaderContent": false
+            }
+          }
+        },
+        "DrsSubscriptionObjectPage": {
+          "type": "Component",
+          "id": "DrsSubscriptionObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/DrsSubscription",
               "editableHeaderContent": false
             }
           }

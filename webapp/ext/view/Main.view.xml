@@ -73,11 +73,52 @@
                         <Title text="Job History Analytics" class="sapUiMediumMargin"/>
                     </ScrollContainer> -->
                     
-                    <ScrollContainer id="catalog" horizontal="false" vertical="true">
-                        <Title text="Report Catalog Management" class="sapUiMediumMargin"/>
+                    <!-- ── REPORT CATALOG TAB ── -->
+                    <ScrollContainer id="catalog" horizontal="false" vertical="true" height="100%">
+                        <macros:FilterBar
+                            id="catalogFilterBar"
+                            metaPath="/ReportCatalog/@com.sap.vocabularies.UI.v1.SelectionFields"
+                            liveMode="false"/>
+                        <macros:Table
+                            id="catalogTable"
+                            metaPath="/ReportCatalog/@com.sap.vocabularies.UI.v1.LineItem"
+                            readOnly="true"
+                            enableExport="true"
+                            enableAutoColumnWidth="true"
+                            variantManagement="Control"
+                            p13nMode="Column,Sort,Filter,Group"
+                            headerText="Report Catalog"
+                            filterBar="catalogFilterBar"
+                            growingThreshold="20">
+                            <macros:actions>
+                                <macros:Action key="preview" text="Preview Report" press=".onPreviewReport" requiresSelection="true" />
+                                <macros:Action key="createSubscr" text="Create Subscription" press=".onCreateSubscriptionFromCatalog" requiresSelection="true" />
+                            </macros:actions>
+                        </macros:Table>
                     </ScrollContainer>
-                    <ScrollContainer id="subscriptions" horizontal="false" vertical="true">
-                        <Title text="Subscriptions List" class="sapUiMediumMargin"/>
+                    
+                    <!-- ── SUBSCRIPTIONS TAB ── -->
+                    <ScrollContainer id="subscriptions" horizontal="false" vertical="true" height="100%">
+                        <macros:FilterBar
+                            id="subscrFilterBar"
+                            metaPath="/DrsSubscription/@com.sap.vocabularies.UI.v1.SelectionFields"
+                            liveMode="false"/>
+                        <macros:Table
+                            id="subscrTable"
+                            metaPath="/DrsSubscription/@com.sap.vocabularies.UI.v1.LineItem"
+                            readOnly="true"
+                            enableExport="true"
+                            enableAutoColumnWidth="true"
+                            variantManagement="Control"
+                            p13nMode="Column,Sort,Filter"
+                            headerText="Subscriptions"
+                            filterBar="subscrFilterBar"
+                            growingThreshold="20">
+                            <macros:actions>
+                                <macros:Action key="customCreate" text="Create" press=".onCreateSubscription" requiresSelection="false" />
+                                <macros:Action key="customDelete" text="Delete" press=".onDeleteSubscription" requiresSelection="true" />
+                            </macros:actions>
+                        </macros:Table>
                     </ScrollContainer>
                     
                     <ScrollContainer id="jobconfigs" horizontal="false" vertical="true" height="100%">
