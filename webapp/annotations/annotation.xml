@@ -710,6 +710,220 @@
 
         </Annotations>
 
+        <!-- ═══════════════════════════════════════════════════════════════════════════ -->
+        <!-- SUBSCRIPTION ENTITY: DrsSubscriptionType                                    -->
+        <!-- ═══════════════════════════════════════════════════════════════════════════ -->
+        <Annotations Target="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsSubscriptionType">
+            <!-- ═══ LINE ITEM: Columns cho Subscription Table ═══ -->
+            <Annotation Term="UI.LineItem">
+                <Collection>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="SubscrId"/>
+                        <PropertyValue Property="Label" String="Subscription ID"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="SubscrName"/>
+                        <PropertyValue Property="Label" String="Description"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="ReportId"/>
+                        <PropertyValue Property="Label" String="Report ID"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="Bukrs"/>
+                        <PropertyValue Property="Label" String="Company Code"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="OutputFormat"/>
+                        <PropertyValue Property="Label" String="Format"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="EmailTo"/>
+                        <PropertyValue Property="Label" String="Email To"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="Status"/>
+                        <PropertyValue Property="Label" String="Status"/>
+                        <PropertyValue Property="Criticality" Path="StatusCriticality"/>
+                        <PropertyValue Property="CriticalityRepresentation" EnumMember="UI.CriticalityRepresentationType/WithIcon"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="CreatedBy"/>
+                        <PropertyValue Property="Label" String="Created By"/>
+                    </Record>
+                </Collection>
+            </Annotation>
+
+            <!-- ═══ SELECTION FIELDS: Filter Bar ═══ -->
+            <Annotation Term="UI.SelectionFields">
+                <Collection>
+                    <PropertyPath>SubscrId</PropertyPath>
+                    <PropertyPath>ReportId</PropertyPath>
+                    <PropertyPath>Bukrs</PropertyPath>
+                    <PropertyPath>Status</PropertyPath>
+                </Collection>
+            </Annotation>
+
+            <!-- ═══ HEADER INFO: Object Page Title ═══ -->
+            <Annotation Term="UI.HeaderInfo">
+                <Record Type="UI.HeaderInfoType">
+                    <PropertyValue Property="TypeName" String="Subscription"/>
+                    <PropertyValue Property="TypeNamePlural" String="Subscriptions"/>
+                    <PropertyValue Property="Title">
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="SubscrName"/>
+                        </Record>
+                    </PropertyValue>
+                    <PropertyValue Property="Description">
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="SubscrId"/>
+                        </Record>
+                    </PropertyValue>
+                </Record>
+            </Annotation>
+        </Annotations>
+
+        <!-- ═══════════════════════════════════════════════════════════════════════ -->
+        <!-- REPORT CATALOG ENTITY: ReportCatalogType                                -->
+        <!-- ═══════════════════════════════════════════════════════════════════════ -->
+        <Annotations Target="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.ReportCatalogType">
+            
+            <!-- ═══ HEADER INFO ═══ -->
+            <Annotation Term="UI.HeaderInfo">
+                <Record Type="UI.HeaderInfoType">
+                    <PropertyValue Property="TypeName" String="Report"/>
+                    <PropertyValue Property="TypeNamePlural" String="Reports"/>
+                    <PropertyValue Property="Title">
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="ReportName"/>
+                        </Record>
+                    </PropertyValue>
+                    <PropertyValue Property="Description">
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="ReportId"/>
+                        </Record>
+                    </PropertyValue>
+                </Record>
+            </Annotation>
+            
+            <!-- ═══ SELECTION FIELDS: Filter Bar ═══ -->
+            <Annotation Term="UI.SelectionFields">
+                <Collection>
+                    <PropertyPath>ModuleId</PropertyPath>
+                    <PropertyPath>ReportId</PropertyPath>
+                    <PropertyPath>IsActive</PropertyPath>
+                </Collection>
+            </Annotation>
+            
+            <!-- ═══ LINE ITEM: Table Columns ═══ -->
+            <Annotation Term="UI.LineItem">
+                <Collection>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="ReportId"/>
+                        <PropertyValue Property="Label" String="Report ID"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="ReportName"/>
+                        <PropertyValue Property="Label" String="Report Name"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="ModuleId"/>
+                        <PropertyValue Property="Label" String="Module"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="Description"/>
+                        <PropertyValue Property="Label" String="Description"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="IsActive"/>
+                        <PropertyValue Property="Label" String="Active"/>
+                        <PropertyValue Property="Criticality" Path="StatusCriticality"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="CdsViewName"/>
+                        <PropertyValue Property="Label" String="CDS View"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="SortOrder"/>
+                        <PropertyValue Property="Label" String="Sort Order"/>
+                    </Record>
+                </Collection>
+            </Annotation>
+            
+            <!-- ═══ FACETS: Object Page Sections ═══ -->
+            <Annotation Term="UI.Facets">
+                <Collection>
+                    <Record Type="UI.ReferenceFacet">
+                        <PropertyValue Property="ID" String="GeneralInfo"/>
+                        <PropertyValue Property="Label" String="General Information"/>
+                        <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#General"/>
+                    </Record>
+                    <Record Type="UI.ReferenceFacet">
+                        <PropertyValue Property="ID" String="TechnicalInfo"/>
+                        <PropertyValue Property="Label" String="Technical Details"/>
+                        <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#Technical"/>
+                    </Record>
+                </Collection>
+            </Annotation>
+            
+            <!-- ═══ FIELD GROUP: General ═══ -->
+            <Annotation Term="UI.FieldGroup" Qualifier="General">
+                <Record Type="UI.FieldGroupType">
+                    <PropertyValue Property="Data">
+                        <Collection>
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="ReportId"/>
+                            </Record>
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="ReportName"/>
+                            </Record>
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="ModuleId"/>
+                            </Record>
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="Description"/>
+                            </Record>
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="IsActive"/>
+                            </Record>
+                        </Collection>
+                    </PropertyValue>
+                </Record>
+            </Annotation>
+            
+            <!-- ═══ FIELD GROUP: Technical ═══ -->
+            <Annotation Term="UI.FieldGroup" Qualifier="Technical">
+                <Record Type="UI.FieldGroupType">
+                    <PropertyValue Property="Data">
+                        <Collection>
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="CdsViewName"/>
+                            </Record>
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="ReportClass"/>
+                            </Record>
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="SortOrder"/>
+                            </Record>
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="CreatedBy"/>
+                            </Record>
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="CreatedAt"/>
+                            </Record>
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="LastChangedBy"/>
+                            </Record>
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="LastChangedAt"/>
+                            </Record>
+                        </Collection>
+                    </PropertyValue>
+                </Record>
+            </Annotation>
+            
+        </Annotations>
+
         </Schema>
     </edmx:DataServices>
 </edmx:Edmx>
