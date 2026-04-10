@@ -1,0 +1,287 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   DRS Custom Fiori Application - Global Styles
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   LAYOUT & CONTAINERS
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Tool Page full height */
+.sapTntToolPage {
+    height: 100%;
+}
+
+/* Side Navigation styling */
+.sapTntSideNavigation {
+    background-color: #f7f7f7;
+}
+
+/* Main content area padding */
+.drsMainContent {
+    padding: 1rem 1.5rem;
+}
+
+/* Section container with proper spacing */
+.drsSection {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: #ffffff;
+    border-radius: 0.25rem;
+    box-shadow: 0 0 0.125rem rgba(0, 0, 0, 0.1);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DASHBOARD - KPI TILES
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* KPI tile container */
+.drsKpiTileContainer {
+    gap: 0.75rem;
+}
+
+/* KPI tile styling */
+.drsKpiTile {
+    margin-right: 0.75rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+/* Make GenericTile slightly larger for better touch */
+.drsKpiTile.sapMGT {
+    min-width: 11rem;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DASHBOARD - QUICK ACTION TILES
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.drsQuickActionTile {
+    margin-right: 0.75rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DASHBOARD - CHARTS
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.drsChartContainer {
+    padding: 1rem;
+    background-color: #ffffff;
+    border-radius: 0.25rem;
+    box-shadow: 0 0 0.125rem rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DASHBOARD - TABLES
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.drsTableSection {
+    padding: 1rem;
+    background-color: #ffffff;
+    border-radius: 0.25rem;
+    box-shadow: 0 0 0.125rem rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.drsTableSection .sapMTableTHead {
+    background-color: #f7f7f7;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SECTION TITLES
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.drsSectionTitle {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SCROLL CONTAINERS
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Content pages padding */
+.drsPageContent {
+    padding: 1.5rem;
+}
+
+/* ScrollContainer backgrounds */
+.sapMScrollContV {
+    background-color: #f4f4f4;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TABLES & LISTS
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Table container with shadow */
+.drsTableContainer {
+    background-color: #ffffff;
+    border-radius: 0.25rem;
+    box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+/* Table toolbar */
+.drsTableToolbar {
+    padding: 0.5rem 1rem;
+    background-color: #f7f7f7;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FORMS & DIALOGS
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Form container padding */
+.drsFormContainer {
+    padding: 1rem;
+}
+
+/* Dialog content padding */
+.drsDialogContent {
+    padding: 1rem;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE UTILITIES
+   ───────────────────────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────────────────────────
+   REPORT CATALOG TILES
+   ─────────────────────────────────────────────────────────────────────────────── */
+
+.drsCatalogToolbar {
+    padding: 0.5rem 0;
+    margin-bottom: 0.5rem;
+}
+
+.drsCatalogContainer {
+    padding-top: 0.5rem;
+}
+
+.drsCatalogGroupTitle {
+    margin: 1rem 0 0.75rem 0;
+    color: #32363a;
+    font-weight: 600;
+}
+
+.drsCatalogGroupTitle:first-child {
+    margin-top: 0;
+}
+
+.drsCatalogTileRow {
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding-bottom: 0.5rem;
+}
+
+/* Tile hover effect */
+.drsCatalogTile {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.drsCatalogTile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Inactive tile styling */
+.drsCatalogTile.sapMGTDisabled {
+    opacity: 0.6;
+}
+/* Extra small margin */
+.drsMarginXS {
+    margin: 0.25rem;
+}
+
+/* Small margin */
+.drsMarginS {
+    margin: 0.5rem;
+}
+
+/* Medium margin */
+.drsMarginM {
+    margin: 1rem;
+}
+
+/* Large margin */
+.drsMarginL {
+    margin: 1.5rem;
+}
+
+/* Padding utilities */
+.drsPaddingS {
+    padding: 0.5rem;
+}
+
+.drsPaddingM {
+    padding: 1rem;
+}
+
+.drsPaddingL {
+    padding: 1.5rem;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FPM SPECIFIC - MACROS TABLE
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Macro table container */
+.drsMacrosTableContainer {
+    padding: 1rem;
+    background-color: #ffffff;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   STATUS INDICATORS
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.drsStatusSuccess {
+    color: #107e3e;
+}
+
+.drsStatusWarning {
+    color: #e9730c;
+}
+
+.drsStatusError {
+    color: #bb0000;
+}
+
+.drsStatusNeutral {
+    color: #6a6d70;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   HEADER & TOOLBAR
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Tool header background */
+.sapTntToolHeader {
+    background-color: #354a5f;
+}
+
+/* Page title in header */
+.drsPageTitle {
+    color: #ffffff;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   EMPTY STATE
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.drsEmptyState {
+    padding: 2rem;
+    text-align: center;
+    color: #6a6d70;
+}
+
+.drsEmptyStateIcon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #d1d1d1;
+}

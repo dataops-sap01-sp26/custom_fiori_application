@@ -75,6 +75,8 @@ sap.ui.define([
                 this._dashboardController.loadDashboardData(this);
             } else if (sKey === "history") {
                 this._jobHistoryController.loadChartData(this);
+            } else if (sKey === "catalog") {
+                this._catalogController.initCatalog(this);
             }
         },
         
@@ -142,6 +144,11 @@ sap.ui.define([
         // CATALOG HANDLERS - Delegate to CatalogController
         // ═══════════════════════════════════════════════════════════════
 
+        onRefreshCatalog: function () {
+            this._catalogController.onRefreshCatalog(this);
+        },
+
+        // Legacy methods (kept for compatibility)
         onPreviewReport: function () {
             this._catalogController.onPreview(this);
         },
