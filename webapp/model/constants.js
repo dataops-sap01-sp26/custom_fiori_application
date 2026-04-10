@@ -6,20 +6,19 @@ sap.ui.define([], function () {
         // OData action namespace
         ACTION_NAMESPACE: "com.sap.gateway.srvd.zsd_drs_main_o4.v0001",
         
-        // Job status values
+        // Job status values (BTCSTATUS domain)
         JOB_STATUS: {
-            SCHEDULED: "1",
-            RUNNING: "2",
-            COMPLETED: "3",
-            FAILED: "4",
-            CANCELLED: "5"
+            SCHEDULED: "S",  // Scheduled
+            FINISHED: "F",   // Finished
+            CANCELLED: "C",  // Cancelled
+            ABORTED: "A"     // Aborted
         },
         
-        // Subscription status values
+        // Subscription status values (single char)
         SUBSCRIPTION_STATUS: {
-            ACTIVE: "ACTIVE",
-            PAUSED: "PAUSED",
-            INACTIVE: "INACTIVE"
+            ACTIVE: "A",     // Active
+            PAUSED: "P",     // Paused
+            INACTIVE: "I"    // Inactive
         },
         
         // Report ID to sidebar page mapping
@@ -63,6 +62,24 @@ sap.ui.define([], function () {
             NEGATIVE: 1,
             CRITICAL: 2,
             POSITIVE: 3
+        },
+        
+        // Dashboard page keys
+        DASHBOARD: {
+            PAGES: {
+                DASHBOARD: "dashboard",
+                CATALOG: "catalog",
+                SUBSCRIPTIONS: "subscriptions",
+                JOB_CONFIGS: "jobconfigs",
+                HISTORY: "history",
+                EXPORTS: "exports"
+            },
+            KPI_COLORS: {
+                NEUTRAL: "Neutral",
+                GOOD: "Good",
+                CRITICAL: "Critical",
+                ERROR: "Error"
+            }
         }
     };
 });

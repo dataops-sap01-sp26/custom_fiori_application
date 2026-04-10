@@ -3,6 +3,7 @@
     xmlns:viz="sap.viz.ui5.controls"
     xmlns:viz.data="sap.viz.ui5.data"
     xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
+    xmlns:l="sap.ui.layout"
     controllerName="cfa.customfioriapplication.ext.view.Main">
     <tnt:ToolPage id="toolPage">
         <!-- HEADER -->
@@ -18,7 +19,7 @@
         
         <!-- SIDEBAR MENU -->
         <tnt:sideContent>
-            <tnt:SideNavigation expanded="true" itemSelect=".onItemSelect">
+            <tnt:SideNavigation id="sideNavigation" expanded="true" itemSelect=".onItemSelect">
                 <tnt:NavigationList>
                     <!-- Nhóm 1: Overview & Analytics -->
                     <tnt:NavigationListItem text="Dashboard Home" icon="sap-icon://home" key="dashboard" />
@@ -66,8 +67,275 @@
         <tnt:mainContents>
             <NavContainer id="pageContainer">
                 <pages>
-                    <ScrollContainer id="dashboard" horizontal="false" vertical="true">
-                        <Title text="Dashboard Overview" class="sapUiMediumMargin"/>
+                    <!-- ══════════════════════════════════════════════════════════════ -->
+                    <!-- DASHBOARD HOME PAGE                                            -->
+                    <!-- ══════════════════════════════════════════════════════════════ -->
+                    <ScrollContainer id="dashboard" horizontal="false" vertical="true" height="100%">
+                        <VBox class="sapUiResponsiveMargin">
+                            
+                            <!-- SECTION 1: KPI Overview -->
+                            <VBox class="sapUiMediumMarginBottom">
+                                <Title id="kpiTitle" text="{i18n>systemOverview}" level="H3" class="sapUiSmallMarginBottom"/>
+                                <HBox id="kpiTilesBox" wrap="Wrap" class="sapUiTinyMarginTop">
+                                    <!-- Reports Available -->
+                                    <GenericTile
+                                        id="tileReports"
+                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                                        header="{i18n>reportsAvailable}"
+                                        press=".onKpiTilePress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="catalog"/>
+                                        </customData>
+                                        <TileContent>
+                                            <NumericContent
+                                                value="{dashboard>/reportCount}"
+                                                icon="sap-icon://document"
+                                                valueColor="Neutral"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                    
+                                    <!-- Total Subscriptions -->
+                                    <GenericTile
+                                        id="tileTotalSubscr"
+                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                                        header="{i18n>totalSubscriptions}"
+                                        press=".onKpiTilePress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="subscriptions"/>
+                                        </customData>
+                                        <TileContent>
+                                            <NumericContent
+                                                value="{dashboard>/totalSubscriptions}"
+                                                icon="sap-icon://email"
+                                                valueColor="Neutral"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                    
+                                    <!-- Active Subscriptions -->
+                                    <GenericTile
+                                        id="tileActiveSubscr"
+                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                                        header="{i18n>activeSubscriptions}"
+                                        press=".onKpiTilePress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="subscriptions"/>
+                                        </customData>
+                                        <TileContent>
+                                            <NumericContent
+                                                value="{dashboard>/activeSubscriptions}"
+                                                icon="sap-icon://activate"
+                                                valueColor="Good"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                    
+                                    <!-- Scheduled Jobs -->
+                                    <GenericTile
+                                        id="tileScheduledJobs"
+                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                                        header="{i18n>scheduledJobs}"
+                                        press=".onKpiTilePress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="jobconfigs"/>
+                                        </customData>
+                                        <TileContent>
+                                            <NumericContent
+                                                value="{dashboard>/scheduledJobs}"
+                                                icon="sap-icon://appointment"
+                                                valueColor="Neutral"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                    
+                                    <!-- Failed Jobs -->
+                                    <GenericTile
+                                        id="tileFailedJobs"
+                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                                        header="{i18n>failedJobs}"
+                                        press=".onKpiTilePress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="history"/>
+                                        </customData>
+                                        <TileContent>
+                                            <NumericContent
+                                                value="{dashboard>/failedJobs}"
+                                                icon="sap-icon://alert"
+                                                valueColor="{= ${dashboard>/failedJobs} > 0 ? 'Error' : 'Neutral'}"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                </HBox>
+                            </VBox>
+                            
+                            <!-- SECTION 2: Quick Actions -->
+                            <VBox class="sapUiMediumMarginBottom">
+                                <Title id="actionsTitle" text="{i18n>quickActions}" level="H3" class="sapUiSmallMarginBottom"/>
+                                <HBox id="actionTilesBox" wrap="Wrap" class="sapUiTinyMarginTop">
+                                    <GenericTile
+                                        id="actionBrowseReports"
+                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                                        header="{i18n>browseReports}"
+                                        subheader="{i18n>browseReportsDesc}"
+                                        press=".onQuickActionPress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="catalog"/>
+                                        </customData>
+                                        <TileContent>
+                                            <ImageContent src="sap-icon://document"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                    
+                                    <GenericTile
+                                        id="actionMySubscr"
+                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                                        header="{i18n>mySubscriptions}"
+                                        subheader="{i18n>mySubscriptionsDesc}"
+                                        press=".onQuickActionPress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="subscriptions"/>
+                                        </customData>
+                                        <TileContent>
+                                            <ImageContent src="sap-icon://email"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                    
+                                    <GenericTile
+                                        id="actionJobMonitor"
+                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                                        header="{i18n>jobMonitor}"
+                                        subheader="{i18n>jobMonitorDesc}"
+                                        press=".onQuickActionPress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="jobconfigs"/>
+                                        </customData>
+                                        <TileContent>
+                                            <ImageContent src="sap-icon://settings"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                    
+                                    <GenericTile
+                                        id="actionJobHistory"
+                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                                        header="{i18n>jobHistory}"
+                                        subheader="{i18n>jobHistoryDesc}"
+                                        press=".onQuickActionPress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="history"/>
+                                        </customData>
+                                        <TileContent>
+                                            <ImageContent src="sap-icon://history"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                    
+                                    <GenericTile
+                                        id="actionMyExports"
+                                        class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                                        header="{i18n>myExports}"
+                                        subheader="{i18n>myExportsDesc}"
+                                        press=".onQuickActionPress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="exports"/>
+                                        </customData>
+                                        <TileContent>
+                                            <ImageContent src="sap-icon://open-folder"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                </HBox>
+                            </VBox>
+                            
+                            <!-- SECTION 3: Job Execution Trend Chart -->
+                            <VBox class="sapUiMediumMarginBottom">
+                                <Title id="chartTitle" text="{i18n>jobTrend}" level="H3" class="sapUiSmallMarginBottom"/>
+                                <viz:VizFrame
+                                    id="dashboardChart"
+                                    vizType="stacked_column"
+                                    height="300px"
+                                    width="100%">
+                                    <viz:dataset>
+                                        <viz.data:FlattenedDataset data="{dashboard>/chartData}">
+                                            <viz.data:dimensions>
+                                                <viz.data:DimensionDefinition name="Date" value="{dashboard>JobDate}"/>
+                                                <viz.data:DimensionDefinition name="Status" value="{dashboard>JobStatus}"/>
+                                            </viz.data:dimensions>
+                                            <viz.data:measures>
+                                                <viz.data:MeasureDefinition name="Count" value="{dashboard>JobCountTotal}"/>
+                                            </viz.data:measures>
+                                        </viz.data:FlattenedDataset>
+                                    </viz:dataset>
+                                    <viz:feeds>
+                                        <viz.feeds:FeedItem id="feedCategoryAxis" type="Dimension" uid="categoryAxis" values="Date"/>
+                                        <viz.feeds:FeedItem id="feedColor" type="Dimension" uid="color" values="Status"/>
+                                        <viz.feeds:FeedItem id="feedValueAxis" type="Measure" uid="valueAxis" values="Count"/>
+                                    </viz:feeds>
+                                </viz:VizFrame>
+                            </VBox>
+                            
+                            <!-- SECTION 4: Recent Subscriptions -->
+                            <VBox class="sapUiMediumMarginBottom">
+                                <HBox id="recentSubscrHeader" justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMarginBottom">
+                                    <Title id="recentSubscrTitle" text="{i18n>recentSubscriptions}" level="H3"/>
+                                    <Link id="viewAllSubscrLink" text="{i18n>viewAll}" press=".onViewAllSubscriptions"/>
+                                </HBox>
+                                <Table
+                                    id="recentSubscriptionsTable"
+                                    inset="false"
+                                    noDataText="{i18n>noSubscriptions}"
+                                    items="{dashboard>/recentSubscriptions}">
+                                    <columns>
+                                        <Column id="colSubscrId" width="15%"><Text text="{i18n>subscriptionId}"/></Column>
+                                        <Column id="colReportId" width="12%"><Text text="{i18n>reportId}"/></Column>
+                                        <Column id="colSubscrName" width="25%"><Text text="{i18n>description}"/></Column>
+                                        <Column id="colSubscrStatus" width="12%" hAlign="Center"><Text text="{i18n>status}"/></Column>
+                                        <Column id="colFormat" width="10%"><Text text="{i18n>format}"/></Column>
+                                        <Column id="colEmail" width="26%"><Text text="{i18n>emailTo}"/></Column>
+                                    </columns>
+                                    <items>
+                                        <ColumnListItem type="Active" press=".onSubscriptionRowPress">
+                                            <Text text="{dashboard>SubscrId}"/>
+                                            <Text text="{dashboard>ReportId}"/>
+                                            <Text text="{dashboard>SubscrName}"/>
+                                            <ObjectStatus
+                                                text="{dashboard>Status}"
+                                                state="{= ${dashboard>Status} === 'A' ? 'Success' : 'Warning'}"
+                                                icon="{= ${dashboard>Status} === 'A' ? 'sap-icon://accept' : 'sap-icon://pause'}"/>
+                                            <Text text="{dashboard>OutputFormat}"/>
+                                            <Text text="{dashboard>EmailTo}"/>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                            </VBox>
+                            
+                            <!-- SECTION 5: Recent Jobs -->
+                            <VBox class="sapUiMediumMarginBottom">
+                                <HBox id="recentJobsHeader" justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMarginBottom">
+                                    <Title id="recentJobsTitle" text="{i18n>recentJobs}" level="H3"/>
+                                    <Link id="viewAllJobsLink" text="{i18n>viewAll}" press=".onViewAllJobs"/>
+                                </HBox>
+                                <Table
+                                    id="recentJobsTable"
+                                    inset="false"
+                                    noDataText="{i18n>noJobs}"
+                                    items="{dashboard>/recentJobs}">
+                                    <columns>
+                                        <Column id="colJobId" width="15%"><Text text="{i18n>jobId}"/></Column>
+                                        <Column id="colJobText" width="30%"><Text text="{i18n>description}"/></Column>
+                                        <Column id="colJobStatus" width="15%" hAlign="Center"><Text text="{i18n>status}"/></Column>
+                                        <Column id="colCreatedAt" width="20%"><Text text="{i18n>startedAt}"/></Column>
+                                        <Column id="colJobSubscrId" width="20%"><Text text="{i18n>subscriptionId}"/></Column>
+                                    </columns>
+                                    <items>
+                                        <ColumnListItem type="Active" press=".onJobRowPress">
+                                            <Text text="{dashboard>JobId}"/>
+                                            <Text text="{dashboard>JobText}"/>
+                                            <ObjectStatus
+                                                text="{dashboard>JobStatusText}"
+                                                state="{= ${dashboard>JobStatus} === 'F' ? 'Success' : (${dashboard>JobStatus} === 'A' ? 'Error' : 'Warning')}"
+                                                icon="{= ${dashboard>JobStatus} === 'F' ? 'sap-icon://accept' : (${dashboard>JobStatus} === 'A' ? 'sap-icon://error' : 'sap-icon://process')}"/>
+                                            <Text text="{dashboard>CreatedAt}"/>
+                                            <Text text="{dashboard>SubscrId}"/>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                            </VBox>
+                            
+                        </VBox>
                     </ScrollContainer>
                     <!-- <ScrollContainer id="analytics" horizontal="false" vertical="true">
                         <Title text="Job History Analytics" class="sapUiMediumMargin"/>

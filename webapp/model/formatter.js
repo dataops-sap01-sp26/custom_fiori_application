@@ -6,29 +6,32 @@ sap.ui.define([
     return {
         
         /**
-         * Format job status code to display text
-         * @param {string} sStatus - Status code (1-5)
+         * Format job status code to display text (BTCSTATUS domain)
+         * @param {string} sStatus - Status code (P/R/S/F/A)
          * @returns {string} Display text
          */
         formatJobStatus: function (sStatus) {
             var mStatusText = {
-                "1": "Scheduled",
-                "2": "Running",
-                "3": "Completed",
-                "4": "Failed",
-                "5": "Cancelled"
+                "S": "Scheduled",
+                "F": "Finished",
+                "C": "Cancelled",
+                "A": "Aborted"
             };
             return mStatusText[sStatus] || sStatus;
         },
         
         /**
          * Format subscription status with proper casing
-         * @param {string} sStatus - Status (ACTIVE, PAUSED, INACTIVE)
-         * @returns {string} Title case status
+         * @param {string} sStatus - Status (A/P/I)
+         * @returns {string} Display text
          */
         formatSubscriptionStatus: function (sStatus) {
-            if (!sStatus) { return ""; }
-            return sStatus.charAt(0) + sStatus.slice(1).toLowerCase();
+            var mStatusText = {
+                "A": "Active",
+                "P": "Paused",
+                "I": "Inactive"
+            };
+            return mStatusText[sStatus] || sStatus;
         },
         
         /**
@@ -86,34 +89,45 @@ sap.ui.define([
         },
         
         /**
-         * Get criticality value for status
-         * @param {string} sStatus - Status value
+         * Get criticality for subscription status
+         * @param {string} sStatus - Status value (A/P/I)
          * @returns {number} Criticality (0-3)
          */
-        getStatusCriticality: function (sStatus) {
+        getSubscriptionStatusCriticality: function (sStatus) {
             var mCriticality = {
-                "ACTIVE": Constants.CRITICALITY.POSITIVE,
-                "PAUSED": Constants.CRITICALITY.CRITICAL,
-                "INACTIVE": Constants.CRITICALITY.NEGATIVE,
-                "3": Constants.CRITICALITY.POSITIVE,   // Completed
-                "4": Constants.CRITICALITY.NEGATIVE,   // Failed
-                "2": Constants.CRITICALITY.CRITICAL    // Running
+                "A": Constants.CRITICALITY.POSITIVE,   // Active
+                "P": Constants.CRITICALITY.CRITICAL,   // Paused
+                "I": Constants.CRITICALITY.NEGATIVE    // Inactive
             };
             return mCriticality[sStatus] || Constants.CRITICALITY.NEUTRAL;
         },
         
         /**
-         * Get icon for job status
-         * @param {string} sStatus - Status code
+         * Get criticality for job status (BTCSTATUS)
+         * @param {string} sStatus - Status value (P/R/S/F/A)
+         * @returns {number} Criticality (0-3)
+         */
+        getJobStatusCriticality: function (sStatus) {
+            var mCriticality = {
+                "S": Constants.CRITICALITY.CRITICAL,   // Scheduled
+                "F": Constants.CRITICALITY.POSITIVE,   // Finished
+                "C": Constants.CRITICALITY.NEUTRAL,    // Cancelled
+                "A": Constants.CRITICALITY.NEGATIVE    // Aborted
+            };
+            return mCriticality[sStatus] || Constants.CRITICALITY.NEUTRAL;
+        },
+        
+        /**
+         * Get icon for job status (BTCSTATUS domain)
+         * @param {string} sStatus - Status code (P/R/S/F/A)
          * @returns {string} SAP icon URI
          */
         getJobStatusIcon: function (sStatus) {
             var mIcons = {
-                "1": "sap-icon://appointment",
-                "2": "sap-icon://synchronize",
-                "3": "sap-icon://accept",
-                "4": "sap-icon://error",
-                "5": "sap-icon://cancel"
+                "S": "sap-icon://appointment",   // Scheduled
+                "F": "sap-icon://accept",        // Finished
+                "C": "sap-icon://cancel",        // Cancelled
+                "A": "sap-icon://error"          // Aborted
             };
             return mIcons[sStatus] || "sap-icon://question-mark";
         }
