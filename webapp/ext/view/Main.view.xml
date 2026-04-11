@@ -3,6 +3,7 @@
     xmlns:viz="sap.viz.ui5.controls"
     xmlns:viz.data="sap.viz.ui5.data"
     xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
+    xmlns:l="sap.ui.layout"
     controllerName="cfa.customfioriapplication.ext.view.Main">
     <tnt:ToolPage id="toolPage">
         <!-- HEADER -->
@@ -18,7 +19,7 @@
         
         <!-- SIDEBAR MENU -->
         <tnt:sideContent>
-            <tnt:SideNavigation expanded="true" itemSelect=".onItemSelect">
+            <tnt:SideNavigation id="sideNavigation" expanded="true" itemSelect=".onItemSelect">
                 <tnt:NavigationList>
                     <!-- Nhóm 1: Overview & Analytics -->
                     <tnt:NavigationListItem text="Dashboard Home" icon="sap-icon://home" key="dashboard" />
@@ -66,8 +67,275 @@
         <tnt:mainContents>
             <NavContainer id="pageContainer">
                 <pages>
-                    <ScrollContainer id="dashboard" horizontal="false" vertical="true">
-                        <Title text="Dashboard Overview" class="sapUiMediumMargin"/>
+                    <!-- ══════════════════════════════════════════════════════════════ -->
+                    <!-- DASHBOARD HOME PAGE                                            -->
+                    <!-- ══════════════════════════════════════════════════════════════ -->
+                    <ScrollContainer id="dashboard" horizontal="false" vertical="true" height="100%">
+                        <VBox class="sapUiResponsiveMargin drsPageContent">
+                            
+                            <!-- SECTION 1: KPI Overview -->
+                            <VBox class="sapUiMediumMarginBottom drsSection">
+                                <Title id="kpiTitle" text="{i18n>systemOverview}" level="H3" class="drsSectionTitle"/>
+                                <HBox id="kpiTilesBox" wrap="Wrap" class="drsKpiTileContainer">
+                                    <!-- Reports Available -->
+                                    <GenericTile
+                                        id="tileReports"
+                                        class="drsKpiTile"
+                                        header="{i18n>reportsAvailable}"
+                                        press=".onKpiTilePress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="catalog"/>
+                                        </customData>
+                                        <TileContent>
+                                            <NumericContent
+                                                value="{dashboard>/reportCount}"
+                                                icon="sap-icon://document"
+                                                valueColor="Neutral"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                    
+                                    <!-- Total Subscriptions -->
+                                    <GenericTile
+                                        id="tileTotalSubscr"
+                                        class="drsKpiTile"
+                                        header="{i18n>totalSubscriptions}"
+                                        press=".onKpiTilePress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="subscriptions"/>
+                                        </customData>
+                                        <TileContent>
+                                            <NumericContent
+                                                value="{dashboard>/totalSubscriptions}"
+                                                icon="sap-icon://email"
+                                                valueColor="Neutral"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                    
+                                    <!-- Active Subscriptions -->
+                                    <GenericTile
+                                        id="tileActiveSubscr"
+                                        class="drsKpiTile"
+                                        header="{i18n>activeSubscriptions}"
+                                        press=".onKpiTilePress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="subscriptions"/>
+                                        </customData>
+                                        <TileContent>
+                                            <NumericContent
+                                                value="{dashboard>/activeSubscriptions}"
+                                                icon="sap-icon://activate"
+                                                valueColor="Good"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                    
+                                    <!-- Scheduled Jobs -->
+                                    <GenericTile
+                                        id="tileScheduledJobs"
+                                        class="drsKpiTile"
+                                        header="{i18n>scheduledJobs}"
+                                        press=".onKpiTilePress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="jobconfigs"/>
+                                        </customData>
+                                        <TileContent>
+                                            <NumericContent
+                                                value="{dashboard>/scheduledJobs}"
+                                                icon="sap-icon://appointment"
+                                                valueColor="Neutral"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                    
+                                    <!-- Failed Jobs -->
+                                    <GenericTile
+                                        id="tileFailedJobs"
+                                        class="drsKpiTile"
+                                        header="{i18n>failedJobs}"
+                                        press=".onKpiTilePress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="history"/>
+                                        </customData>
+                                        <TileContent>
+                                            <NumericContent
+                                                value="{dashboard>/failedJobs}"
+                                                icon="sap-icon://alert"
+                                                valueColor="{= ${dashboard>/failedJobs} > 0 ? 'Error' : 'Neutral'}"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                </HBox>
+                            </VBox>
+                            
+                            <!-- SECTION 2: Quick Actions -->
+                            <VBox class="sapUiMediumMarginBottom drsSection">
+                                <Title id="actionsTitle" text="{i18n>quickActions}" level="H3" class="drsSectionTitle"/>
+                                <HBox id="actionTilesBox" wrap="Wrap" class="drsKpiTileContainer">
+                                    <GenericTile
+                                        id="actionBrowseReports"
+                                        class="drsQuickActionTile"
+                                        header="{i18n>browseReports}"
+                                        subheader="{i18n>browseReportsDesc}"
+                                        press=".onQuickActionPress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="catalog"/>
+                                        </customData>
+                                        <TileContent>
+                                            <ImageContent src="sap-icon://document"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                    
+                                    <GenericTile
+                                        id="actionMySubscr"
+                                        class="drsQuickActionTile"
+                                        header="{i18n>mySubscriptions}"
+                                        subheader="{i18n>mySubscriptionsDesc}"
+                                        press=".onQuickActionPress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="subscriptions"/>
+                                        </customData>
+                                        <TileContent>
+                                            <ImageContent src="sap-icon://email"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                    
+                                    <GenericTile
+                                        id="actionJobMonitor"
+                                        class="drsQuickActionTile"
+                                        header="{i18n>jobMonitor}"
+                                        subheader="{i18n>jobMonitorDesc}"
+                                        press=".onQuickActionPress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="jobconfigs"/>
+                                        </customData>
+                                        <TileContent>
+                                            <ImageContent src="sap-icon://settings"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                    
+                                    <GenericTile
+                                        id="actionJobHistory"
+                                        class="drsQuickActionTile"
+                                        header="{i18n>jobHistory}"
+                                        subheader="{i18n>jobHistoryDesc}"
+                                        press=".onQuickActionPress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="history"/>
+                                        </customData>
+                                        <TileContent>
+                                            <ImageContent src="sap-icon://history"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                    
+                                    <GenericTile
+                                        id="actionMyExports"
+                                        class="drsQuickActionTile"
+                                        header="{i18n>myExports}"
+                                        subheader="{i18n>myExportsDesc}"
+                                        press=".onQuickActionPress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="exports"/>
+                                        </customData>
+                                        <TileContent>
+                                            <ImageContent src="sap-icon://open-folder"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                </HBox>
+                            </VBox>
+                            
+                            <!-- SECTION 3: Job Execution Trend Chart -->
+                            <VBox class="drsChartContainer">
+                                <Title id="chartTitle" text="{i18n>jobTrend}" level="H3" class="drsSectionTitle"/>
+                                <viz:VizFrame
+                                    id="dashboardChart"
+                                    vizType="stacked_column"
+                                    height="300px"
+                                    width="100%">
+                                    <viz:dataset>
+                                        <viz.data:FlattenedDataset data="{dashboard>/chartData}">
+                                            <viz.data:dimensions>
+                                                <viz.data:DimensionDefinition name="Date" value="{dashboard>JobDate}"/>
+                                                <viz.data:DimensionDefinition name="Status" value="{dashboard>JobStatus}"/>
+                                            </viz.data:dimensions>
+                                            <viz.data:measures>
+                                                <viz.data:MeasureDefinition name="Count" value="{dashboard>JobCountTotal}"/>
+                                            </viz.data:measures>
+                                        </viz.data:FlattenedDataset>
+                                    </viz:dataset>
+                                    <viz:feeds>
+                                        <viz.feeds:FeedItem id="feedCategoryAxis" type="Dimension" uid="categoryAxis" values="Date"/>
+                                        <viz.feeds:FeedItem id="feedColor" type="Dimension" uid="color" values="Status"/>
+                                        <viz.feeds:FeedItem id="feedValueAxis" type="Measure" uid="valueAxis" values="Count"/>
+                                    </viz:feeds>
+                                </viz:VizFrame>
+                            </VBox>
+                            
+                            <!-- SECTION 4: Recent Subscriptions -->
+                            <VBox class="drsTableSection">
+                                <HBox id="recentSubscrHeader" justifyContent="SpaceBetween" alignItems="Center" class="drsSectionTitle">
+                                    <Title id="recentSubscrTitle" text="{i18n>recentSubscriptions}" level="H3"/>
+                                    <Link id="viewAllSubscrLink" text="{i18n>viewAll}" press=".onViewAllSubscriptions"/>
+                                </HBox>
+                                <Table
+                                    id="recentSubscriptionsTable"
+                                    inset="false"
+                                    noDataText="{i18n>noSubscriptions}"
+                                    items="{dashboard>/recentSubscriptions}">
+                                    <columns>
+                                        <Column id="colSubscrId" width="15%"><Text text="{i18n>subscriptionId}"/></Column>
+                                        <Column id="colReportId" width="12%"><Text text="{i18n>reportId}"/></Column>
+                                        <Column id="colSubscrName" width="25%"><Text text="{i18n>description}"/></Column>
+                                        <Column id="colSubscrStatus" width="12%" hAlign="Center"><Text text="{i18n>status}"/></Column>
+                                        <Column id="colFormat" width="10%"><Text text="{i18n>format}"/></Column>
+                                        <Column id="colEmail" width="26%"><Text text="{i18n>emailTo}"/></Column>
+                                    </columns>
+                                    <items>
+                                        <ColumnListItem type="Active" press=".onSubscriptionRowPress">
+                                            <Text text="{dashboard>SubscrId}"/>
+                                            <Text text="{dashboard>ReportId}"/>
+                                            <Text text="{dashboard>SubscrName}"/>
+                                            <ObjectStatus
+                                                text="{dashboard>Status}"
+                                                state="{= ${dashboard>Status} === 'A' ? 'Success' : 'Warning'}"
+                                                icon="{= ${dashboard>Status} === 'A' ? 'sap-icon://accept' : 'sap-icon://pause'}"/>
+                                            <Text text="{dashboard>OutputFormat}"/>
+                                            <Text text="{dashboard>EmailTo}"/>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                            </VBox>
+                            
+                            <!-- SECTION 5: Recent Jobs -->
+                            <VBox class="drsTableSection">
+                                <HBox id="recentJobsHeader" justifyContent="SpaceBetween" alignItems="Center" class="drsSectionTitle">
+                                    <Title id="recentJobsTitle" text="{i18n>recentJobs}" level="H3"/>
+                                    <Link id="viewAllJobsLink" text="{i18n>viewAll}" press=".onViewAllJobs"/>
+                                </HBox>
+                                <Table
+                                    id="recentJobsTable"
+                                    inset="false"
+                                    noDataText="{i18n>noJobs}"
+                                    items="{dashboard>/recentJobs}">
+                                    <columns>
+                                        <Column id="colJobId" width="15%"><Text text="{i18n>jobId}"/></Column>
+                                        <Column id="colJobText" width="30%"><Text text="{i18n>description}"/></Column>
+                                        <Column id="colJobStatus" width="15%" hAlign="Center"><Text text="{i18n>status}"/></Column>
+                                        <Column id="colCreatedAt" width="20%"><Text text="{i18n>startedAt}"/></Column>
+                                        <Column id="colJobSubscrId" width="20%"><Text text="{i18n>subscriptionId}"/></Column>
+                                    </columns>
+                                    <items>
+                                        <ColumnListItem type="Active" press=".onJobRowPress">
+                                            <Text text="{dashboard>JobId}"/>
+                                            <Text text="{dashboard>JobText}"/>
+                                            <ObjectStatus
+                                                text="{dashboard>JobStatusText}"
+                                                state="{= ${dashboard>JobStatus} === 'F' ? 'Success' : (${dashboard>JobStatus} === 'A' ? 'Error' : 'Warning')}"
+                                                icon="{= ${dashboard>JobStatus} === 'F' ? 'sap-icon://accept' : (${dashboard>JobStatus} === 'A' ? 'sap-icon://error' : 'sap-icon://process')}"/>
+                                            <Text text="{dashboard>CreatedAt}"/>
+                                            <Text text="{dashboard>SubscrId}"/>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                            </VBox>
+                            
+                        </VBox>
                     </ScrollContainer>
                     <!-- <ScrollContainer id="analytics" horizontal="false" vertical="true">
                         <Title text="Job History Analytics" class="sapUiMediumMargin"/>
@@ -75,97 +343,100 @@
                     
                     <!-- ── REPORT CATALOG TAB ── -->
                     <ScrollContainer id="catalog" horizontal="false" vertical="true" height="100%">
-                        <macros:FilterBar
-                            id="catalogFilterBar"
-                            metaPath="/ReportCatalog/@com.sap.vocabularies.UI.v1.SelectionFields"
-                            liveMode="false"/>
-                        <macros:Table
-                            id="catalogTable"
-                            metaPath="/ReportCatalog/@com.sap.vocabularies.UI.v1.LineItem"
-                            readOnly="true"
-                            enableExport="true"
-                            enableAutoColumnWidth="true"
-                            variantManagement="Control"
-                            p13nMode="Column,Sort,Filter,Group"
-                            headerText="Report Catalog"
-                            filterBar="catalogFilterBar"
-                            growingThreshold="20">
-                            <macros:actions>
-                                <macros:Action key="preview" text="Preview Report" press=".onPreviewReport" requiresSelection="true" />
-                                <macros:Action key="createSubscr" text="Create Subscription" press=".onCreateSubscriptionFromCatalog" requiresSelection="true" />
-                            </macros:actions>
-                        </macros:Table>
+                        <VBox class="sapUiResponsiveMargin drsPageContent">
+                            <!-- Header -->
+                            <HBox id="catalogHeader" 
+                                  justifyContent="SpaceBetween" 
+                                  alignItems="Center" 
+                                  class="drsSectionTitle">
+                                <Title id="catalogTitle" text="{i18n>reportCatalogTitle}" level="H3"/>
+                                <Button 
+                                    id="catalogRefreshBtn"
+                                    icon="sap-icon://refresh"
+                                    tooltip="{i18n>refresh}"
+                                    press=".onRefreshCatalog"
+                                    type="Transparent"/>
+                            </HBox>
+
+                            <!-- Tile Container (populated dynamically) -->
+                            <VBox id="catalogTileContainer" class="drsCatalogContainer"/>
+                        </VBox>
                     </ScrollContainer>
                     
                     <!-- ── SUBSCRIPTIONS TAB ── -->
                     <ScrollContainer id="subscriptions" horizontal="false" vertical="true" height="100%">
-                        <macros:FilterBar
-                            id="subscrFilterBar"
-                            metaPath="/DrsSubscription/@com.sap.vocabularies.UI.v1.SelectionFields"
-                            liveMode="false"/>
-                        <macros:Table
-                            id="subscrTable"
-                            metaPath="/DrsSubscription/@com.sap.vocabularies.UI.v1.LineItem"
-                            readOnly="true"
-                            enableExport="true"
-                            enableAutoColumnWidth="true"
-                            variantManagement="Control"
-                            p13nMode="Column,Sort,Filter"
-                            headerText="Subscriptions"
-                            filterBar="subscrFilterBar"
-                            growingThreshold="20">
-                            <macros:actions>
-                                <macros:Action key="customCreate" text="Create" press=".onCreateSubscription" requiresSelection="false" />
-                                <macros:Action key="customDelete" text="Delete" press=".onDeleteSubscription" requiresSelection="true" />
-                            </macros:actions>
-                        </macros:Table>
+                        <VBox class="sapUiResponsiveMargin drsPageContent">
+                            <macros:FilterBar
+                                id="subscrFilterBar"
+                                metaPath="/DrsSubscription/@com.sap.vocabularies.UI.v1.SelectionFields"
+                                liveMode="false"/>
+                            <macros:Table
+                                id="subscrTable"
+                                metaPath="/DrsSubscription/@com.sap.vocabularies.UI.v1.LineItem"
+                                readOnly="true"
+                                enableExport="true"
+                                enableAutoColumnWidth="true"
+                                variantManagement="Control"
+                                p13nMode="Column,Sort,Filter"
+                                headerText="Subscriptions"
+                                filterBar="subscrFilterBar"
+                                growingThreshold="20">
+                                <macros:actions>
+                                    <macros:Action key="customCreate" text="Create" press=".onCreateSubscription" requiresSelection="false" />
+                                    <macros:Action key="customDelete" text="Delete" press=".onDeleteSubscription" requiresSelection="true" />
+                                </macros:actions>
+                            </macros:Table>
+                        </VBox>
                     </ScrollContainer>
                     
                     <ScrollContainer id="jobconfigs" horizontal="false" vertical="true" height="100%">
-                        <macros:FilterBar
-                            id="jobConfigFilterBar"
-                            metaPath="/DrsJobConfig/@com.sap.vocabularies.UI.v1.SelectionFields"
-                            liveMode="false"/>
-                        <macros:Table
-                            id="jobConfigTable"
-                            metaPath="/DrsJobConfig/@com.sap.vocabularies.UI.v1.LineItem"
-                            readOnly="true"
-                            enableExport="true"
-                            enableAutoColumnWidth="true"
-                            variantManagement="Control"
-                            p13nMode="Column,Sort,Filter"
-                            headerText="Job Configurations"
-                            filterBar="jobConfigFilterBar"
-                            growingThreshold="20">
-                            <macros:actions>
-                                <macros:Action key="customCreate" text="Create" press=".onCreateJobConfig" requiresSelection="false" />
-                                <macros:Action key="customDelete" text="Delete" press=".onDeleteJobConfig" requiresSelection="true" />
-                            </macros:actions>
-                        </macros:Table>
+                        <VBox class="sapUiResponsiveMargin drsPageContent">
+                            <macros:FilterBar
+                                id="jobConfigFilterBar"
+                                metaPath="/DrsJobConfig/@com.sap.vocabularies.UI.v1.SelectionFields"
+                                liveMode="false"/>
+                            <macros:Table
+                                id="jobConfigTable"
+                                metaPath="/DrsJobConfig/@com.sap.vocabularies.UI.v1.LineItem"
+                                readOnly="true"
+                                enableExport="true"
+                                enableAutoColumnWidth="true"
+                                variantManagement="Control"
+                                p13nMode="Column,Sort,Filter"
+                                headerText="Job Configurations"
+                                filterBar="jobConfigFilterBar"
+                                growingThreshold="20">
+                                <macros:actions>
+                                    <macros:Action key="customCreate" text="Create" press=".onCreateJobConfig" requiresSelection="false" />
+                                    <macros:Action key="customDelete" text="Delete" press=".onDeleteJobConfig" requiresSelection="true" />
+                                </macros:actions>
+                            </macros:Table>
+                        </VBox>
                     </ScrollContainer>
 
                     <ScrollContainer id="history" horizontal="false" vertical="true" height="100%">
-                        <macros:FilterBar
-                            id="jobHistoryFilterBar"
-                            metaPath="/JobHistoryAnalytics/@com.sap.vocabularies.UI.v1.SelectionFields"
-                            liveMode="false"
-                            search=".onJobHistoryFilterSearch"/>
+                        <VBox class="sapUiResponsiveMargin drsPageContent">
+                            <macros:FilterBar
+                                id="jobHistoryFilterBar"
+                                metaPath="/JobHistoryAnalytics/@com.sap.vocabularies.UI.v1.SelectionFields"
+                                liveMode="false"
+                                search=".onJobHistoryFilterSearch"/>
 
-                        <!-- Chart Section — VizFrame thuần, không dùng macros:Chart -->
-                        <Panel id="jobHistoryChartPanel" headerText="Job Execution Statistics" class="sapUiResponsiveMargin">
-                            <viz:VizFrame
-                                id="jobTrendChart"
-                                vizType="stacked_column"
-                                height="350px"
-                                width="100%">
-                                <viz:dataset>
-                                    <viz.data:FlattenedDataset data="{chartModel>/chartData}">
-                                        <viz.data:dimensions>
-                                            <viz.data:DimensionDefinition name="Date"   value="{chartModel>JobDate}"/>
-                                            <viz.data:DimensionDefinition name="Status" value="{chartModel>JobStatus}"/>
-                                        </viz.data:dimensions>
-                                        <viz.data:measures>
-                                            <viz.data:MeasureDefinition name="Count" value="{chartModel>JobCountTotal}"/>
+                            <!-- Chart Section — VizFrame thuần, không dùng macros:Chart -->
+                            <Panel id="jobHistoryChartPanel" headerText="Job Execution Statistics" class="drsSection">
+                                <viz:VizFrame
+                                    id="jobTrendChart"
+                                    vizType="stacked_column"
+                                    height="350px"
+                                    width="100%">
+                                    <viz:dataset>
+                                        <viz.data:FlattenedDataset data="{chartModel>/chartData}">
+                                            <viz.data:dimensions>
+                                                <viz.data:DimensionDefinition name="Date"   value="{chartModel>JobDate}"/>
+                                                <viz.data:DimensionDefinition name="Status" value="{chartModel>JobStatus}"/>
+                                            </viz.data:dimensions>
+                                            <viz.data:measures>
+                                                <viz.data:MeasureDefinition name="Count" value="{chartModel>JobCountTotal}"/>
                                         </viz.data:measures>
                                     </viz.data:FlattenedDataset>
                                 </viz:dataset>
@@ -177,27 +448,29 @@
                             </viz:VizFrame>
                         </Panel>
 
-                        <macros:Table
-                            id="jobHistoryTable"
-                            metaPath="/JobHistoryAnalytics/@com.sap.vocabularies.UI.v1.LineItem"
-                            readOnly="true"
-                            enableExport="true"
-                            enableAutoColumnWidth="true"
-                            variantManagement="Control"
-                            p13nMode="Column,Sort,Filter"
-                            headerText="Global Job History"
-                            filterBar="jobHistoryFilterBar"
-                            growingThreshold="20">
-                        </macros:Table>
+                            <macros:Table
+                                id="jobHistoryTable"
+                                metaPath="/JobHistoryAnalytics/@com.sap.vocabularies.UI.v1.LineItem"
+                                readOnly="true"
+                                enableExport="true"
+                                enableAutoColumnWidth="true"
+                                variantManagement="Control"
+                                p13nMode="Column,Sort,Filter"
+                                headerText="Global Job History"
+                                filterBar="jobHistoryFilterBar"
+                                growingThreshold="20">
+                            </macros:Table>
+                        </VBox>
                     </ScrollContainer>
 
                     <ScrollContainer id="exports" horizontal="false" vertical="true" height="100%">
-                        <macros:FilterBar
-                            id="drsFileFilterBar"
-                            metaPath="/DrsFile/@com.sap.vocabularies.UI.v1.SelectionFields"
-                            liveMode="false"/>
-                        <macros:Table
-                            id="drsFileTable"
+                        <VBox class="sapUiResponsiveMargin drsPageContent">
+                            <macros:FilterBar
+                                id="drsFileFilterBar"
+                                metaPath="/DrsFile/@com.sap.vocabularies.UI.v1.SelectionFields"
+                                liveMode="false"/>
+                            <macros:Table
+                                id="drsFileTable"
                             metaPath="/DrsFile/@com.sap.vocabularies.UI.v1.LineItem"
                             readOnly="true"
                             enableExport="true"
@@ -207,27 +480,30 @@
                             headerText="My Exports (Report Files)"
                             filterBar="drsFileFilterBar"
                             growingThreshold="20">
-                        </macros:Table>
+                            </macros:Table>
+                        </VBox>
                     </ScrollContainer>
 
                     <!-- ── AP-01: Vendor Open Items ── -->
                     <ScrollContainer id="report_ap01" horizontal="false" vertical="true" height="100%">
-                        <macros:FilterBar
-                            id="ap01FilterBar"
-                            metaPath="/AP01_VendorOpenItems/@com.sap.vocabularies.UI.v1.SelectionFields"
-                            liveMode="false"/>
-                        <macros:Table
-                            id="ap01Table"
-                            metaPath="/AP01_VendorOpenItems/@com.sap.vocabularies.UI.v1.LineItem"
-                            readOnly="true"
-                            enableExport="true"
-                            enableAutoColumnWidth="true"
-                            variantManagement="Control"
-                            p13nMode="Column,Sort,Filter"
-                            headerText="AP-01: Vendor Open Items"
-                            filterBar="ap01FilterBar"
-                            growingThreshold="20">
-                        </macros:Table>
+                        <VBox class="sapUiResponsiveMargin drsPageContent">
+                            <macros:FilterBar
+                                id="ap01FilterBar"
+                                metaPath="/AP01_VendorOpenItems/@com.sap.vocabularies.UI.v1.SelectionFields"
+                                liveMode="false"/>
+                            <macros:Table
+                                id="ap01Table"
+                                metaPath="/AP01_VendorOpenItems/@com.sap.vocabularies.UI.v1.LineItem"
+                                readOnly="true"
+                                enableExport="true"
+                                enableAutoColumnWidth="true"
+                                variantManagement="Control"
+                                p13nMode="Column,Sort,Filter"
+                                headerText="AP-01: Vendor Open Items"
+                                filterBar="ap01FilterBar"
+                                growingThreshold="20">
+                            </macros:Table>
+                        </VBox>
                     </ScrollContainer>
 
                     <!-- ── AP-02: Vendor Balances ── -->
