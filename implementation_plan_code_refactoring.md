@@ -22,64 +22,80 @@ webapp/
 - Difficult to maintain and test
 - No reusable utilities
 
-### Target State (Refactored)
+### Target State (Đã hoàn thành — Cấu trúc thực tế hiện tại)
 ```
 webapp/
 ├── ext/
-│   ├── controller/                    ← Domain-specific controllers
-│   │   ├── BaseController.js          ← Shared methods
-│   │   ├── JobConfigController.js     ← Job config CRUD
-│   │   ├── SubscriptionController.js  ← Subscription CRUD
-│   │   ├── CatalogController.js       ← Report catalog actions
-│   │   └── JobHistoryController.js    ← Job history & charts
+│   ├── controller/                    ← Domain-specific controllers (đã triển khai)
+│   │   ├── BaseController.js          ← Shared methods (showMessage, showError, getTableSelectedContexts...)
+│   │   ├── DashboardController.js     ← Dashboard KPIs, charts, recent data, navigateToPage (NavContainer + router cho List Report)
+│   │   ├── JobConfigController.js     ← Job config CRUD (Create/Delete)
+│   │   ├── SubscriptionController.js  ← Subscription CRUD + dialog chọn Report
+│   │   ├── CatalogController.js       ← Report catalog: tile rendering, ActionSheet
+│   │   └── JobHistoryController.js    ← Job history chart: load, configure, aggregate
 │   ├── view/
-│   │   ├── Main.controller.js         ← Orchestration only
-│   │   └── Main.view.xml
-│   ├── fragment/                       ← Reusable dialogs
-│   │   ├── CreateSubscriptionDialog.fragment.xml
-│   │   └── ReportSelectDialog.fragment.xml
-│   └── helper/                         ← Utility classes
-│       ├── ChartHelper.js             ← Chart configuration
-│       ├── TableHelper.js             ← Table operations
-│       └── NavigationHelper.js        ← Router/navigation
-├── model/                              ← Business logic models
-│   ├── constants.js                   ← Enums, mappings
-│   ├── formatter.js                   ← Data formatters
-│   └── models.js                      ← Model factory
-├── util/                               ← Service utilities
-│   ├── ServiceHelper.js               ← OData operations
-│   └── ErrorHandler.js                ← Error handling
-├── css/
-│   └── style.css                      ← Custom styles
+│   │   ├── Main.controller.js         ← Orchestration (~160+ lines; `onItemSelect` có map router cho exports/reports)
+│   │   └── Main.view.xml              ← ToolPage + NavContainer: dashboard, catalog, subscriptions, jobconfigs, history, settings (macros); exports + 7 reports → `sap.fe.templates.ListReport` qua manifest (~460 lines)
+│   └── fragment/
+│       ├── DashboardChart.fragment.xml   ← (backup — VizFrame đã inline trong view)
+│       └── JobHistoryChart.fragment.xml  ← (backup — VizFrame đã inline trong view)
 ├── annotations/
-│   └── annotation.xml
+│   └── annotation.xml                 ← UI annotations cho tất cả entities
+├── css/
+│   └── style.css                      ← Custom styles (~128 lines)
+├── i18n/
+│   └── i18n.properties                ← Resource bundle (~61 lines)
 └── Component.js
 ```
+
+> **Các file đã bị xóa trong quá trình cleanup:**
+> - `model/constants.js` — các constant đã được inline vào từng controller
+> - `model/formatter.js` — không còn dùng formatter
+> - `ext/helper/ChartHelper.js` — logic chart nằm trong `JobHistoryController.js`
+> - Tất cả `ext/fragment/Page*.fragment.xml` (11 files) — Fragment-based lazy loading không hoạt động với macros:Table
 
 ---
 
 ## 2. Current Method Inventory
 
-### Main.controller.js (500+ lines)
+### Main.controller.js — Trạng thái TRƯỚC khi refactor (~500 lines, monolithic)
 
-| Method | Lines | Domain | Description |
-|--------|-------|--------|-------------|
-| `onInit` | 13-31 | Core | Initialization, router setup |
-| `_configureChart` | 34-54 | JobHistory | VizFrame configuration |
-| `_loadHistoryChart` | 56-80 | JobHistory | Load chart data |
-| `_aggregateChartData` | 83-108 | JobHistory | Aggregate data for chart |
-| `onJobHistoryFilterSearch` | 111-115 | JobHistory | Filter search handler |
-| `onMenuButtonPress` | 118-121 | Navigation | Toggle sidebar |
-| `onItemSelect` | 123-137 | Navigation | Sidebar item selection |
-| `_refreshJobConfigTable` | 139-145 | JobConfig | Refresh table |
-| `onCreateJobConfig` | 147-153 | JobConfig | Create job config |
-| `onDeleteJobConfig` | 155-216 | JobConfig | Delete job config |
-| `onCreateSubscription` | 218-280 | Subscription | Create subscription dialog |
-| `_createSubscriptionWithReportId` | 283-321 | Subscription | Create with ReportId |
-| `_navigateToSubscription` | 324-340 | Subscription | Navigate to detail |
-| `onDeleteSubscription` | 343-413 | Subscription | Delete subscription |
-| `onPreviewReport` | 418-463 | Catalog | Preview report |
-| `onCreateSubscriptionFromCatalog` | 467-487 | Catalog | Create from catalog |
+| Method | Domain | Mô tả |
+|--------|--------|-------|
+| `onInit` | Core | Khởi tạo, router setup |
+| `_configureChart` | JobHistory | Cấu hình VizFrame |
+| `_loadHistoryChart` | JobHistory | Load dữ liệu chart |
+| `_aggregateChartData` | JobHistory | Aggregate data cho chart |
+| `onJobHistoryFilterSearch` | JobHistory | Filter search handler |
+| `onMenuButtonPress` | Navigation | Toggle sidebar |
+| `onItemSelect` | Navigation | Chọn sidebar item |
+| `_refreshJobConfigTable` | JobConfig | Refresh bảng |
+| `onCreateJobConfig` | JobConfig | Tạo job config |
+| `onDeleteJobConfig` | JobConfig | Xóa job config |
+| `onCreateSubscription` | Subscription | Dialog tạo subscription |
+| `_createSubscriptionWithReportId` | Subscription | Tạo subscription với ReportId |
+| `onDeleteSubscription` | Subscription | Xóa subscription |
+| `onPreviewReport` | Catalog | Preview report |
+| `onCreateSubscriptionFromCatalog` | Catalog | Tạo subscription từ catalog |
+
+### Main.controller.js — Trạng thái SAU khi refactor (~160+ lines, orchestration only)
+
+| Method | Domain | Mô tả |
+|--------|--------|-------|
+| `onInit` | Core | Khởi tạo domain controllers, router setup |
+| `onMenuButtonPress` | Navigation | Toggle sidebar |
+| `onItemSelect` | Navigation | Chọn sidebar: `exports` / `report_*` → `router.navTo(ListReport)`; còn lại → `NavContainer.to` + delegate load data |
+| `onKpiTilePress` | Dashboard | Delegate → DashboardController |
+| `onQuickActionPress` | Dashboard | Delegate → DashboardController |
+| `onViewAllSubscriptions` | Dashboard | Navigate → subscriptions |
+| `onViewAllJobs` | Dashboard | Navigate → jobconfigs |
+| `onSubscriptionRowPress` | Dashboard | Navigate → subscriptions |
+| `onJobRowPress` | Dashboard | Navigate → jobconfigs |
+| `onCreateJobConfig` | JobConfig | Delegate → JobConfigController |
+| `onDeleteJobConfig` | JobConfig | Delegate → JobConfigController |
+| `onCreateSubscription` | Subscription | Delegate → SubscriptionController |
+| `onDeleteSubscription` | Subscription | Delegate → SubscriptionController |
+| `onJobHistoryFilterSearch` | JobHistory | Delegate → JobHistoryController |
 
 ---
 

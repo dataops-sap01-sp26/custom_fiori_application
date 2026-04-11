@@ -6,13 +6,13 @@ Tài liệu này ghi nhận lại toàn bộ quá trình thiết kế và triể
 
 ## 1. Kiến trúc Tổng quan
 
-### Entity Backend: `DrsSubscr` (Subscription)
+### Entity Backend: `DrsSubscription` (Subscription)
 
 Entity này được expose từ CDS Projection `ZC_DRS_SUBSCR` (dựa trên Interface View `ZR_DRS_SUBSCR` và bảng vật lý `zdrs_subscr`) qua service `ZSD_DRS_MAIN_O4`.
 
 **So sánh với các entity đã triển khai:**
 
-| Đặc điểm | DrsJobConfig | JobHistoryAnalytics | DrsFile | **DrsSubscr** |
+| Đặc điểm | DrsJobConfig | JobHistoryAnalytics | DrsFile | **DrsSubscription** |
 |---|---|---|---|---|
 | Loại | RAP BO (CRUD) | Analytics Cube | RAP BO (Read-only) | **RAP BO (CRUD + Draft)** |
 | Dùng Draft? | Có | Không | Không | **Có** |
@@ -27,7 +27,7 @@ Entity này được expose từ CDS Projection `ZC_DRS_SUBSCR` (dựa trên Int
 3. **Custom Actions trên Object Page**: 4 action buttons (Create Report Parameters, Pause, Resume, Copy) được khai báo trong DDLX `UI.identification` — Fiori Elements Object Page tự render chúng.
 4. **Value Helps**: 3 field có value help annotation: `ReportId` → `ZIR_DRS_CATALOG`, `Bukrs` → `I_CompanyCodeStdVH`, `OutputFormat` → `ZI_VH_DRS_FORMAT`.
 
-### Toàn bộ fields của entity `DrsSubscr`
+### Toàn bộ fields của entity `DrsSubscription`
 
 | Field | Kiểu dữ liệu | Mô tả | Hiển thị UI |
 |---|---|---|---|
@@ -162,28 +162,24 @@ Fiori Elements Object Page tự nhận diện composition child `_ParamGL01` và
 
 ```json
 {
-  "name": "DrsSubscrObjectPage",
-  "pattern": "DrsSubscr({SubscrUuid},{SubscrId}):?query:",
-  "target": "DrsSubscrObjectPage"
+  "name": "DrsSubscriptionObjectPage",
+  "pattern": "DrsSubscription({key}):?query:",
+  "target": "DrsSubscriptionObjectPage"
 }
 ```
 
-> **Tại sao pattern có 2 key segments `{SubscrUuid},{SubscrId}`?**
->
-> Entity `ZC_DRS_SUBSCR` có composite key gồm cả `SubscrUuid` và `SubscrId`. OData V4 route pattern phải bao gồm tất cả key fields. Tuy nhiên, trong thực tế Fiori Elements FPM có thể tự generate URL đúng khi user click row — ta chỉ cần khai báo pattern phù hợp.
->
-> **Lưu ý:** Nếu gặp lỗi routing, có thể đơn giản hoá thành `DrsSubscr({SubscrUuid}):?query:` vì `SubscrUuid` là UUID unique. Cần test thực tế trên hệ thống.
+> **Tại sao pattern chỉ dùng `{key}` thay vì liệt kê từng key field?** FPM tự xử lý việc build URL từ composite key. Khai báo `{key}` là đủ trong hầu hết trường hợp — framework tự map sang đúng key fields khi navigate.
 
 ### 4.2 Thêm Target (Object Page Template)
 
 ```json
-"DrsSubscrObjectPage": {
+"DrsSubscriptionObjectPage": {
   "type": "Component",
-  "id": "DrsSubscrObjectPage",
+  "id": "DrsSubscriptionObjectPage",
   "name": "sap.fe.templates.ObjectPage",
   "options": {
     "settings": {
-      "contextPath": "/DrsSubscr",
+      "contextPath": "/DrsSubscription",
       "editableHeaderContent": false
     }
   }
@@ -209,9 +205,9 @@ Fiori Elements Object Page tự nhận diện composition child `_ParamGL01` và
 Trong mục `DashboardMainPage.options.settings.navigation`, thêm:
 
 ```json
-"DrsSubscr": {
+"DrsSubscription": {
   "detail": {
-    "route": "DrsSubscrObjectPage"
+    "route": "DrsSubscriptionObjectPage"
   }
 }
 ```
@@ -228,33 +224,36 @@ Tab Subscriptions đã có sẵn trong sidebar menu (key=`"subscriptions"`) như
 
 ```xml
 <ScrollContainer id="subscriptions" horizontal="false" vertical="true" height="100%">
-    <macros:FilterBar
-        id="subscrFilterBar"
-        metaPath="/DrsSubscr/@com.sap.vocabularies.UI.v1.SelectionFields"
-        liveMode="false"/>
-    <macros:Table
-        id="subscrTable"
-        metaPath="/DrsSubscr/@com.sap.vocabularies.UI.v1.LineItem"
-        readOnly="true"
-        enableExport="true"
-        enableAutoColumnWidth="true"
-        variantManagement="Control"
-        p13nMode="Column,Sort,Filter"
-        headerText="Subscriptions"
-        filterBar="subscrFilterBar"
-        growingThreshold="20">
-        <macros:actions>
-            <macros:Action key="customCreate" text="Create" press=".onCreateSubscription" requiresSelection="false" />
-            <macros:Action key="customDelete" text="Delete" press=".onDeleteSubscription" requiresSelection="true" />
-        </macros:actions>
-    </macros:Table>
+    <VBox class="sapUiResponsiveMargin drsPageContent">
+        <macros:FilterBar
+            id="subscrFilterBar"
+            metaPath="/DrsSubscription/@com.sap.vocabularies.UI.v1.SelectionFields"
+            liveMode="false"/>
+        <macros:Table
+            id="subscrTable"
+            metaPath="/DrsSubscription/@com.sap.vocabularies.UI.v1.LineItem"
+            readOnly="true"
+            enableExport="true"
+            enableAutoColumnWidth="true"
+            variantManagement="Control"
+            p13nMode="Column,Sort,Filter"
+            headerText="Subscriptions"
+            filterBar="subscrFilterBar"
+            growingThreshold="20">
+            <macros:actions>
+                <macros:Action key="customCreate" text="Create" press=".onCreateSubscription" requiresSelection="false" />
+                <macros:Action key="customDelete" text="Delete" press=".onDeleteSubscription" requiresSelection="true" />
+            </macros:actions>
+        </macros:Table>
+    </VBox>
 </ScrollContainer>
 ```
 
 **Giải thích các thuộc tính:**
 
-- `metaPath="/DrsSubscr/@com.sap.vocabularies.UI.v1.SelectionFields"`: Trỏ FilterBar vào annotation SelectionFields — FPM tự render filter fields (SubscrId, ReportId, Status).
-- `metaPath="/DrsSubscr/@com.sap.vocabularies.UI.v1.LineItem"`: Trỏ Table vào annotation LineItem — FPM tự render columns.
+- `metaPath="/DrsSubscription/@com.sap.vocabularies.UI.v1.SelectionFields"`: Trỏ FilterBar vào annotation SelectionFields — FPM tự render filter fields (SubscrId, ReportId, Status).
+- `metaPath="/DrsSubscription/@com.sap.vocabularies.UI.v1.LineItem"`: Trỏ Table vào annotation LineItem — FPM tự render columns.
+- Có thêm `<VBox class="sapUiResponsiveMargin drsPageContent">` bọc ngoài để chuẩn hóa layout với các tab khác.
 - `readOnly="true"`: Table ở chế độ chỉ đọc (edit thực hiện trên Object Page).
 - `<macros:actions>`: Custom Create/Delete buttons — **bắt buộc vì FPM Custom Page không tự sinh CRUD buttons** (giống pattern DrsJobConfig).
 
@@ -317,7 +316,7 @@ onCreateSubscription: function (oEvent) {
     var oExtensionAPI = this.getExtensionAPI();
     var oEditFlow = oExtensionAPI.getEditFlow();
     var oModel = oExtensionAPI.getModel();
-    var oListBinding = oModel.bindList("/DrsSubscr");
+    var oListBinding = oModel.bindList("/DrsSubscription");
 
     // Step 1: Create draft (không tự navigate - ta control navigation)
     var oContext = oListBinding.create({}, true); // true = bSkipRefresh
@@ -426,7 +425,7 @@ _createSubscriptionWithReportId: function (sReportId) {
     var oExtensionAPI = this.getExtensionAPI();
     var oEditFlow = oExtensionAPI.getEditFlow();
     var oModel = oExtensionAPI.getModel();
-    var oListBinding = oModel.bindList("/DrsSubscr");
+    var oListBinding = oModel.bindList("/DrsSubscription");
 
     // Step 1: Create draft WITH ReportId pre-filled
     var oContext = oListBinding.create({
@@ -619,7 +618,7 @@ onItemSelect: function (oEvent) {
 ### 7.1 LineItem — Columns cho Table trên Dashboard
 
 ```xml
-<Annotations Target="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsSubscrType">
+<Annotations Target="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsSubscriptionType">
     <!-- ═══ LINE ITEM: Columns cho Subscription Table ═══ -->
     <Annotation Term="UI.LineItem">
         <Collection>
@@ -783,10 +782,10 @@ Khi backend team kích hoạt thêm report types:
 
 | # | File | Hành động | Nội dung |
 |---|---|---|---|
-| 1 | `manifest.json` | **Sửa** | Thêm route `DrsSubscrObjectPage`, target, navigation |
-| 2 | `Main.view.xml` | **Sửa** | Thay placeholder `subscriptions` bằng FilterBar + Table |
-| 3 | `annotation.xml` | **Sửa** | Thêm `DrsSubscrType` annotations (LineItem, SelectionFields, HeaderInfo) |
-| 4 | `Main.controller.js` | **Sửa** | Thêm `onCreateSubscription`, `onDeleteSubscription`, `_refreshSubscriptionTable` |
+| 1 | `manifest.json` | **Sửa** | Thêm route `DrsSubscriptionObjectPage`, target, navigation |
+| 2 | `Main.view.xml` | **Sửa** | Thay placeholder `subscriptions` bằng VBox + FilterBar + Table |
+| 3 | `annotation.xml` | **Sửa** | Thêm `DrsSubscriptionType` annotations (LineItem, SelectionFields, HeaderInfo) |
+| 4 | `Main.controller.js` + `SubscriptionController.js` | **Sửa** | `onCreateSubscription` delegate → `SubscriptionController.showCreateDialog()`, `onDeleteSubscription` delegate → `SubscriptionController.onDelete()` |
 
 ### So sánh code lượng: drs_admin vs FPM
 
@@ -841,7 +840,7 @@ User           Dashboard        Backend                 Object Page
  │                 │                │                        │
  │── [GL-01] ─────►│                │                        │
  │                 │                │                        │
- │                 │── POST /DrsSubscr ────────────────────►│
+ │                 │── POST /DrsSubscription ───────────────►│
  │                 │   { ReportId: "GL-01" }                 │
  │                 │                │                        │
  │                 │◄── 201 Created { SubscrUuid, SubscrId } │
@@ -867,9 +866,9 @@ User           Dashboard        Backend                 Object Page
 
 ### 10.1 Composite Key Routing
 
-**Vấn đề:** `DrsSubscr` có composite key (`SubscrUuid` + `SubscrId`). FPM cần generate URL pattern đúng khi user click row.
+**Vấn đề:** `DrsSubscription` có composite key (`SubscrUuid` + `SubscrId`). FPM cần generate URL pattern đúng khi user click row.
 
-**Giải pháp:** Khai báo pattern `DrsSubscr({SubscrUuid},{SubscrId}):?query:` trong route. Nếu FPM không generate đúng URL, thử đơn giản hoá thành `DrsSubscr({SubscrUuid}):?query:` vì UUID đủ unique.
+**Giải pháp:** Khai báo pattern `DrsSubscription({key}):?query:` trong route. FPM tự build URL từ key fields của entity.
 
 ### 10.2 Draft Indicator trên Table
 

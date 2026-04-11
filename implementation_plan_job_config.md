@@ -65,27 +65,29 @@ Nhúng Trình điều khiển danh sách (`macros:Table` và `macros:FilterBar`)
 
 ```xml
 <ScrollContainer id="jobconfigs" horizontal="false" vertical="true" height="100%">
-    <macros:FilterBar
-        id="jobConfigFilterBar"
-        metaPath="/DrsJobConfig/@com.sap.vocabularies.UI.v1.SelectionFields"
-        liveMode="false"/>
-    <macros:Table
-        id="jobConfigTable"
-        metaPath="/DrsJobConfig/@com.sap.vocabularies.UI.v1.LineItem"
-        readOnly="true"           <!-- Bắt buộc "chỉ xem" -->
-        enableExport="true"       <!-- Cho phép xuất Excel -->
-        enableAutoColumnWidth="true"
-        variantManagement="Control"
-        p13nMode="Column,Sort,Filter"
-        headerText="Job Configurations"
-        filterBar="jobConfigFilterBar"
-        growingThreshold="20">
-        <!-- Tự cấu hình UI các nút chức năng Create/Delete vì Framework không tự sinh trên FPM Page -->
-        <macros:actions>
-            <macros:Action key="customCreate" text="Create" press=".onCreateJobConfig" requiresSelection="false" />
-            <macros:Action key="customDelete" text="Delete" press=".onDeleteJobConfig" requiresSelection="true" />
-        </macros:actions>
-    </macros:Table>
+    <!-- VBox wrapper chuẩn hóa layout — tất cả các tab đều có cấu trúc này -->
+    <VBox class="sapUiResponsiveMargin drsPageContent">
+        <macros:FilterBar
+            id="jobConfigFilterBar"
+            metaPath="/DrsJobConfig/@com.sap.vocabularies.UI.v1.SelectionFields"
+            liveMode="false"/>
+        <macros:Table
+            id="jobConfigTable"
+            metaPath="/DrsJobConfig/@com.sap.vocabularies.UI.v1.LineItem"
+            readOnly="true"
+            enableExport="true"
+            enableAutoColumnWidth="true"
+            variantManagement="Control"
+            p13nMode="Column,Sort,Filter"
+            headerText="Job Configurations"
+            filterBar="jobConfigFilterBar"
+            growingThreshold="20">
+            <macros:actions>
+                <macros:Action key="customCreate" text="Create" press=".onCreateJobConfig" requiresSelection="false" />
+                <macros:Action key="customDelete" text="Delete" press=".onDeleteJobConfig" requiresSelection="true" />
+            </macros:actions>
+        </macros:Table>
+    </VBox>
 </ScrollContainer>
 ```
 
@@ -232,10 +234,11 @@ _refreshJobConfigTable: function () {
 
 ## 4. Tổng Kết
 
-Thông qua sự kết hợp của 4 elements:
+Thông qua sự kết hợp của 5 elements:
 1. **Routing Config** — Chuyển đổi trang giữa Dashboard ↔ Object Page
-2. **Custom XML View** — Gắn `macros:Table`, `macros:FilterBar` và `macros:Action` (Create/Delete) vào layout FPM
+2. **Custom XML View** — Gắn `macros:Table`, `macros:FilterBar` và `macros:Action` (Create/Delete) vào layout FPM (bọc trong `VBox.drsPageContent`)
 3. **Fiori Annotations** — Meta data map giao diện UI/UX cho cả List và Object Page
 4. **Table Auto-Refresh** — Routing event (`patternMatched`) + OData binding refresh đảm bảo dữ liệu luôn đồng bộ sau mỗi thao tác CRUD
+5. **Domain Controller Pattern** — Logic CRUD nằm trong `JobConfigController.js` riêng; `Main.controller.js` chỉ delegate. Action namespace `com.sap.gateway.srvd.zsd_drs_main_o4.v0001` được inline trực tiếp (không còn dùng `constants.js`).
 
 Chúng ta hoàn tất module **Job Configurations** đảm bảo ba trải nghiệm: List view nhanh chóng với xuất khẩu/lọc/phân trang; Detail view (Object Page) chuyên nghiệp; và CRUD operations (Create/Delete) hoạt động mượt mà với phản hồi UI tức thời — tất cả trên nền tảng Custom FPM Dashboard thay vì ListReport truyền thống.

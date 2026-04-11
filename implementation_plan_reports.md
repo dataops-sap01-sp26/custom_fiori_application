@@ -1,6 +1,6 @@
 # Tài liệu Triển khai: Financial Reports Dashboard (AP / AR / GL)
 
-Tài liệu này ghi nhận lại toàn bộ quá trình thiết kế và triển khai 7 module báo cáo tài chính trên Fiori Custom Dashboard. Mỗi report là một tab riêng trong sidebar "Reports", hiển thị dữ liệu từ các CDS View chuyên dụng được expose qua OData service `ZSD_DRS_MAIN_O4`.
+Tài liệu này ghi nhận lại toàn bộ quá trình thiết kế và triển khai 7 module báo cáo tài chính trên Fiori Custom Dashboard. Sidebar "Reports" vẫn dùng các `key` cũ (`report_ap01` … `report_gl01`), nhưng **danh sách không còn nằm trong `Main.view.xml`**: mỗi report mở bằng route `sap.fe.templates.ListReport` (full-screen), dữ liệu từ các CDS View expose qua OData service `ZSD_DRS_MAIN_O4`.
 
 ---
 
@@ -186,7 +186,7 @@ FPM sẽ tự build URL theo đúng format này khi user click vào dòng trên 
 
 > **Tại sao phải liệt kê đầy đủ tên key trong pattern?** FPM routing dùng pattern để match URL ngược lại khi user copy/paste link hoặc navigate back. Nếu pattern không khớp chính xác với URL format mà FPM tạo ra → không navigate được.
 
-### 3.2 Routes đã thêm (7 entries)
+### 3.2 Routes Object Page đã thêm (7 entries)
 
 ```json
 { "name": "AP01ObjectPage", "pattern": "AP01_VendorOpenItems(Ledger={Ledger},SourceLedger={SourceLedger},CompanyCode={CompanyCode},Supplier={Supplier}):?query:", "target": "AP01ObjectPage" },
@@ -200,6 +200,8 @@ FPM sẽ tự build URL theo đúng format này khi user click vào dòng trên 
 
 ### 3.3 Navigation linking (trong `DashboardMainPage`)
 
+Các entry sau vẫn cần nếu user mở entity từ **trong** Custom FPM page (ví dụ tương lai nhúng lại macro). Với luồng chính hiện tại, drill-down từ list sang Object Page dùng `navigation` trong từng target **ListReport** (mục 3.5).
+
 ```json
 "AP01_VendorOpenItems":    { "detail": { "route": "AP01ObjectPage" } },
 "AP02_VendorBalances":     { "detail": { "route": "AP02ObjectPage" } },
@@ -210,7 +212,29 @@ FPM sẽ tự build URL theo đúng format này khi user click vào dòng trên 
 "GL01_GLAccountBalances":  { "detail": { "route": "GL01ObjectPage" } }
 ```
 
-### 3.4 Targets (7 entries — tất cả `editableHeaderContent: false`)
+### 3.5 List Report routes & targets (triển khai hiện tại)
+
+Thêm **7 route** (pattern list, không có key trong path — khác Object Page):
+
+| Route name | Pattern (rút gọn) | Target |
+|------------|-------------------|--------|
+| `AP01ListPage` | `AP01_VendorOpenItems:?query:` | `AP01ListPage` |
+| `AP02ListPage` | `AP02_VendorBalances:?query:` | `AP02ListPage` |
+| `AP03ListPage` | `AP03_APAgingReport:?query:` | `AP03ListPage` |
+| `AR01ListPage` | `AR01_CustomerOpenItems:?query:` | `AR01ListPage` |
+| `AR02ListPage` | `AR02_CustomerBalances:?query:` | `AR02ListPage` |
+| `AR03ListPage` | `AR03_ARAgingReport:?query:` | `AR03ListPage` |
+| `GL01ListPage` | `GL01_GLAccountBalances:?query:` | `GL01ListPage` |
+
+Mỗi target:
+
+- `"name": "sap.fe.templates.ListReport"`
+- `"options.settings.contextPath": "/EntitySetName"` (ví dụ `/AP01_VendorOpenItems`)
+- `"options.settings.navigation": { "AP01_VendorOpenItems": { "detail": { "route": "AP01ObjectPage" } } }` (tên entity set khớp metadata)
+
+Kèm theo: `sap.ui5/dependencies/libs` có `"sap.fe.templates": {}`. `sap.fe.app.enableLazyLoading: true` giúp chỉ tải target khi navigate.
+
+### 3.6 Targets Object Page (7 entries — tất cả `editableHeaderContent: false`)
 
 ```json
 "AP01ObjectPage": { "contextPath": "/AP01_VendorOpenItems",   "editableHeaderContent": false },
@@ -226,48 +250,33 @@ FPM sẽ tự build URL theo đúng format này khi user click vào dòng trên 
 
 ---
 
-## 4. Giao diện Điều khiển (`Main.view.xml`)
+## 4. Điều hướng từ sidebar (không còn macros trong `Main.view.xml`)
 
-### 4.1 Pattern chung cho mỗi report tab
+### 4.1 Vì sao bỏ `ScrollContainer` + macros cho 7 report
 
-Mỗi trong 7 `ScrollContainer` placeholder được thay bằng cấu trúc giống nhau:
+Nhúng 7 cặp `macros:FilterBar` + `macros:Table` trong một `Main.view.xml` khiến FPM XML preprocessor chạy toàn bộ lúc mở app → khởi động chậm. Template `sap.fe.templates.ListReport` qua router chỉ preprocess khi user mở đúng route.
 
-```xml
-<ScrollContainer id="report_xxx" horizontal="false" vertical="true" height="100%">
-    <macros:FilterBar
-        id="xxxFilterBar"
-        metaPath="/EntitySetName/@com.sap.vocabularies.UI.v1.SelectionFields"
-        liveMode="false"/>
-    <macros:Table
-        id="xxxTable"
-        metaPath="/EntitySetName/@com.sap.vocabularies.UI.v1.LineItem"
-        readOnly="true"
-        enableExport="true"
-        enableAutoColumnWidth="true"
-        variantManagement="Control"
-        p13nMode="Column,Sort,Filter"
-        headerText="Tên report"
-        filterBar="xxxFilterBar"
-        growingThreshold="20">
-    </macros:Table>
-</ScrollContainer>
-```
+### 4.2 Ánh xạ sidebar key → route name
 
-> **Tại sao không có `<macros:actions>`?** Không cần Create/Delete trên financial reports. `readOnly="true"` là đủ.
+`Main.controller.js` (`onItemSelect`) và `DashboardController.js` (`navigateToPage`) dùng cùng một map:
 
-> **Tại sao `metaPath` trỏ thẳng vào SelectionFields/LineItem từ backend?** Khác với `DrsFile` phải thêm `SelectionFields` vào `annotation.xml` local, cả 7 entity report này đã có đầy đủ cả `UI.LineItem` lẫn `UI.SelectionFields` trong DDLX backend. `macros:FilterBar` và `macros:Table` đọc trực tiếp từ `$metadata` của service — không cần override local.
+| Sidebar key | `router.navTo(...)` |
+|---|---|
+| `report_ap01` | `AP01ListPage` |
+| `report_ap02` | `AP02ListPage` |
+| `report_ap03` | `AP03ListPage` |
+| `report_ar01` | `AR01ListPage` |
+| `report_ar02` | `AR02ListPage` |
+| `report_ar03` | `AR03ListPage` |
+| `report_gl01` | `GL01ListPage` |
 
-### 4.2 Bảng ánh xạ sidebar key → control IDs
+### 4.3 UX
 
-| Sidebar key | FilterBar ID | Table ID | Entity Set |
-|---|---|---|---|
-| `report_ap01` | `ap01FilterBar` | `ap01Table` | `AP01_VendorOpenItems` |
-| `report_ap02` | `ap02FilterBar` | `ap02Table` | `AP02_VendorBalances` |
-| `report_ap03` | `ap03FilterBar` | `ap03Table` | `AP03_APAgingReport` |
-| `report_ar01` | `ar01FilterBar` | `ar01Table` | `AR01_CustomerOpenItems` |
-| `report_ar02` | `ar02FilterBar` | `ar02Table` | `AR02_CustomerBalances` |
-| `report_ar03` | `ar03FilterBar` | `ar03Table` | `AR03_ARAgingReport` |
-| `report_gl01` | `gl01FilterBar` | `gl01Table` | `GL01_GLAccountBalances` |
+Màn List Report là **full-screen** (không còn `ToolPage` sidebar). Người dùng quay lại dashboard bằng nút **Back** / breadcrumb của shell Fiori (hash về route `DashboardMainPage`).
+
+### 4.4 Tính năng Fiori Elements trên List Report
+
+Filter bar, bảng, variant, export, P13n, drill-down Object Page do template `ListReport` + annotations backend đảm nhiệm — tương đương chức năng khi còn dùng macro, không cần XML view tùy chỉnh cho từng report.
 
 ---
 
@@ -298,15 +307,14 @@ Các file DDLX backend liên quan:
 
 ---
 
-## 6. Controller (`Main.controller.js`)
+## 6. Controller (`Main.controller.js`, `DashboardController.js`)
 
-**Không có thay đổi nào trong Controller.**
+**Có thay đổi:** điều hướng report qua router.
 
-Tất cả 7 report là read-only với FilterBar + Table đơn giản:
-- `macros:FilterBar` tự render filter fields từ `UI.SelectionFields`
-- `macros:Table` tự kết nối với FilterBar qua `filterBar="..."`, tự filter khi nhấn "Go"
-- FPM tự xử lý navigation sang Object Page khi click dòng
-- Không có custom actions, không có chart, không có data aggregation
+- `Main.controller.js` — `onItemSelect`: nếu `sKey` là một trong 7 key `report_*` → `this.getAppComponent().getRouter().navTo("AP01ListPage")` (v.v. theo bảng mục 4.2) và `return` (không gọi `NavContainer.to`).
+- `DashboardController.js` — `navigateToPage`: cùng map `report_*` → `router.navTo` (quick action / tile không thể `byId("report_ap01")` vì không còn page trong NavContainer).
+
+List Report template tự xử lý filter, table, navigate Object Page — không cần thêm handler trong controller cho từng report.
 
 ---
 
@@ -340,42 +348,40 @@ Tất cả 7 report là read-only với FilterBar + Table đơn giản:
 
 ## 8. Tổng Kết
 
-**Các file đã thay đổi:**
+**Các file đã thay đổi (trạng thái sau Option C — List Report):**
 
 | File | Thay đổi |
 |---|---|
-| `manifest.json` | +7 routes, +7 targets, +7 navigation entries |
-| `Main.view.xml` | Thay 7 placeholder `<Title>` bằng `macros:FilterBar` + `macros:Table` |
-| `Main.controller.js` | **Không thay đổi** |
+| `manifest.json` | +7 routes list + 7 targets `sap.fe.templates.ListReport` (mỗi target có `navigation` → Object Page); lib `sap.fe.templates`; giữ nguyên 7 route/target Object Page (compound key) |
+| `Main.view.xml` | **Xóa** 7 khối `ScrollContainer` + macros cho report (sidebar keys giữ nguyên) |
+| `Main.controller.js` | `onItemSelect`: map `report_*` → `router.navTo` |
+| `DashboardController.js` | `navigateToPage`: cùng map cho tile/quick action |
 | `annotation.xml` | **Không thay đổi** |
 
 **Luồng hoạt động (giống nhau cho cả 7 report):**
 
 ```
 User click menu sidebar (vd: "Report AP-03")
-    → onItemSelect() → byId("pageContainer").to(byId("report_ap03"))
-    → macros:FilterBar render: CompanyCode / Supplier (từ UI.SelectionFields backend)
-    → macros:Table load: GET /AP03_APAgingReport?$select=...&$top=20
+    → onItemSelect() → router.navTo("AP03ListPage")
+    → Target ListReport load (lazy) → FilterBar + Table từ annotations backend
+    → GET /AP03_APAgingReport?$select=...&$top=...
 
 User nhập filter rồi nhấn "Go"
-    → FPM tự build query: GET /AP03_APAgingReport?$filter=CompanyCode eq '1000'&...
-    → Table tự refresh — không cần code controller
+    → ListReport tự build OData query — không cần code controller
 
-User click vào dòng "Nhà cung cấp XYZ"
-    → FPM navigation → AP03ObjectPage
-    → URL: #/AP03_APAgingReport(CompanyCode=1000,Supplier=100000,LocalCurrency=VND)
-    → Object Page render HeaderInfo + Facets từ backend DDLX
-    → Panel "General" hiển thị thông tin tổng hợp
-    → Panel "Items" hiển thị từng chứng từ kế toán chi tiết (_Items)
+User click vào một dòng
+    → navigation trong target ListReport → AP03ObjectPage
+    → URL: #/AP03_APAgingReport(CompanyCode=...,Supplier=...,LocalCurrency=...)
+    → Object Page: HeaderInfo + Facets + _Items
 ```
 
 **So sánh độ phức tạp triển khai:**
 
-| Module | Số file sửa | Cần annotation local? | Cần controller code? |
+| Module | Số file sửa | Cần annotation local? | Controller |
 |---|---|---|---|
-| Job Config | 4 | Có (đầy đủ) | Có (CRUD logic) |
-| Job History | 4 | Có (Aggregation) | Có (Chart data) |
-| DrsFile | 3 | Có (SelectionFields) | Không |
-| **7 Reports** | **2** | **Không** | **Không** |
+| Job Config | 4 | Có (đầy đủ) | CRUD logic |
+| Job History | 4 | Có (Aggregation) | Chart data |
+| DrsFile (list) | manifest + 2 JS | Có (SelectionFields) | Router map |
+| **7 Reports** | manifest + Main.view + 2 JS | **Không** | Chỉ map router |
 
-> **Lý do 7 report đơn giản nhất:** Đây là các entity thuần read-only với backend đã hoàn chỉnh annotations. FPM xử lý 100% — FilterBar, Table, Object Page, Navigation — mà không cần bất kỳ dòng code JavaScript hay annotation XML nào từ phía frontend.
+> **Ghi chú:** List Report là template chuẩn SAP — có auto-refresh / lifecycle tốt hơn so với `macros:Table` nhúng trong Custom FPM page; trade-off là màn list full-screen, không còn sidebar ToolPage.

@@ -4,6 +4,8 @@ Tài liệu này trả lời câu hỏi thực tiễn: **"Khi muốn thêm một
 
 Được rút gọn từ kinh nghiệm triển khai thực tế hai module: **Job Configurations** và **Job History Analytics**.
 
+**Kiến trúc hiện tại (hybrid):** Trang chính vẫn là `sap.fe.core.fpm` + `Main.view.xml` với sidebar và `NavContainer` cho **dashboard, catalog, subscriptions, job configs, job history**. **My Exports** và **7 financial reports** không còn nhúng `macros:FilterBar` / `macros:Table` trong `Main.view.xml`; mỗi mục là route + target `sap.fe.templates.ListReport` trong `manifest.json`, điều hướng bằng `router.navTo()` khi chọn sidebar hoặc quick action. Cách này giảm chi phí FPM XML preprocess lúc khởi động và tránh lỗi khi tạo `sap.fe.core.fpm` thủ công ngoài router.
+
 ---
 
 ## 1. Bản đồ Kiến trúc Dự án
@@ -12,16 +14,31 @@ Tài liệu này trả lời câu hỏi thực tiễn: **"Khi muốn thêm một
 customfioriapplication/
 │
 ├── webapp/
-│   ├── manifest.json                  ← "Bản khai sinh" của app
+│   ├── manifest.json                     ← "Bản khai sinh" của app
 │   ├── annotations/
-│   │   └── annotation.xml             ← "Kịch bản UI" cho từng entity
-│   └── ext/
-│       └── view/
-│           ├── Main.view.xml          ← "Bản vẽ" giao diện HTML
-│           └── Main.controller.js     ← "Não" xử lý logic JS
+│   │   └── annotation.xml                ← "Kịch bản UI" cho từng entity
+│   ├── ext/
+│   │   ├── controller/
+│   │   │   ├── BaseController.js         ← Shared utilities
+│   │   │   ├── DashboardController.js    ← Dashboard KPIs & chart
+│   │   │   ├── JobConfigController.js    ← Job Config CRUD
+│   │   │   ├── SubscriptionController.js ← Subscription CRUD + dialog
+│   │   │   ├── CatalogController.js      ← Report Catalog tiles
+│   │   │   └── JobHistoryController.js   ← History chart
+│   │   └── view/
+│   │       ├── Main.view.xml             ← "Bản vẽ" giao diện HTML
+│   │       └── Main.controller.js        ← "Não" orchestration (delegate to domain controllers)
+│   ├── css/
+│   │   └── style.css
+│   └── i18n/
+│       └── i18n.properties
 │
-├── implementation_plan_job_config.md  ← Tài liệu triển khai Job Config
-└── implementation_plan_job_history.md ← Tài liệu triển khai Job History
+├── implementation_plan_job_config.md     ← Tài liệu triển khai Job Config
+├── implementation_plan_job_history.md    ← Tài liệu triển khai Job History
+├── implementation_plan_reports.md        ← Tài liệu 7 Financial Reports
+├── implementation_plan_file.md           ← Tài liệu My Exports (DrsFile)
+├── implementation_plan_subscriptions.md  ← Tài liệu Subscriptions
+└── implementation_plan_dashboard.md      ← Tài liệu Dashboard
 ```
 
 ---
@@ -35,7 +52,8 @@ customfioriapplication/
 **Khi thêm module mới, phải sửa file này để:**
 - **Khai báo Route mới**: Mỗi trang Object Page (chi tiết) cần một route riêng. Nếu không có route, click vào dòng trên table sẽ báo lỗi không tìm thấy đường dẫn.
 - **Khai báo Target**: Trỏ route vào template `sap.fe.templates.ObjectPage` kèm `contextPath` của entity.
-- **Khai báo Navigation**: Liên kết entity với route Object Page để FPM biết khi click dòng nào thì navigate đâu.
+- **List Report độc lập (My Exports + 7 reports):** Thêm route + target `sap.fe.templates.ListReport` với `contextPath` và `navigation` (detail → Object Page route tương ứng). Thư viện `sap.fe.templates` phải có trong `sap.ui5/dependencies/libs`.
+- **Khai báo Navigation**: Liên kết entity với route Object Page để FPM biết khi click dòng nào thì navigate đâu (trong `DashboardMainPage` cho tab embed; trong từng ListReport target cho màn full-screen).
 - **Khai báo Library mới**: Nếu dùng thêm thư viện UI5 chưa có (ví dụ: `sap.viz` cho chart, `sap.suite.ui.microchart` cho sparkline).
 
 ```
@@ -65,11 +83,11 @@ annotation.xml ảnh hưởng: Giao diện Table, FilterBar, Object Page, Chart
 
 ### `Main.view.xml` — Bản vẽ Giao diện
 
-**Mục đích:** File XML định nghĩa cấu trúc giao diện Dashboard — sidebar menu, các tab nội dung, vị trí đặt table/chart/filterbar.
+**Mục đích:** File XML định nghĩa cấu trúc giao diện Dashboard — sidebar menu, các tab nội dung **nhúng trong NavContainer**, vị trí đặt table/chart/filterbar.
 
 **Khi thêm module mới, phải sửa để:**
-- **Thêm menu item mới** vào `tnt:SideNavigation` với `key` trùng với `id` của ScrollContainer.
-- **Thêm `ScrollContainer` mới** vào `NavContainer` chứa nội dung của tab (FilterBar + Table hoặc FilterBar + Chart + Table).
+- **Thêm menu item mới** vào `tnt:SideNavigation` với `key` (ví dụ `report_xyz`). Với tab **nhúng trong Main**, `key` phải trùng `id` của `ScrollContainer` trong `NavContainer`. Với **List Report full-screen**, `key` chỉ dùng trong controller để map sang `router.navTo("...ListPage")` — **không** cần `ScrollContainer` tương ứng trong `Main.view.xml`.
+- **Thêm `ScrollContainer` mới** vào `NavContainer` chỉ khi nội dung nằm **bên trong** ToolPage (macros FilterBar + Table, chart, v.v.). Nếu chọn pattern ListReport như Exports/reports thì **không** thêm page vào đây.
 - **Nhúng `macros:FilterBar`**: Trỏ `metaPath` vào `UI.SelectionFields` của entity. Bắt buộc nếu muốn filter.
 - **Nhúng `macros:Table`**: Trỏ `metaPath` vào `UI.LineItem` của entity. Đây là control hiển thị danh sách + tự support drill-down Object Page.
 - **Nhúng `viz:VizFrame`** (nếu cần chart): Khai báo dataset, dimensions, measures, feeds. **Không dùng `macros:Chart`** trong Dashboard đa-entity — xem lý do ở mục 4.
@@ -81,19 +99,29 @@ Main.view.xml ảnh hưởng: Layout menu, vị trí các control UI
 
 ---
 
-### `Main.controller.js` — Não xử lý Logic
+### `Main.controller.js` + Domain Controllers — Não xử lý Logic
 
-**Mục đích:** File JavaScript xử lý toàn bộ tương tác người dùng: click nút, navigate trang, load dữ liệu, CRUD operations, xử lý sự kiện.
+**Mục đích:** `Main.controller.js` đóng vai trò **orchestration** — chỉ nhận event từ view và delegate ngay sang domain controller tương ứng. Toàn bộ business logic nằm trong các domain controller chuyên biệt.
 
-**Khi thêm module mới, phải sửa để:**
-- **Cập nhật `onItemSelect`**: Thêm `if (sKey === "tenTab") { ... }` để xử lý logic riêng khi chuyển tab (ví dụ: trigger load chart data).
-- **Thêm event handlers mới**: Ví dụ `onJobAbcFilterSearch`, `onCreateJobAbc`, `onDeleteJobAbc`...
-- **Thêm hàm load data cho chart** (nếu dùng VizFrame): `_loadAbcChart()`, `_aggregateAbcData()`, `_configureAbcChart()`.
-- **Thêm import module mới** trong `sap.ui.define`: Ví dụ `JSONModel` nếu dùng chart, `Filter/FilterOperator` nếu cần filter client-side.
-- **Khởi tạo model** cho chart trong `onInit` (nếu dùng VizFrame).
+**Domain Controllers hiện có:**
+- `DashboardController.js` — Dashboard KPIs, chart, recent data, navigate (gồm `router.navTo` cho exports/reports)
+- `JobConfigController.js` — Job Config CRUD (Create/Delete)
+- `SubscriptionController.js` — Subscription CRUD + dialog chọn Report
+- `CatalogController.js` — Report Catalog: load tiles, ActionSheet
+- `JobHistoryController.js` — Job History chart: load, configure, aggregate
+
+**Khi thêm module mới, phải sửa:**
+- **`Main.controller.js`**: Chỉ thêm event handler delegating sang domain controller mới.
+  ```javascript
+  onCreateJobAbc: function () { this._jobAbcController.onCreate(this); }
+  ```
+- **Tạo `JobAbcController.js` mới** kế thừa `BaseController`: chứa toàn bộ logic CRUD, data load, chart.
+- **`onItemSelect`** trong `Main.controller.js`: Thêm `if (sKey === "tenTab") { ... }` nếu tab cần trigger data load đặc biệt (ví dụ: chart data). Với key thuộc exports/reports, gọi `getAppComponent().getRouter().navTo(...)` thay vì `NavContainer.to()`.
+- **Import domain controller mới** trong `Main.controller.js` và khởi tạo trong `onInit`.
 
 ```
-Main.controller.js ảnh hưởng: Logic xử lý sự kiện, data loading, CRUD
+Main.controller.js ảnh hưởng: Event delegation
+Domain Controllers ảnh hưởng: Business logic, data loading, CRUD
 ```
 
 ---
@@ -110,6 +138,18 @@ Main.controller.js ảnh hưởng: Logic xử lý sự kiện, data loading, CRU
 | 3 | `manifest.json` | Thêm Route + Target `ObjectPage` + Navigation cho entity |
 | 4 | `Main.view.xml` | Thêm menu item trong sidebar + thêm `ScrollContainer` chứa `macros:FilterBar` và `macros:Table` |
 | 5 | `Main.controller.js` | Không cần sửa gì thêm (FPM tự xử lý navigation và filtering) |
+
+### Trường hợp A′: Read-only nhưng muốn List Report full-screen (startup nhanh)
+> Ví dụ đã làm: **My Exports (`DrsFile`)**, **7 financial reports** — không nhúng macros trong `Main.view.xml`.
+
+| Bước | File | Việc phải làm |
+|------|------|---------------|
+| 1–3 | Giống Trường hợp A | `annotation.xml` + Object Page route/target/navigation |
+| 4 | `manifest.json` | Thêm route (pattern dạng `EntitySet:?query:`) + target `sap.fe.templates.ListReport` với `contextPath` và `navigation` (detail → Object Page) |
+| 5 | `Main.view.xml` | Chỉ thêm **menu item** (sidebar key), **không** thêm `ScrollContainer`/macros cho entity đó |
+| 6 | `Main.controller.js` + `DashboardController.js` | Map `key` sidebar → `router.navTo("XxxListPage")` trong `onItemSelect` / `navigateToPage` |
+
+**UX:** Màn List Report là full-screen (không còn sidebar ToolPage); dùng nút Back / breadcrumb của Fiori để quay lại dashboard (`:?query:` về `DashboardMainPage`).
 
 ---
 
@@ -185,7 +225,11 @@ Nếu không, `FlattenedDataset` tìm binding `{chartModel>/chartData}` khi view
 
 Khác với ListReport template chuẩn, Custom FPM Page không có auto-refresh. Phải gọi tường minh `this.getView().getModel().refresh()` sau mỗi thao tác Create/Delete. Và dùng `router.getRoute("...").attachPatternMatched()` để refresh khi user quay lại từ Object Page.
 
-### ❼ `Aggregation.CustomAggregate` phải khai báo ở **EntityType level**, không phải property level
+### ❼ Không khởi tạo `sap.fe.core.fpm` bằng `Component.create()` ngoài router
+
+Component FPM kỳ vọng cấu hình route (`options`) từ manifest/router. Tạo thủ công trong `ComponentContainer` dễ gây lỗi kiểu `Cannot read properties of undefined (reading 'options')`. **Cách đúng:** dùng target `sap.fe.templates.ListReport` (hoặc giữ macros trong `Main.view.xml` nếu chấp nhận chi phí preprocess lúc mở app).
+
+### ❽ `Aggregation.CustomAggregate` phải khai báo ở **EntityType level**, không phải property level
 
 ```xml
 <!-- ✅ Đúng — khai báo trên EntityType, qualifier = tên field -->
@@ -211,14 +255,15 @@ Khác với ListReport template chuẩn, Custom FPM Page không có auto-refresh
 [ ] manifest.json   — Navigation linking
 [ ] manifest.json   — Library mới (nếu cần, vd: sap.viz)
 [ ] Main.view.xml   — Menu item trong SideNavigation
-[ ] Main.view.xml   — ScrollContainer + FilterBar + Table
+[ ] Main.view.xml   — ScrollContainer + macros (chỉ nếu tab nhúng trong NavContainer); hoặc bỏ qua nếu dùng ListReport (A′)
+[ ] manifest.json   — ListReport route + target + navigation (nếu theo pattern A′)
+[ ] Main.controller.js / DashboardController.js — Map sidebar key → router (nếu theo pattern A′)
 [ ] Main.view.xml   — XML namespace mới (nếu cần)
 [ ] Main.view.xml   — VizFrame + FlattenedDataset (nếu có chart)
-[ ] Main.controller.js — Import mới (JSONModel, Filter...)
-[ ] Main.controller.js — onInit: khởi tạo model (nếu có chart)
-[ ] Main.controller.js — onItemSelect: thêm case cho tab mới
-[ ] Main.controller.js — Event handlers mới (CRUD, search, chart load)
-[ ] Main.controller.js — Hàm chart: _configure, _load, _aggregate (nếu có chart)
+[ ] Tạo XxxController.js mới kế thừa BaseController — chứa toàn bộ logic
+[ ] Main.controller.js — Import + khởi tạo domain controller mới trong onInit
+[ ] Main.controller.js — onItemSelect: thêm case cho tab mới (nếu cần trigger data load)
+[ ] Main.controller.js — Event handler delegates → domain controller method
 ```
 
 ---
@@ -229,3 +274,5 @@ Khác với ListReport template chuẩn, Custom FPM Page không có auto-refresh
 |--------|----------------|
 | Job Configurations (CRUD + Object Page) | `implementation_plan_job_config.md` |
 | Job History (Analytics + Chart + Read-only) | `implementation_plan_job_history.md` |
+| My Exports (`DrsFile`, List Report + Object Page) | `implementation_plan_file.md` |
+| 7 Financial Reports (List Report + Object Page) | `implementation_plan_reports.md` |

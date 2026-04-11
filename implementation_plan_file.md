@@ -122,7 +122,7 @@ Trước khi implement, cần hiểu rõ backend (`zc_drs_file.ddlx.asddlxs`) đ
 
 ### 4.3 Thêm Navigation linking
 
-Trong mục `DashboardMainPage`, bổ sung:
+Trong mục `DashboardMainPage`, bổ sung (vẫn hữu ích nếu sau này nhúng lại `DrsFile` trong FPM page):
 
 ```json
 "DrsFile": {
@@ -132,59 +132,39 @@ Trong mục `DashboardMainPage`, bổ sung:
 }
 ```
 
-> **Tại sao cần khai báo Navigation này?** FPM cần biết: khi user click vào một dòng trên `macros:Table` binding vào entity `DrsFile`, thì sẽ navigate sang route nào. Nếu thiếu khai báo này, click vào dòng sẽ không có phản ứng hoặc báo lỗi routing.
+> **Tại sao cần khai báo Navigation này?** FPM cần biết: khi user click vào một dòng trên list binding vào entity `DrsFile`, thì sẽ navigate sang route nào. Trên **List Report** full-screen, cùng một mối liên kết được khai báo trong target `ExportsListPage` (`navigation.DrsFile.detail`).
+
+### 4.4 List Report cho danh sách file (triển khai hiện tại)
+
+Thêm route + target để mở danh sách **ngoài** `Main.view.xml`:
+
+- **Route:** `ExportsListPage` — pattern `DrsFile:?query:`
+- **Target:** `sap.fe.templates.ListReport` với `contextPath: "/DrsFile"` và `navigation: { "DrsFile": { "detail": { "route": "DrsFileObjectPage" } } }`
+
+Sidebar key `exports` và quick action "My Exports" gọi `router.navTo("ExportsListPage")` (xem `Main.controller.js`, `DashboardController.js`).
 
 ---
 
-## 5. Giao diện Điều khiển (`Main.view.xml`)
+## 5. Giao diện (`Main.view.xml`) — trạng thái hiện tại
 
-### 5.1 Trước khi thay đổi
+**Không còn** `ScrollContainer id="exports"` trong `NavContainer`. Tab "My Exports" chỉ còn **mục menu** trong `SideNavigation` (`key="exports"`); nội dung list do template `ListReport` render khi navigate.
+
+### 5.1 So sánh với bản nhúng macro (đã bỏ)
+
+Trước đây tab exports dùng:
 
 ```xml
-<ScrollContainer id="exports" horizontal="false" vertical="true">
-    <Title text="Generated Files / My Exports" class="sapUiMediumMargin"/>
+<ScrollContainer id="exports" ...>
+    <macros:FilterBar metaPath="/DrsFile/@com.sap.vocabularies.UI.v1.SelectionFields" .../>
+    <macros:Table metaPath="/DrsFile/@com.sap.vocabularies.UI.v1.LineItem" ... filterBar="drsFileFilterBar"/>
 </ScrollContainer>
 ```
 
-Tab "My Exports" chỉ có một tiêu đề tĩnh — chưa có control nào thực sự.
+Cấu hình tương đương về OData/annotations nay do **List Report** áp dụng tự động từ `UI.LineItem` + `UI.SelectionFields` (local + backend). Thuộc tính như `readOnly`, export, P13n là hành vi mặc định / cấu hình template, không cần lặp lại trong XML dashboard.
 
-### 5.2 Sau khi thay đổi
+### 5.2 UX
 
-```xml
-<ScrollContainer id="exports" horizontal="false" vertical="true" height="100%">
-    <macros:FilterBar
-        id="drsFileFilterBar"
-        metaPath="/DrsFile/@com.sap.vocabularies.UI.v1.SelectionFields"
-        liveMode="false"/>
-    <macros:Table
-        id="drsFileTable"
-        metaPath="/DrsFile/@com.sap.vocabularies.UI.v1.LineItem"
-        readOnly="true"
-        enableExport="true"
-        enableAutoColumnWidth="true"
-        variantManagement="Control"
-        p13nMode="Column,Sort,Filter"
-        headerText="My Exports (Report Files)"
-        filterBar="drsFileFilterBar"
-        growingThreshold="20">
-    </macros:Table>
-</ScrollContainer>
-```
-
-**Giải thích từng thuộc tính:**
-
-| Thuộc tính | Giá trị | Lý do |
-|---|---|---|
-| `height="100%"` | 100% | Đảm bảo ScrollContainer chiếm toàn bộ chiều cao khung nội dung, giống các tab khác |
-| `liveMode="false"` (FilterBar) | false | User phải nhấn "Go" để search — tránh query liên tục khi đang gõ |
-| `readOnly="true"` (Table) | true | Entity chỉ xem, không cho phép sửa |
-| `enableExport="true"` | true | Cho phép xuất danh sách file ra Excel |
-| `enableAutoColumnWidth="true"` | true | Tự động căn chiều rộng cột theo nội dung |
-| `p13nMode="Column,Sort,Filter"` | — | Cho phép ẩn/hiện cột, sắp xếp, thêm filter qua personalization |
-| `growingThreshold="20"` | 20 | Load 20 dòng ban đầu, load thêm khi scroll xuống |
-| `filterBar="drsFileFilterBar"` | — | Kết nối Table với FilterBar — khi nhấn "Go", table tự filter theo điều kiện |
-
-> **Tại sao không có `<macros:actions>`?** Khác với `DrsJobConfig` (có Create/Delete), `DrsFile` là entity chỉ xem (file do system sinh ra, không phải user tạo thủ công). `readOnly="true"` là đủ — FPM tự tắt toàn bộ các action CRUD, không cần thêm custom actions.
+Màn list file là **full-screen**; quay lại dashboard bằng **Back** / breadcrumb. Download `FileContent` và Object Page không đổi.
 
 ---
 
@@ -284,16 +264,14 @@ Object Page được chia thành 2 panel:
 
 ---
 
-## 7. Controller (`Main.controller.js`)
+## 7. Controller (`Main.controller.js`, `DashboardController.js`)
 
-**Không có thay đổi nào trong Controller.**
+**Có thay đổi:** điều hướng exports qua router.
 
-`DrsFile` là module đơn giản nhất trong Dashboard — hoàn toàn read-only, không có tính năng đặc biệt nào cần xử lý client-side:
-- Không có CRUD → không cần action handlers
-- Không có chart → không cần JSONModel hay data aggregation
-- Download file → do OData V4 streaming + Fiori Elements tự xử lý
+- `onItemSelect`: nếu `sKey === "exports"` → `getAppComponent().getRouter().navTo("ExportsListPage")`.
+- `DashboardController.navigateToPage`: cùng xử lý cho quick action `exports`.
 
-`macros:Table` tự kết nối với `macros:FilterBar` qua thuộc tính `filterBar="drsFileFilterBar"`. Khi user nhấn "Go", FPM tự build OData query với `$filter` và refresh table — không cần code controller.
+Không cần handler riêng cho filter/table — List Report đảm nhiệm. Download và Object Page vẫn do OData V4 + Fiori Elements.
 
 ---
 
@@ -301,40 +279,32 @@ Object Page được chia thành 2 panel:
 
 | Thành phần | Công nghệ | Lý do |
 |---|---|---|
-| **FilterBar** | `macros:FilterBar` | FPM building block, tự render từ `UI.SelectionFields` |
-| **Bảng danh sách** | `macros:Table` | FPM building block, hỗ trợ drill-down + file download |
-| **Download file** | `@Semantics.largeObject` (OData V4 streaming) | Framework tự xử lý, không cần code frontend |
-| **Object Page** | `sap.fe.templates.ObjectPage` | Template chuẩn, không cần code thêm |
-| **Controller** | Không thay đổi | Module đủ đơn giản để FPM xử lý hoàn toàn |
+| **Danh sách file** | `sap.fe.templates.ListReport` (route `ExportsListPage`) | Template chuẩn, lazy theo router; giảm macros trong `Main.view.xml` |
+| **Filter / table** | List Report (từ `UI.SelectionFields` + `UI.LineItem`) | Cùng metadata như khi dùng macro |
+| **Download file** | `@Semantics.largeObject` (OData V4 streaming) | Framework tự xử lý |
+| **Object Page** | `sap.fe.templates.ObjectPage` | Không đổi |
+| **Controller** | `router.navTo` cho key `exports` | Điều hướng sang List Report |
 
 **Luồng hoạt động hoàn chỉnh:**
 
 ```
-User mở tab "My Exports (Files)"
-    → macros:FilterBar hiện 3 filter: FileName / CreatedBy / CreatedAt
-    → macros:Table tự load dữ liệu từ OData GET /DrsFile
-    → Hiển thị danh sách file với cột Download (FileContent → nút tải)
+User chọn "My Exports (Files)" trên sidebar (hoặc quick action)
+    → router.navTo("ExportsListPage")
+    → List Report: FilterBar (FileName / CreatedBy / CreatedAt) + table GET /DrsFile
+    → Cột FileContent → download (Semantics.largeObject)
 
-User nhấn "Go" trên FilterBar (sau khi nhập điều kiện)
-    → FPM tự build: GET /DrsFile?$filter=FileName eq '...' &$select=...
-    → Table tự cập nhật — không cần code controller
+User nhấn "Go" trên FilterBar
+    → List Report tự build OData $filter — không cần code controller
 
-User click nút Download trên cột FileContent
-    → Browser gửi: GET /DrsFile(guid'...')/FileContent/$value
-    → OData V4 stream trả về binary content
-    → Browser tải file về với tên FileName và MIME type tương ứng
-
-User click vào một dòng trên Table
-    → FPM navigation → DrsFileObjectPage
-    → Object Page hiển thị 2 panel: File Details + Administrative Data
-    → Panel File Details vẫn có nút Download để tải file
+User click Download / một dòng
+    → Giống trước: streaming $value hoặc DrsFileObjectPage
 ```
 
 **Các file đã thay đổi:**
 
 | File | Thay đổi |
 |---|---|
-| `annotation.xml` | Thêm block `DrsFileType`: LineItem, SelectionFields, HeaderInfo, Facets, FieldGroups |
-| `manifest.json` | Thêm Route `DrsFileObjectPage`, Target, Navigation linking |
-| `Main.view.xml` | Thay `<Title>` placeholder bằng `macros:FilterBar` + `macros:Table` thực sự |
-| `Main.controller.js` | **Không thay đổi** |
+| `annotation.xml` | Block `DrsFileType`: LineItem, SelectionFields, HeaderInfo, Facets, FieldGroups (giữ nguyên) |
+| `manifest.json` | Route + target `DrsFileObjectPage`; thêm `ExportsListPage` (ListReport) + `navigation` |
+| `Main.view.xml` | **Không** còn `ScrollContainer` exports — chỉ menu item `key="exports"` |
+| `Main.controller.js` + `DashboardController.js` | Map `exports` → `router.navTo("ExportsListPage")` |

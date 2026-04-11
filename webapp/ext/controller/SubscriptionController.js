@@ -7,9 +7,19 @@ sap.ui.define([
     "sap/m/Label",
     "sap/m/Text",
     "sap/ui/core/Item",
-    "sap/m/MessageBox",
-    "cfa/customfioriapplication/model/constants"
-], function (BaseController, Dialog, Button, Select, VBox, Label, Text, Item, MessageBox, Constants) {
+    "sap/m/MessageBox"
+], function (BaseController, Dialog, Button, Select, VBox, Label, Text, Item, MessageBox) {
+    var ACTION_NS = "com.sap.gateway.srvd.zsd_drs_main_o4.v0001";
+    var REPORT_OPTIONS = [
+        { key: "", text: "-- Select a Report --" },
+        { key: "GL-01", text: "GL-01 - GL Account Balances" },
+        { key: "AR-01", text: "AR-01 - Customer Open Items" },
+        { key: "AR-02", text: "AR-02 - Customer Balances" },
+        { key: "AR-03", text: "AR-03 - AR Aging Report" },
+        { key: "AP-01", text: "AP-01 - Vendor Open Items" },
+        { key: "AP-02", text: "AP-02 - Vendor Balances" },
+        { key: "AP-03", text: "AP-03 - AP Aging Report" }
+    ];
     "use strict";
 
     /**
@@ -28,7 +38,7 @@ sap.ui.define([
             
             // Create dialog if not exists
             if (!this._oReportSelectDialog) {
-                var aItems = Constants.REPORT_OPTIONS.map(function (oOpt) {
+                var aItems = REPORT_OPTIONS.map(function (oOpt) {
                     return new Item({ key: oOpt.key, text: oOpt.text });
                 });
                 
@@ -100,7 +110,7 @@ sap.ui.define([
 
             oContext.created().then(function () {
                 // Step 2: Call createReportParams action
-                var sActionPath = oContext.getPath() + "/" + Constants.ACTION_NAMESPACE + ".createReportParams";
+                var sActionPath = oContext.getPath() + "/" + ACTION_NS + ".createReportParams";
                 var oOperation = oModel.bindContext(sActionPath + "(...)");
                 
                 return oOperation.execute().then(function () {
@@ -197,7 +207,7 @@ sap.ui.define([
 
             // Draft records → Discard action
             aDraftContexts.forEach(function (oContext) {
-                var sDiscardPath = oContext.getPath() + "/" + Constants.ACTION_NAMESPACE + ".Discard";
+                var sDiscardPath = oContext.getPath() + "/" + ACTION_NS + ".Discard";
                 var oOp = oModel.bindContext(sDiscardPath + "(...)");
                 aAllPromises.push(oOp.execute());
             });

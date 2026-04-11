@@ -1,12 +1,11 @@
 sap.ui.define([
     "sap/fe/core/PageController",
-    "sap/ui/model/json/JSONModel",
     "../controller/DashboardController",
     "../controller/JobConfigController",
     "../controller/SubscriptionController",
     "../controller/CatalogController",
     "../controller/JobHistoryController"
-], function (PageController, JSONModel, DashboardController, JobConfigController, 
+], function (PageController, DashboardController, JobConfigController,
              SubscriptionController, CatalogController, JobHistoryController) {
     "use strict";
 
@@ -67,6 +66,23 @@ sap.ui.define([
             var sKey = oItem.getKey();
 
             if (!sKey) { return; }
+
+            // Report/export pages are proper router targets — navigate via router
+            var mReportRoutes = {
+                "exports":     "ExportsListPage",
+                "report_ap01": "AP01ListPage",
+                "report_ap02": "AP02ListPage",
+                "report_ap03": "AP03ListPage",
+                "report_ar01": "AR01ListPage",
+                "report_ar02": "AR02ListPage",
+                "report_ar03": "AR03ListPage",
+                "report_gl01": "GL01ListPage"
+            };
+
+            if (mReportRoutes[sKey]) {
+                this.getAppComponent().getRouter().navTo(mReportRoutes[sKey]);
+                return;
+            }
 
             this.byId("pageContainer").to(this.byId(sKey));
 
@@ -134,27 +150,6 @@ sap.ui.define([
 
         onDeleteSubscription: function () {
             this._subscriptionController.onDelete(this);
-        },
-        
-        _createSubscriptionWithReportId: function (sReportId) {
-            this._subscriptionController.createWithReportId(this, sReportId);
-        },
-
-        // ═══════════════════════════════════════════════════════════════
-        // CATALOG HANDLERS - Delegate to CatalogController
-        // ═══════════════════════════════════════════════════════════════
-
-        onRefreshCatalog: function () {
-            this._catalogController.onRefreshCatalog(this);
-        },
-
-        // Legacy methods (kept for compatibility)
-        onPreviewReport: function () {
-            this._catalogController.onPreview(this);
-        },
-
-        onCreateSubscriptionFromCatalog: function () {
-            this._catalogController.onCreateSubscription(this, this._subscriptionController);
         },
 
         // ═══════════════════════════════════════════════════════════════

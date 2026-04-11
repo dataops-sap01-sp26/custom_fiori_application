@@ -1,8 +1,7 @@
 sap.ui.define([
     "./BaseController",
-    "sap/m/MessageBox",
-    "cfa/customfioriapplication/model/constants"
-], function (BaseController, MessageBox, Constants) {
+    "sap/m/MessageBox"
+], function (BaseController, MessageBox) {
     "use strict";
 
     /**
@@ -86,7 +85,7 @@ sap.ui.define([
 
             // Draft records → Discard action
             aDraftContexts.forEach(function (oContext) {
-                var sDiscardAction = oContext.getPath() + "/" + Constants.ACTION_NAMESPACE + ".Discard";
+                var sDiscardAction = oContext.getPath() + "/com.sap.gateway.srvd.zsd_drs_main_o4.v0001.Discard";
                 var oDiscardOp = oModel.bindContext(sDiscardAction + "(...)");
                 aAllPromises.push(oDiscardOp.execute());
             });

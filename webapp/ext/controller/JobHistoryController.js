@@ -113,12 +113,5 @@ sap.ui.define([
             this.loadChartData(oController);
         },
         
-        /**
-         * Get cached history data
-         * @returns {Array} Cached history data
-         */
-        getCachedData: function () {
-            return this._aHistoryData;
-        }
     });
 });

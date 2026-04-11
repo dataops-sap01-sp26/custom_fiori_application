@@ -114,7 +114,7 @@ Do sử dụng `sap.viz` controls, cần bổ sung 3 namespace vào thẻ root `
 ### 3.3 Chart — Panel bọc VizFrame
 
 ```xml
-<Panel id="jobHistoryChartPanel" headerText="Job Execution Statistics" class="sapUiResponsiveMargin">
+<Panel id="jobHistoryChartPanel" headerText="Job Execution Statistics" class="drsSection">
     <viz:VizFrame
         id="jobTrendChart"
         vizType="stacked_column"
@@ -237,345 +237,158 @@ Trong quá trình thử nghiệm `macros:Chart`, nhiều lỗi annotation phát 
 
 ---
 
-## 5. Controller (`Main.controller.js`)
+## 5. Controller — Kiến trúc Phân tách Domain Controller
 
-### 5.0 So sánh trước / sau khi implement Job History (Diff Analysis)
+> **Lưu ý quan trọng:** Sau khi refactor (xem `implementation_plan_code_refactoring.md`), toàn bộ logic Job History đã được **chuyển ra khỏi `Main.controller.js`** vào file riêng `ext/controller/JobHistoryController.js`. `Main.controller.js` chỉ còn vai trò orchestration — delegate đến controller tương ứng.
 
-Phần này trình bày **từng thay đổi cụ thể** đã được thực hiện trên file `Main.controller.js` so với phiên bản gốc (chỉ có Job Configurations), kèm lý do rõ ràng cho mỗi thay đổi.
+### 5.1 Kiến trúc phân tách
 
----
+```
+Main.controller.js (orchestration)
+    ├── onInit()
+    │   ├── new JobHistoryController() → this._jobHistoryController
+    │   └── this._jobHistoryController.init(this)  ← khởi tạo chartModel
+    │
+    ├── onItemSelect()
+    │   └── if (sKey === "history") → this._jobHistoryController.loadChartData(this)
+    │
+    └── onJobHistoryFilterSearch()
+        └── this._jobHistoryController.onFilterSearch(this)
 
-#### ① THÊM — Import `sap/ui/model/json/JSONModel`
+JobHistoryController.js (domain logic)
+    ├── init(oController)          ← khởi tạo chartModel rỗng
+    ├── loadChartData(oController) ← load OData + configure + aggregate
+    ├── configureChart(oController)← set VizProperties
+    ├── _aggregateChartData(oController, aData) ← group by date+status
+    └── onFilterSearch(oController)← reload chart khi nhấn "Go"
+```
 
-**Trước:**
+### 5.2 `JobHistoryController.js` — Code thực tế
+
 ```javascript
 sap.ui.define([
-    'sap/fe/core/PageController',
-    'sap/m/MessageBox',
-    'sap/m/MessageToast'
-], function (PageController, MessageBox, MessageToast) {
-```
+    "./BaseController",
+    "sap/ui/model/json/JSONModel"
+], function (BaseController, JSONModel) {
+    "use strict";
 
-**Sau:**
-```javascript
-sap.ui.define([
-    'sap/fe/core/PageController',
-    'sap/m/MessageBox',
-    'sap/m/MessageToast',
-    'sap/ui/model/json/JSONModel'          // ← THÊM
-], function (PageController, MessageBox, MessageToast, JSONModel) {  // ← THÊM tham số
-```
-
-> **Tại sao thêm?** `VizFrame` không bind trực tiếp vào OData model. Nó cần một **JSONModel riêng** (đặt tên `"chartModel"`) để chứa dữ liệu đã được xử lý phía client. Để tạo JSONModel bằng `new JSONModel(...)`, cần import class này vào controller. Đây là dependency bắt buộc cho toàn bộ tính năng chart.
-
----
-
-#### ② SỬA — Thêm khởi tạo `chartModel` vào `onInit`
-
-**Trước:**
-```javascript
-onInit: function () {
-    PageController.prototype.onInit.apply(this, arguments);
-
-    var that = this;
-    try {
-        var oRouter = this.getAppComponent().getRouter();
-        oRouter.getRoute("DashboardMainPage").attachPatternMatched(function () {
-            setTimeout(function () { that._refreshJobConfigTable(); }, 500);
-        });
-    } catch (e) { }
-},
-```
-
-**Sau:**
-```javascript
-onInit: function () {
-    PageController.prototype.onInit.apply(this, arguments);
-
-    // ← THÊM: Khởi tạo chartModel rỗng để VizFrame binding không bị lỗi khi view mount
-    this.getView().setModel(new JSONModel({ chartData: [] }), "chartModel");
-
-    var that = this;
-    try {
-        var oRouter = this.getAppComponent().getRouter();
-        oRouter.getRoute("DashboardMainPage").attachPatternMatched(function () {
-            setTimeout(function () { that._refreshJobConfigTable(); }, 500);
-        });
-    } catch (e) { }
-},
-```
-
-> **Tại sao thêm ngay trong `onInit` và không phải ở nơi khác?** `onInit` là hook vòng đời đầu tiên chạy khi controller được tạo — **trước khi view được render**. XML view đã có khai báo `data="{chartModel>/chartData}"`, nên ngay khi view mount xong, `FlattenedDataset` tìm kiếm model tên `"chartModel"` ngay lập tức. Nếu model chưa tồn tại tại thời điểm đó → binding lỗi → VizFrame throw exception. Khởi tạo model với `{ chartData: [] }` (mảng rỗng) đảm bảo VizFrame render thành công với trạng thái "no data" — không hiển thị lỗi, chỉ hiện chart trống — cho đến khi data thực sự được load.
-
----
-
-#### ③ SỬA — Refactor `onItemSelect`: thêm trigger load chart
-
-**Trước:**
-```javascript
-onItemSelect: function (oEvent) {
-    var oItem = oEvent.getParameter("item");
-    var sKey = oItem.getKey();
-
-    if (!sKey) { return; }
-
-    var oNavContainer = this.byId("pageContainer");
-    oNavContainer.to(this.byId(sKey));
-},
-```
-
-**Sau:**
-```javascript
-onItemSelect: function (oEvent) {
-    var oItem = oEvent.getParameter("item");
-    var sKey  = oItem.getKey();
-
-    if (!sKey) { return; }
-
-    this.byId("pageContainer").to(this.byId(sKey));
-
-    // ← THÊM: Khi chuyển sang tab History, tự load chart data
-    if (sKey === "history") {
-        this._loadHistoryChart();
-    }
-},
-```
-
-> **Tại sao cần thêm `if (sKey === "history")`?** VizFrame không có cơ chế autoload — nó chỉ render lại khi JSONModel thay đổi. Khi user lần đầu click vào menu "Job History & Logs", view đã có sẵn (được khởi tạo từ trước) nhưng `chartModel.chartData` vẫn là mảng rỗng từ `onInit`. Nếu không trigger `_loadHistoryChart()` tại đây, chart sẽ **trống mãi mãi** cho đến khi user nhấn "Go" trên FilterBar. Việc load ngay khi chuyển tab mang lại trải nghiệm tốt hơn: chart hiện data ngay khi tab mở ra.
-
-> **Tại sao bỏ biến `oNavContainer`?** Refactor nhỏ để code gọn hơn. `this.byId("pageContainer").to(...)` thay vì tạo biến trung gian không cần thiết. Chức năng hoàn toàn giống nhau.
-
----
-
-#### ④ THÊM — Hàm `_configureChart()` (hoàn toàn mới)
-
-```javascript
-// ← THÊM HOÀN TOÀN MỚI
-_configureChart: function () {
-    var oVizFrame = this.byId("jobTrendChart");
-    if (!oVizFrame) { return; }
-    oVizFrame.setVizProperties({
-        plotArea:     { dataLabel: { visible: false } },
-        valueAxis:    { title: { visible: true, text: "Execution Count" } },
-        categoryAxis: { title: { visible: true, text: "Job Date" } },
-        title:        { visible: false },
-        legend:       { visible: true, title: { visible: true, text: "Job Status" } }
-    });
-},
-```
-
-> **Tại sao phải có hàm này (thay vì set trực tiếp trong XML)?** Như đã phân tích ở mục 3.3 ❸, không thể truyền object JSON vào attribute XML vì UI5 sẽ parse `{...}` thành model binding. Hàm này tách bạch **một nhiệm vụ duy nhất**: cấu hình giao diện của chart (labels, legend, title). Không liên quan đến load data. Gọi một lần khi đầu tiên load chart.
-
-> **Tại sao check `if (!oVizFrame) { return; }`?** Phòng trường hợp hàm được gọi khi view chưa mount xong (edge case race condition). Guard này đảm bảo không throw lỗi nếu `byId` trả về `null`.
-
----
-
-#### ⑤ THÊM — Hàm `_loadHistoryChart()` (hoàn toàn mới)
-
-```javascript
-// ← THÊM HOÀN TOÀN MỚI
-_loadHistoryChart: function () {
-    var that = this;
-    this._configureChart();
-
-    var oModel = this.getView().getModel();
-    var oBinding = oModel.bindList("/JobHistoryAnalytics", undefined, undefined, undefined, {
-        $orderby: "JobDate desc"
-    });
-
-    oBinding.requestContexts(0, 999).then(function (aContexts) {
-        var aRawData = aContexts.map(function (oCtx) { return oCtx.getObject(); });
-        that._aHistoryData = aRawData;       // Cache để tái sử dụng
-        that._aggregateChartData(aRawData);
-    }).catch(function (oError) {
-        console.error("JobHistory chart data load error:", oError);
-    });
-},
-```
-
-> **Tại sao tách hàm load riêng thay vì viết inline trong `onItemSelect`?** Vì hàm này được gọi từ **hai nơi khác nhau**: `onItemSelect` (khi chuyển tab) và `onJobHistoryFilterSearch` (khi nhấn "Go"). Nếu viết inline sẽ phải duplicate code. Tách thành hàm riêng tuân thủ nguyên tắc DRY (Don't Repeat Yourself).
-
----
-
-#### ⑥ THÊM — Hàm `_aggregateChartData()` (hoàn toàn mới)
-
-```javascript
-// ← THÊM HOÀN TOÀN MỚI
-_aggregateChartData: function (aData) {
-    var mAggregated = {};
-
-    aData.forEach(function (oItem) {
-        var sDate   = oItem.JobDate   || "";
-        var sStatus = oItem.JobStatus || "Unknown";
-        var sKey    = sDate + "|" + sStatus;
-
-        if (!mAggregated[sKey]) {
-            mAggregated[sKey] = { JobDate: sDate, JobStatus: sStatus, JobCountTotal: 0 };
+    return BaseController.extend("cfa.customfioriapplication.ext.controller.JobHistoryController", {
+        
+        _aHistoryData: [],
+        
+        /**
+         * Khởi tạo chartModel rỗng — gọi trong onInit của Main controller
+         * Bắt buộc phải gọi trước khi view mount để FlattenedDataset không bị lỗi binding
+         */
+        init: function (oController) {
+            oController.getView().setModel(new JSONModel({ chartData: [] }), "chartModel");
+        },
+        
+        /**
+         * Configure VizFrame chart properties — KHÔNG set trong XML (UI5 sẽ parse {} thành binding)
+         */
+        configureChart: function (oController) {
+            var oVizFrame = oController.byId("jobTrendChart");
+            if (!oVizFrame) { return; }
+            
+            oVizFrame.setVizProperties({
+                plotArea: { dataLabel: { visible: false } },
+                valueAxis: { title: { visible: true, text: "Execution Count" } },
+                categoryAxis: { title: { visible: true, text: "Job Date" } },
+                title: { visible: false },
+                legend: { visible: true, title: { visible: true, text: "Job Status" } }
+            });
+        },
+        
+        /**
+         * Load chart data từ JobHistoryAnalytics entity
+         * Gọi khi: (1) user mở tab History, (2) user nhấn "Go" trên FilterBar
+         */
+        loadChartData: function (oController) {
+            var that = this;
+            
+            this.configureChart(oController);
+            
+            var oModel = oController.getView().getModel();
+            var oBinding = oModel.bindList("/JobHistoryAnalytics", undefined, undefined, undefined, {
+                $orderby: "JobDate desc"
+            });
+            
+            oBinding.requestContexts(0, 999).then(function (aContexts) {
+                var aRawData = aContexts.map(function (oCtx) { return oCtx.getObject(); });
+                that._aHistoryData = aRawData;  // Cache để tái sử dụng (filter client-side sau này)
+                that._aggregateChartData(oController, aRawData);
+            }).catch(function (oError) {
+                console.error("JobHistory chart data load error:", oError);
+            });
+        },
+        
+        /**
+         * Aggregate data: group by (JobDate + JobStatus), sum JobCountTotal
+         * Kết quả set vào chartModel → VizFrame tự cập nhật
+         */
+        _aggregateChartData: function (oController, aData) {
+            var mAggregated = {};
+            
+            aData.forEach(function (oItem) {
+                var sDate   = oItem.JobDate   || "";
+                var sStatus = oItem.JobStatus || "Unknown";
+                var sKey    = sDate + "|" + sStatus;
+                
+                if (!mAggregated[sKey]) {
+                    mAggregated[sKey] = { JobDate: sDate, JobStatus: sStatus, JobCountTotal: 0 };
+                }
+                mAggregated[sKey].JobCountTotal += (oItem.JobCountTotal || 1);
+            });
+            
+            var aChartData = Object.values(mAggregated).sort(function (a, b) {
+                return a.JobDate.localeCompare(b.JobDate);
+            });
+            
+            oController.getView().getModel("chartModel").setProperty("/chartData", aChartData);
+        },
+        
+        /**
+         * Handler cho FilterBar search — bridge giữa FilterBar và VizFrame
+         * macros:Table tự filter, VizFrame cần reload thủ công
+         */
+        onFilterSearch: function (oController) {
+            this.loadChartData(oController);
         }
-        mAggregated[sKey].JobCountTotal += (oItem.JobCountTotal || 1);
     });
-
-    var aChartData = Object.values(mAggregated).sort(function (a, b) {
-        return a.JobDate.localeCompare(b.JobDate);
-    });
-
-    this.getView().getModel("chartModel").setProperty("/chartData", aChartData);
-},
+});
 ```
 
-> **Tại sao tách hàm aggregate riêng?** Hàm này nhận vào `aData` (mảng raw) và trả về data đã aggregate vào chartModel — thuần túy là business logic xử lý dữ liệu, không liên quan đến UI hay OData call. Tách riêng giúp dễ test và dễ tái sử dụng: tương lai khi implement filter chart theo ngày, chỉ cần lọc `_aHistoryData` rồi gọi lại `_aggregateChartData(filteredData)` mà không cần gọi thêm API.
-
----
-
-#### ⑦ THÊM — Event handler `onJobHistoryFilterSearch()` (hoàn toàn mới)
+### 5.3 `Main.controller.js` — Phần liên quan đến Job History
 
 ```javascript
-// ← THÊM HOÀN TOÀN MỚI
+// Import
+"../controller/JobHistoryController"
+
+// onInit
+this._jobHistoryController = new JobHistoryController();
+this._jobHistoryController.init(this);  // ← khởi tạo chartModel
+
+// onItemSelect — khi user click tab History
+if (sKey === "history") {
+    this._jobHistoryController.loadChartData(this);
+}
+
+// Event handler bridge — được khai báo trong macros:FilterBar search=".onJobHistoryFilterSearch"
 onJobHistoryFilterSearch: function () {
-    this._loadHistoryChart();
-},
-```
-
-> **Tại sao cần event handler này?** `macros:Table` tự kết nối với `macros:FilterBar` thông qua `filterBar="jobHistoryFilterBar"` — khi user nhấn "Go", bảng **tự filter** mà không cần code. Nhưng VizFrame **không có kết nối tự động** với FilterBar. Hàm này đóng vai trò **bridge**: khi FilterBar phát sự kiện `search` (người dùng nhấn "Go"), handler này được gọi và trigger reload chart để chart cũng cập nhật theo. Đây là lý do `search=".onJobHistoryFilterSearch"` được khai báo trên `macros:FilterBar` trong view.
-
-> **Lưu ý về giới hạn hiện tại:** `_loadHistoryChart()` hiện tải toàn bộ data mà không truyền filter conditions của FilterBar sang OData query. Điều này có nghĩa chart chưa thực sự phản ánh đúng filter — đây là tính năng sẽ phát triển thêm sau.
-
----
-
-#### Tổng hợp tất cả thay đổi
-
-| # | Loại | Vị trí | Nội dung | Mục đích |
-|---|---|---|---|---|
-| 1 | **THÊM** | `sap.ui.define` imports | `sap/ui/model/json/JSONModel` | Cần để tạo model cho VizFrame |
-| 2 | **SỬA** | `onInit` | Khởi tạo `chartModel` rỗng | VizFrame cần model tồn tại trước khi view mount |
-| 3 | **SỬA** | `onItemSelect` | Thêm `if (sKey === "history") _loadHistoryChart()` | Auto-load chart khi mở tab History |
-| 4 | **THÊM** | — | Hàm `_configureChart()` | Set VizProperties đúng cách (không dùng XML) |
-| 5 | **THÊM** | — | Hàm `_loadHistoryChart()` | Fetch OData + trigger aggregation |
-| 6 | **THÊM** | — | Hàm `_aggregateChartData()` | Group data theo ngày + status cho chart |
-| 7 | **THÊM** | — | Event `onJobHistoryFilterSearch()` | Sync chart khi FilterBar trigger search |
-
-Các hàm của Job Configurations (`_refreshJobConfigTable`, `onCreateJobConfig`, `onDeleteJobConfig`, `onMenuButtonPress`) **không bị sửa đổi** — Job History được implement hoàn toàn độc lập, không ảnh hưởng code cũ.
-
----
-
-### 5.1 Khởi tạo `chartModel` trong `onInit`
-
-```javascript
-onInit: function () {
-    PageController.prototype.onInit.apply(this, arguments);
-    // Khởi tạo chartModel rỗng để VizFrame binding không bị lỗi khi view mount
-    this.getView().setModel(new JSONModel({ chartData: [] }), "chartModel");
-    ...
+    this._jobHistoryController.onFilterSearch(this);
 }
 ```
 
-> **Tại sao phải khởi tạo sớm với mảng rỗng?** Khi view được mount, `FlattenedDataset` ngay lập tức tìm kiếm binding `{chartModel>/chartData}`. Nếu model chưa tồn tại → binding lỗi → VizFrame throw exception. Khởi tạo model với `chartData: []` (mảng rỗng) đảm bảo VizFrame render thành công với trạng thái "no data" trước khi data thực sự được load.
+### 5.4 Những điểm kỹ thuật quan trọng (giữ nguyên từ plan gốc)
 
-### 5.2 Hàm `_configureChart()` — Set VizProperties đúng cách
+> **chartModel phải khởi tạo trong `init()` trước khi view mount.** Khi view được render, `FlattenedDataset data="{chartModel>/chartData}"` tìm model ngay lập tức. Nếu model chưa tồn tại → binding lỗi → VizFrame throw exception.
 
-```javascript
-_configureChart: function () {
-    var oVizFrame = this.byId("jobTrendChart");
-    if (!oVizFrame) { return; }
-    oVizFrame.setVizProperties({
-        plotArea:     { dataLabel: { visible: false } },
-        valueAxis:    { title: { visible: true, text: "Execution Count" } },
-        categoryAxis: { title: { visible: true, text: "Job Date" } },
-        title:        { visible: false },
-        legend:       { visible: true, title: { visible: true, text: "Job Status" } }
-    });
-},
-```
+> **`configureChart()` cần gọi từ JavaScript, KHÔNG set trong XML.** UI5 parser hiểu `{...}` trong XML attribute là model binding — truyền JSON object trực tiếp sẽ bị parse sai.
 
-> **Tại sao tách thành hàm riêng thay vì set trong `_loadHistoryChart`?** Để tách biệt rõ ràng hai việc: **cấu hình giao diện** (set một lần) và **tải dữ liệu** (có thể gọi lại nhiều lần). `_loadHistoryChart` gọi `_configureChart()` ở đầu; ngay cả khi data chưa có, chart đã có đúng labels và legend.
+> **`_aggregateChartData` cần tham số `oController`.** Khác với Main.controller.js (có `this.getView()` trực tiếp), domain controller cần nhận `oController` reference để truy cập view.
 
-### 5.3 Hàm `_loadHistoryChart()` — Tải và Cache dữ liệu
-
-```javascript
-_loadHistoryChart: function () {
-    var that = this;
-    this._configureChart();
-
-    var oModel = this.getView().getModel();
-    var oBinding = oModel.bindList("/JobHistoryAnalytics", undefined, undefined, undefined, {
-        $orderby: "JobDate desc"
-    });
-
-    oBinding.requestContexts(0, 999).then(function (aContexts) {
-        var aRawData = aContexts.map(function (oCtx) { return oCtx.getObject(); });
-        that._aHistoryData = aRawData;  // Cache để tái sử dụng
-        that._aggregateChartData(aRawData);
-    }).catch(function (oError) {
-        console.error("JobHistory chart data load error:", oError);
-    });
-},
-```
-
-> **Tại sao dùng `oModel.bindList()` + `requestContexts()` thay vì `$.ajax` hay `fetch()`?** Đây là cách chuẩn của UI5 OData V4 để đọc dữ liệu. Binding được quản lý bởi OData model (có cache, retry, error handling). `requestContexts(0, 999)` đọc tối đa 999 records — đủ cho aggregation client-side mà không overload.
-
-> **Tại sao lưu vào `_aHistoryData`?** Cache dữ liệu gốc để tương lai có thể implement filter client-side (lọc biểu đồ theo tiêu chí) mà không cần gọi thêm API. Filter chỉ cần tính toán lại từ `_aHistoryData` → gọi `_aggregateChartData()` → cập nhật chart.
-
-### 5.4 Hàm `_aggregateChartData()` — Gộp dữ liệu phía client
-
-```javascript
-_aggregateChartData: function (aData) {
-    var mAggregated = {};
-
-    aData.forEach(function (oItem) {
-        var sDate   = oItem.JobDate   || "";
-        var sStatus = oItem.JobStatus || "Unknown";
-        var sKey    = sDate + "|" + sStatus;
-
-        if (!mAggregated[sKey]) {
-            mAggregated[sKey] = { JobDate: sDate, JobStatus: sStatus, JobCountTotal: 0 };
-        }
-        mAggregated[sKey].JobCountTotal += (oItem.JobCountTotal || 1);
-    });
-
-    var aChartData = Object.values(mAggregated).sort(function (a, b) {
-        return a.JobDate.localeCompare(b.JobDate);
-    });
-
-    this.getView().getModel("chartModel").setProperty("/chartData", aChartData);
-},
-```
-
-**Logic aggregation:**
-- Duyệt từng record của `_aHistoryData`
-- Tạo key composite `"2026-04-07|Finished"` từ `JobDate + JobStatus`
-- Gộp: đếm số lần xuất hiện mỗi (ngày + trạng thái) vào `JobCountTotal`
-- Sort theo ngày tăng dần → chart hiển thị từ trái sang phải theo thứ tự thời gian
-- Set vào `chartModel>/chartData` → VizFrame tự cập nhật
-
-> **Tại sao gộp phía client thay vì dùng OData `$apply`?** Vì `macros:Chart` không hoạt động (đã giải thích ở mục 4). Với VizFrame + JSONModel, ta tự làm aggregation. Với lượng data vừa phải (< 1000 records), client-side aggregation **đủ nhanh** và **không cần backend hỗ trợ `$apply`**.
-
-> **Tại sao dùng `oItem.JobCountTotal || 1`?** `JobCountTotal` trong CDS được định nghĩa là `cast(1 as abap.int4)` — mỗi row = 1 lần chạy. Giá trị luôn là 1, nhưng dùng `|| 1` để bảo vệ trường hợp null/undefined. Khi gộp nhiều row cùng (ngày + status), ta cộng dồn → kết quả là số lần chạy job.
-
-### 5.5 Sự kiện `onJobHistoryFilterSearch` và `onItemSelect`
-
-```javascript
-// Khi user nhấn "Go" trên FilterBar
-onJobHistoryFilterSearch: function () {
-    this._loadHistoryChart();
-},
-
-// Khi user click menu Job History & Logs
-onItemSelect: function (oEvent) {
-    var sKey = oEvent.getParameter("item").getKey();
-    if (!sKey) { return; }
-    this.byId("pageContainer").to(this.byId(sKey));
-
-    if (sKey === "history") {
-        this._loadHistoryChart();
-    }
-},
-```
-
-> **Tại sao chart cần reload khi nhấn "Go"?** Vì `macros:Table` kết nối trực tiếp với `macros:FilterBar` qua thuộc tính `filterBar="jobHistoryFilterBar"` nên tự filter theo filter bar. Nhưng VizFrame **không kết nối với FilterBar** — nó dùng JSONModel riêng. Do đó, mỗi khi user nhấn "Go", controller phải **tự gọi lại** `_loadHistoryChart()` để reload và re-aggregate data tương ứng với filter đang áp dụng.
-
-> **Lưu ý hiện tại:** `_loadHistoryChart()` hiện tải toàn bộ data không theo filter của FilterBar. Việc đồng bộ filter FilterBar → chart là tính năng sẽ phát triển thêm sau.
-
-> **Tại sao load chart khi chuyển tab?** Chart không autoload khi view mount (data là rỗng). Khi user lần đầu click vào menu "Job History & Logs", `onItemSelect` bắt sự kiện `sKey === "history"` và trigger load — đảm bảo chart có data ngay khi tab mở ra.
+> **Lưu ý giới hạn:** `loadChartData()` hiện tải toàn bộ data mà không theo filter của FilterBar. Chart chưa phản ánh đúng filter conditions — đây là tính năng sẽ phát triển thêm sau.
 
 ---
 
@@ -746,14 +559,15 @@ Module **Job History & Logs** được triển khai thành công với kiến tr
 **Luồng hoạt động hoàn chỉnh:**
 ```
 User mở tab "Job History"
-    → onItemSelect() → _loadHistoryChart()
+    → Main.onItemSelect() → _jobHistoryController.loadChartData(this)
+    → JobHistoryController.configureChart() → set VizProperties
     → OData GET /JobHistoryAnalytics (999 records)
-    → _aggregateChartData() → group by (JobDate + JobStatus) → count
+    → JobHistoryController._aggregateChartData() → group by (JobDate + JobStatus) → count
     → JSONModel "chartModel" → VizFrame render stacked_column chart
 
 User nhấn "Go" trên FilterBar
     → macros:Table tự filter theo conditions (FPM internal)
-    → onJobHistoryFilterSearch() → _loadHistoryChart() → chart reload
+    → Main.onJobHistoryFilterSearch() → _jobHistoryController.onFilterSearch(this) → loadChartData() → chart reload
 
 User click dòng trên Table
     → FPM navigation → JobHistoryObjectPage (4 panels chi tiết)

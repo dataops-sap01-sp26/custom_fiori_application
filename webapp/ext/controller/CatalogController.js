@@ -1,6 +1,5 @@
 sap.ui.define([
     "./BaseController",
-    "cfa/customfioriapplication/model/constants",
     "sap/ui/model/json/JSONModel",
     "sap/ui/model/Sorter",
     "sap/m/GenericTile",
@@ -13,9 +12,18 @@ sap.ui.define([
     "sap/m/FlexWrap",
     "sap/m/ActionSheet",
     "sap/m/Button"
-], function (BaseController, Constants, JSONModel, Sorter,
+], function (BaseController, JSONModel, Sorter,
     GenericTile, TileContent, ImageContent, Title, Text, HBox, VBox, FlexWrap,
     ActionSheet, Button) {
+    var REPORT_PAGE_MAP = {
+        "GL-01": "report_gl01",
+        "AR-01": "report_ar01",
+        "AR-02": "report_ar02",
+        "AR-03": "report_ar03",
+        "AP-01": "report_ap01",
+        "AP-02": "report_ap02",
+        "AP-03": "report_ap03"
+    };
     "use strict";
 
     /**
@@ -23,27 +31,27 @@ sap.ui.define([
      */
     var MODULE_GROUPS = {
         "GL": { 
-            title: "FI-GL — General Ledger", 
+            title: "FI:GL - General Ledger", 
             icon: "sap-icon://accounting-document-verification", 
             sort: 1 
         },
         "AR": { 
-            title: "FI-AR — Accounts Receivable", 
+            title: "FI:AR - Accounts Receivable", 
             icon: "sap-icon://customer", 
             sort: 2 
         },
         "AP": { 
-            title: "FI-AP — Accounts Payable", 
+            title: "FI:AP - Accounts Payable", 
             icon: "sap-icon://supplier", 
             sort: 3 
         },
         "CO": { 
-            title: "CO — Controlling", 
+            title: "CO:Controlling", 
             icon: "sap-icon://cost-center", 
             sort: 4 
         },
         "FI": { 
-            title: "FI — Finance", 
+            title: "FI:Finance", 
             icon: "sap-icon://accounting-document-verification", 
             sort: 5 
         }
@@ -250,7 +258,7 @@ sap.ui.define([
          * Navigate to report preview page
          */
         _navigateToPreview: function (oController, sReportId) {
-            var sPageKey = Constants.REPORT_PAGE_MAP[sReportId];
+            var sPageKey = REPORT_PAGE_MAP[sReportId];
             
             if (sPageKey) {
                 var oNavContainer = oController.byId("pageContainer");

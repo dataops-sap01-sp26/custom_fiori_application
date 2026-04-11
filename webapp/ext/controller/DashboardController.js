@@ -250,13 +250,28 @@ sap.ui.define([
          * @param {string} sKey - Page key (catalog, subscriptions, etc.)
          */
         navigateToPage: function (oController, sKey) {
+            var mReportRoutes = {
+                "exports":     "ExportsListPage",
+                "report_ap01": "AP01ListPage",
+                "report_ap02": "AP02ListPage",
+                "report_ap03": "AP03ListPage",
+                "report_ar01": "AR01ListPage",
+                "report_ar02": "AR02ListPage",
+                "report_ar03": "AR03ListPage",
+                "report_gl01": "GL01ListPage"
+            };
+
+            if (mReportRoutes[sKey]) {
+                oController.getAppComponent().getRouter().navTo(mReportRoutes[sKey]);
+                return;
+            }
+
             var oNavContainer = oController.byId("pageContainer");
             var oPage = oController.byId(sKey);
-            
+
             if (oPage) {
                 oNavContainer.to(oPage);
-                
-                // Update sidebar navigation highlight
+
                 var oSideNav = oController.byId("sideNavigation");
                 if (oSideNav) {
                     oSideNav.setSelectedKey(sKey);
@@ -266,20 +281,5 @@ sap.ui.define([
             }
         },
         
-        /**
-         * Get color for KPI based on type and value
-         * @param {string} sType - KPI type (failed, active, etc.)
-         * @param {number} iValue - KPI value
-         * @returns {string} Color string for NumericContent
-         */
-        getKpiColor: function (sType, iValue) {
-            if (sType === "failed") {
-                return iValue > 0 ? "Error" : "Neutral";
-            }
-            if (sType === "active") {
-                return iValue > 0 ? "Good" : "Neutral";
-            }
-            return "Neutral";
-        }
     });
 });

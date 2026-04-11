@@ -39,19 +39,6 @@ sap.ui.define([
         },
         
         /**
-         * Display a confirmation dialog
-         * @param {string} sMessage - Confirmation message
-         * @param {function} fnCallback - Callback function(sAction)
-         * @param {string} [sTitle] - Optional dialog title
-         */
-        confirmAction: function (sMessage, fnCallback, sTitle) {
-            MessageBox.confirm(sMessage, {
-                title: sTitle || "Confirm",
-                onClose: fnCallback
-            });
-        },
-        
-        /**
          * Get table contexts with fallback for inner table
          * @param {sap.fe.core.PageController} oController - Main controller
          * @param {string} sTableId - Table ID

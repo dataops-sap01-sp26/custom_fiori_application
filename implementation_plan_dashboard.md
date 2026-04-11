@@ -48,8 +48,8 @@ Transform the empty dashboard into a fully functional overview page with KPIs, q
     reportCount: 0,
     totalSubscriptions: 0,
     activeSubscriptions: 0,
-    runningJobs: 0,
-    failedJobs: 0,
+    scheduledJobs: 0,      // ← "Scheduled" (BTCSTATUS domain: 'S')
+    failedJobs: 0,         // ← "Aborted" (BTCSTATUS domain: 'A')
     
     // Chart Data
     chartData: [],
@@ -65,16 +65,18 @@ Transform the empty dashboard into a fully functional overview page with KPIs, q
 
 ### 3.2 OData Queries
 
-| Data | Entity | Query Parameters |
-|------|--------|------------------|
-| Report Count | `ReportCatalog` | `$count=true&$filter=IsActive eq true&$top=0` |
-| Total Subscriptions | `DrsSubscription` | `$count=true&$top=0` |
-| Active Subscriptions | `DrsSubscription` | `$count=true&$filter=Status eq 'ACTIVE'&$top=0` |
-| Running Jobs | `DrsJobConfig` | `$count=true&$filter=JobStatus eq '2'&$top=0` |
-| Failed Jobs (Today) | `JobHistoryAnalytics` | `$count=true&$filter=JobStatus eq '4'&$top=0` |
-| Chart Data | `JobHistoryAnalytics` | `$orderby=JobDate desc&$top=100` |
-| Recent Subscriptions | `DrsSubscription` | `$orderby=CreatedAt desc&$top=5` |
-| Recent Jobs | `DrsJobConfig` | `$orderby=CreatedAt desc&$top=5` |
+| Data | Entity | Filter / Sort |
+|------|--------|---------------|
+| Report Count | `ReportCatalog` | `$filter=IsActive eq true` |
+| Total Subscriptions | `DrsSubscription` | (không filter) |
+| Active Subscriptions | `DrsSubscription` | `$filter=Status eq 'A'` ← single char domain |
+| Scheduled Jobs | `DrsJobConfig` | `$filter=JobStatus eq 'S'` ← BTCSTATUS: S=Scheduled |
+| Aborted Jobs (Failed) | `DrsJobConfig` | `$filter=JobStatus eq 'A'` ← BTCSTATUS: A=Aborted |
+| Chart Data | `JobHistoryAnalytics` | `$orderby=JobDate desc`, top 100 |
+| Recent Subscriptions | `DrsSubscription` | `$orderby=CreatedAt desc`, top 5 |
+| Recent Jobs | `DrsJobConfig` | `$orderby=CreatedAt desc`, top 5 |
+
+> **Lưu ý domain values:** `Status` trên `DrsSubscription` dùng single char: `A`=Active, `P`=Paused, `I`=Inactive (KHÔNG phải `'ACTIVE'`). `JobStatus` dùng BTCSTATUS domain: `S`=Scheduled, `F`=Finished, `C`=Cancelled, `A`=Aborted (KHÔNG phải số `'2'`, `'4'`).
 
 ---
 
@@ -82,34 +84,15 @@ Transform the empty dashboard into a fully functional overview page with KPIs, q
 
 ### Phase 1: Foundation (30 min)
 
-#### Step 1.1: Update constants.js
-Add dashboard-related constants.
+#### Step 1.1: ~~Update constants.js~~ ← File này đã bị xóa
 
-```javascript
-// Add to model/constants.js
-DASHBOARD: {
-    TILE_KEYS: {
-        REPORTS: "catalog",
-        SUBSCRIPTIONS: "subscriptions", 
-        JOB_CONFIGS: "jobconfigs",
-        HISTORY: "history",
-        EXPORTS: "exports"
-    },
-    KPI_COLORS: {
-        NEUTRAL: "Neutral",
-        GOOD: "Good",
-        CRITICAL: "Critical",
-        ERROR: "Error"
-    }
-}
-```
+`constants.js` đã bị xóa trong quá trình cleanup. Các constant (ACTION_NAMESPACE, REPORT_OPTIONS, REPORT_PAGE_MAP) đã được inline trực tiếp vào từng controller cần dùng.
 
 #### Step 1.2: Update i18n.properties
-Add all dashboard text labels.
+Keys hiện có trong `i18n.properties` (đã cleanup — các key không dùng đã xóa):
 
 ```properties
 # Dashboard Section
-dashboardTitle=Dashboard Overview
 systemOverview=System Overview
 quickActions=Quick Actions
 jobTrend=Job Execution Trend
@@ -121,7 +104,7 @@ viewAll=View All
 reportsAvailable=Reports Available
 totalSubscriptions=Total Subscriptions
 activeSubscriptions=Active Subscriptions
-runningJobs=Running Jobs
+scheduledJobs=Scheduled Jobs    ← tên đúng (không phải runningJobs)
 failedJobs=Failed Jobs
 
 # Quick Action Tiles
@@ -145,43 +128,40 @@ format=Format
 emailTo=Email
 jobId=Job ID
 startedAt=Started
-duration=Duration
 
-# Status
-statusActive=Active
-statusPaused=Paused
-statusCompleted=Completed
-statusRunning=Running
-statusFailed=Failed
+# No data
+noSubscriptions=No subscriptions found
+noJobs=No jobs found
 ```
+
+> **Keys đã xóa (không dùng):** `dashboardTitle`, `duration`, `statusActive/Paused/Completed/Running/Failed`, `refresh`, `noReportsFound`, `reportsRefreshed`, `MainTitle`
 
 ---
 
 ### Phase 2: Dashboard Controller (45 min)
 
-#### Step 2.1: Create DashboardController.js
+#### Step 2.1: Create DashboardController.js (code thực tế hiện tại)
 
 ```javascript
 // ext/controller/DashboardController.js
 sap.ui.define([
     "./BaseController",
-    "sap/ui/model/json/JSONModel"
-], function (BaseController, JSONModel) {
+    "sap/ui/model/json/JSONModel",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+    "sap/ui/model/Sorter"
+], function (BaseController, JSONModel, Filter, FilterOperator, Sorter) {
     "use strict";
 
     return BaseController.extend("cfa.customfioriapplication.ext.controller.DashboardController", {
         
-        /**
-         * Initialize dashboard model
-         * @param {sap.fe.core.PageController} oController - Main controller
-         */
         init: function (oController) {
             var oModel = new JSONModel({
                 reportCount: 0,
                 totalSubscriptions: 0,
                 activeSubscriptions: 0,
-                runningJobs: 0,
-                failedJobs: 0,
+                scheduledJobs: 0,      // ← "Scheduled" không phải "running"
+                failedJobs: 0,         // ← "Aborted" (JobStatus='A')
                 chartData: [],
                 recentSubscriptions: [],
                 recentJobs: [],
@@ -190,15 +170,13 @@ sap.ui.define([
             oController.getView().setModel(oModel, "dashboard");
         },
         
-        /**
-         * Load all dashboard data
-         * @param {sap.fe.core.PageController} oController - Main controller
-         */
         loadDashboardData: function (oController) {
             var that = this;
             var oODataModel = oController.getView().getModel();
+            var oDashboard = oController.getView().getModel("dashboard");
             
-            // Load all data in parallel
+            oDashboard.setProperty("/isLoading", true);
+            
             Promise.all([
                 this._loadReportCount(oODataModel),
                 this._loadSubscriptionCounts(oODataModel),
@@ -207,204 +185,91 @@ sap.ui.define([
                 this._loadRecentSubscriptions(oODataModel),
                 this._loadRecentJobs(oODataModel)
             ]).then(function (aResults) {
-                var oDashboard = oController.getView().getModel("dashboard");
-                
                 oDashboard.setProperty("/reportCount", aResults[0]);
                 oDashboard.setProperty("/totalSubscriptions", aResults[1].total);
                 oDashboard.setProperty("/activeSubscriptions", aResults[1].active);
-                oDashboard.setProperty("/runningJobs", aResults[2].running);
+                oDashboard.setProperty("/scheduledJobs", aResults[2].scheduled);  // ← scheduled
                 oDashboard.setProperty("/failedJobs", aResults[2].failed);
                 oDashboard.setProperty("/chartData", aResults[3]);
                 oDashboard.setProperty("/recentSubscriptions", aResults[4]);
                 oDashboard.setProperty("/recentJobs", aResults[5]);
                 oDashboard.setProperty("/isLoading", false);
                 
+                that._configureDashboardChart(oController);
+                
             }).catch(function (oError) {
                 console.error("Dashboard load error:", oError);
-                oController.getView().getModel("dashboard").setProperty("/isLoading", false);
+                oDashboard.setProperty("/isLoading", false);
             });
         },
         
-        /**
-         * Load report catalog count
-         * @private
-         */
-        _loadReportCount: function (oModel) {
-            return new Promise(function (resolve) {
-                var oBinding = oModel.bindList("/ReportCatalog", undefined, undefined, 
-                    new sap.ui.model.Filter("IsActive", "EQ", true));
-                oBinding.requestContexts(0, 1).then(function (aContexts) {
-                    resolve(oBinding.getLength() || 0);
-                }).catch(function () {
-                    resolve(0);
-                });
-            });
-        },
-        
-        /**
-         * Load subscription counts (total and active)
-         * @private
-         */
         _loadSubscriptionCounts: function (oModel) {
-            var that = this;
             return new Promise(function (resolve) {
                 var oTotalBinding = oModel.bindList("/DrsSubscription");
+                // Status domain: A=Active, P=Paused, I=Inactive (single char)
                 var oActiveBinding = oModel.bindList("/DrsSubscription", undefined, undefined,
-                    new sap.ui.model.Filter("Status", "EQ", "ACTIVE"));
+                    [new Filter("Status", FilterOperator.EQ, "A")]);  // ← 'A' không phải 'ACTIVE'
                 
                 Promise.all([
-                    oTotalBinding.requestContexts(0, 1),
-                    oActiveBinding.requestContexts(0, 1)
-                ]).then(function () {
-                    resolve({
-                        total: oTotalBinding.getLength() || 0,
-                        active: oActiveBinding.getLength() || 0
-                    });
+                    oTotalBinding.requestContexts(0, 999),
+                    oActiveBinding.requestContexts(0, 999)
+                ]).then(function (aResults) {
+                    resolve({ total: aResults[0].length, active: aResults[1].length });
                 }).catch(function () {
                     resolve({ total: 0, active: 0 });
                 });
             });
         },
         
-        /**
-         * Load job counts (running and failed)
-         * @private
-         */
         _loadJobCounts: function (oModel) {
             return new Promise(function (resolve) {
-                var oRunningBinding = oModel.bindList("/DrsJobConfig", undefined, undefined,
-                    new sap.ui.model.Filter("JobStatus", "EQ", "2"));
-                var oFailedBinding = oModel.bindList("/JobHistoryAnalytics", undefined, undefined,
-                    new sap.ui.model.Filter("JobStatus", "EQ", "4"));
+                // BTCSTATUS domain: S=Scheduled, F=Finished, C=Cancelled, A=Aborted
+                var oScheduledBinding = oModel.bindList("/DrsJobConfig", undefined, undefined,
+                    [new Filter("JobStatus", FilterOperator.EQ, "S")]);  // ← 'S' không phải '2'
+                var oAbortedBinding = oModel.bindList("/DrsJobConfig", undefined, undefined,
+                    [new Filter("JobStatus", FilterOperator.EQ, "A")]);  // ← 'A' không phải '4'
                 
                 Promise.all([
-                    oRunningBinding.requestContexts(0, 1),
-                    oFailedBinding.requestContexts(0, 1)
-                ]).then(function () {
-                    resolve({
-                        running: oRunningBinding.getLength() || 0,
-                        failed: oFailedBinding.getLength() || 0
-                    });
+                    oScheduledBinding.requestContexts(0, 999),
+                    oAbortedBinding.requestContexts(0, 999)
+                ]).then(function (aResults) {
+                    resolve({ scheduled: aResults[0].length, failed: aResults[1].length });
                 }).catch(function () {
-                    resolve({ running: 0, failed: 0 });
-                });
-            });
-        },
-        
-        /**
-         * Load chart data from JobHistoryAnalytics
-         * @private
-         */
-        _loadChartData: function (oModel) {
-            return new Promise(function (resolve) {
-                var oBinding = oModel.bindList("/JobHistoryAnalytics", undefined,
-                    [new sap.ui.model.Sorter("JobDate", true)], // descending
-                    undefined,
-                    { $top: 100 });
-                
-                oBinding.requestContexts(0, 100).then(function (aContexts) {
-                    var aData = aContexts.map(function (oCtx) {
-                        return oCtx.getObject();
-                    });
-                    
-                    // Aggregate by date and status
-                    var mAggregated = {};
-                    aData.forEach(function (oItem) {
-                        var sDate = oItem.JobDate || "";
-                        var sStatus = oItem.JobStatus || "Unknown";
-                        var sKey = sDate + "|" + sStatus;
-                        
-                        if (!mAggregated[sKey]) {
-                            mAggregated[sKey] = {
-                                JobDate: sDate,
-                                JobStatus: sStatus,
-                                JobCountTotal: 0
-                            };
-                        }
-                        mAggregated[sKey].JobCountTotal += (oItem.JobCountTotal || 1);
-                    });
-                    
-                    var aChartData = Object.values(mAggregated).sort(function (a, b) {
-                        return a.JobDate.localeCompare(b.JobDate);
-                    });
-                    
-                    resolve(aChartData);
-                }).catch(function () {
-                    resolve([]);
-                });
-            });
-        },
-        
-        /**
-         * Load recent subscriptions (top 5)
-         * @private
-         */
-        _loadRecentSubscriptions: function (oModel) {
-            return new Promise(function (resolve) {
-                var oBinding = oModel.bindList("/DrsSubscription", undefined,
-                    [new sap.ui.model.Sorter("CreatedAt", true)], // descending
-                    undefined,
-                    { $top: 5 });
-                
-                oBinding.requestContexts(0, 5).then(function (aContexts) {
-                    resolve(aContexts.map(function (oCtx) {
-                        return oCtx.getObject();
-                    }));
-                }).catch(function () {
-                    resolve([]);
-                });
-            });
-        },
-        
-        /**
-         * Load recent jobs (top 5)
-         * @private
-         */
-        _loadRecentJobs: function (oModel) {
-            return new Promise(function (resolve) {
-                var oBinding = oModel.bindList("/DrsJobConfig", undefined,
-                    [new sap.ui.model.Sorter("CreatedAt", true)], // descending
-                    undefined,
-                    { $top: 5 });
-                
-                oBinding.requestContexts(0, 5).then(function (aContexts) {
-                    resolve(aContexts.map(function (oCtx) {
-                        return oCtx.getObject();
-                    }));
-                }).catch(function () {
-                    resolve([]);
+                    resolve({ scheduled: 0, failed: 0 });
                 });
             });
         },
         
         /**
          * Navigate to a page by key
-         * @param {string} sKey - Page key (catalog, subscriptions, etc.)
-         * @param {sap.fe.core.PageController} oController - Main controller
+         * CHÚ Ý: tham số (oController, sKey) — oController đứng TRƯỚC sKey
          */
-        navigateToPage: function (sKey, oController) {
+        navigateToPage: function (oController, sKey) {  // ← thứ tự tham số khác plan ban đầu
+            var mReportRoutes = {
+                exports: "ExportsListPage",
+                report_ap01: "AP01ListPage", report_ap02: "AP02ListPage", report_ap03: "AP03ListPage",
+                report_ar01: "AR01ListPage", report_ar02: "AR02ListPage", report_ar03: "AR03ListPage",
+                report_gl01: "GL01ListPage"
+            };
+            if (mReportRoutes[sKey]) {
+                oController.getAppComponent().getRouter().navTo(mReportRoutes[sKey]);
+                return;
+            }
             var oNavContainer = oController.byId("pageContainer");
             var oPage = oController.byId(sKey);
             if (oPage) {
                 oNavContainer.to(oPage);
+                var oSideNav = oController.byId("sideNavigation");
+                if (oSideNav) { oSideNav.setSelectedKey(sKey); }
             }
-        },
-        
-        /**
-         * Get color for KPI based on value
-         */
-        getKpiColor: function (sType, iValue) {
-            if (sType === "failed") {
-                return iValue > 0 ? "Error" : "Neutral";
-            }
-            if (sType === "active") {
-                return iValue > 0 ? "Good" : "Neutral";
-            }
-            return "Neutral";
         }
+        
+        // getKpiColor() đã bị xóa trong cleanup — không còn dùng
     });
 });
 ```
+
+> **Cập nhật (List Report — My Exports + 7 reports):** Các key `exports` và `report_ap01` … `report_gl01` không còn `ScrollContainer` tương ứng trong `Main.view.xml`. `navigateToPage` (và `Main.controller.js` / `onItemSelect`) phải gọi `router.navTo("ExportsListPage")` hoặc `AP01ListPage` … `GL01ListPage` trước khi fallback `NavContainer.to`. Quick action "My Exports" (`targetPage="exports"`) cũng đi qua map này. Màn list là full-screen; quay lại dashboard bằng Back / breadcrumb.
 
 ---
 
@@ -667,63 +532,95 @@ Replace the empty dashboard `ScrollContainer` with full content:
 
 ### Phase 4: Main Controller Integration (30 min)
 
-#### Step 4.1: Update Main.controller.js
-
-Add dashboard controller import and initialization:
+#### Step 4.1: Update Main.controller.js (code thực tế hiện tại)
 
 ```javascript
-// Add to imports
-"../controller/DashboardController"
+// Main.controller.js — Orchestration layer
+sap.ui.define([
+    "sap/fe/core/PageController",
+    "../controller/DashboardController",
+    "../controller/JobConfigController",
+    "../controller/SubscriptionController",
+    "../controller/CatalogController",
+    "../controller/JobHistoryController"
+], function (PageController, DashboardController, JobConfigController,
+             SubscriptionController, CatalogController, JobHistoryController) {
+    "use strict";
 
-// Add to onInit
-this._dashboardController = new DashboardController();
-this._dashboardController.init(this);
+    return PageController.extend("cfa.customfioriapplication.ext.view.Main", {
 
-// Load dashboard data when navigating to dashboard page
-// In onItemSelect, add:
-if (sKey === "dashboard") {
-    this._dashboardController.loadDashboardData(this);
-}
+        onInit: function () {
+            PageController.prototype.onInit.apply(this, arguments);
 
-// Also load on initial page load in onInit:
-setTimeout(function () {
-    that._dashboardController.loadDashboardData(that);
-}, 1000);
+            this._dashboardController = new DashboardController();
+            this._jobConfigController = new JobConfigController();
+            this._subscriptionController = new SubscriptionController();
+            this._catalogController = new CatalogController();
+            this._jobHistoryController = new JobHistoryController();
+            
+            this._dashboardController.init(this);
+            this._jobHistoryController.init(this);
 
-// Add new handler methods
-onKpiTilePress: function (oEvent) {
-    var sKey = oEvent.getSource().data("key");
-    this._dashboardController.navigateToPage(sKey, this);
-},
+            var that = this;
+            try {
+                var oRouter = this.getAppComponent().getRouter();
+                oRouter.getRoute("DashboardMainPage").attachPatternMatched(function () {
+                    that._dashboardController.loadDashboardData(that);
+                    setTimeout(function () {
+                        that._jobConfigController.refreshTable(that);
+                    }, 500);
+                });
+            } catch (e) {
+                this._dashboardController.loadDashboardData(this);
+            }
+        },
 
-onQuickActionPress: function (oEvent) {
-    var sKey = oEvent.getSource().data("key");
-    this._dashboardController.navigateToPage(sKey, this);
-},
+        onItemSelect: function (oEvent) {
+            var oItem = oEvent.getParameter("item");
+            var sKey = oItem.getKey();
+            if (!sKey) { return; }
 
-onViewAllSubscriptions: function () {
-    this._dashboardController.navigateToPage("subscriptions", this);
-},
+            this.byId("pageContainer").to(this.byId(sKey));
 
-onViewAllJobs: function () {
-    this._dashboardController.navigateToPage("jobconfigs", this);
-},
+            if (sKey === "dashboard") {
+                this._dashboardController.loadDashboardData(this);
+            } else if (sKey === "history") {
+                this._jobHistoryController.loadChartData(this);
+            } else if (sKey === "catalog") {
+                this._catalogController.initCatalog(this);
+            }
+        },
 
-onSubscriptionRowPress: function (oEvent) {
-    var oContext = oEvent.getSource().getBindingContext("dashboard");
-    var sSubscrUuid = oContext.getProperty("SubscrUuid");
-    var sSubscrId = oContext.getProperty("SubscrId");
-    // Navigate to subscription detail
-    this._subscriptionController.navigateToDetail(this, {
-        getProperty: function (sProp) {
-            return oContext.getProperty(sProp);
+        // Handlers delegate sang DashboardController
+        // CHÚ Ý: navigateToPage(oController, sKey) — oController đứng TRƯỚC sKey
+        onKpiTilePress: function (oEvent) {
+            var sTargetPage = oEvent.getSource().data("targetPage");
+            this._dashboardController.navigateToPage(this, sTargetPage);
+        },
+
+        onQuickActionPress: function (oEvent) {
+            var sTargetPage = oEvent.getSource().data("targetPage");
+            this._dashboardController.navigateToPage(this, sTargetPage);
+        },
+
+        onViewAllSubscriptions: function () {
+            this._dashboardController.navigateToPage(this, "subscriptions");
+        },
+
+        onViewAllJobs: function () {
+            this._dashboardController.navigateToPage(this, "jobconfigs");
+        },
+
+        // Row press đơn giản — chỉ navigate đến trang list tương ứng
+        onSubscriptionRowPress: function () {
+            this._dashboardController.navigateToPage(this, "subscriptions");
+        },
+
+        onJobRowPress: function () {
+            this._dashboardController.navigateToPage(this, "jobconfigs");
         }
     });
-},
-
-onJobRowPress: function (oEvent) {
-    // Navigate to job detail (implement similar to subscription)
-}
+});
 ```
 
 ---
@@ -790,28 +687,33 @@ Add to `css/style.css`:
 
 ---
 
-## Appendix: Final File Structure
+## Appendix: File Structure Hiện Tại (sau cleanup)
 
 ```
 webapp/
 ├── ext/
 │   ├── controller/
 │   │   ├── BaseController.js
-│   │   ├── DashboardController.js    ← NEW
+│   │   ├── DashboardController.js
 │   │   ├── JobConfigController.js
 │   │   ├── SubscriptionController.js
 │   │   ├── CatalogController.js
 │   │   └── JobHistoryController.js
 │   ├── view/
-│   │   ├── Main.controller.js        ← MODIFIED
-│   │   └── Main.view.xml             ← MODIFIED
-│   └── helper/
-│       └── ChartHelper.js
-├── model/
-│   ├── constants.js                  ← MODIFIED
-│   └── formatter.js
+│   │   ├── Main.controller.js        ← Orchestration only (~147 lines)
+│   │   └── Main.view.xml             ← Full view (~635 lines)
+│   └── fragment/
+│       ├── DashboardChart.fragment.xml   ← backup (VizFrame đã inline)
+│       └── JobHistoryChart.fragment.xml  ← backup (VizFrame đã inline)
+├── annotations/
+│   └── annotation.xml
 ├── i18n/
-│   └── i18n.properties               ← MODIFIED
+│   └── i18n.properties
 └── css/
-    └── style.css                     ← NEW (optional)
+    └── style.css
+
+Đã xóa:
+├── model/constants.js    ← DELETED — inline vào từng controller
+├── model/formatter.js    ← DELETED — không còn dùng
+└── ext/helper/ChartHelper.js  ← DELETED — logic nằm trong JobHistoryController
 ```
