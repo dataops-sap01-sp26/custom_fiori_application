@@ -140,7 +140,7 @@ Domain Controllers ảnh hưởng: Business logic, data loading, CRUD
 | 5 | `Main.controller.js` | Không cần sửa gì thêm (FPM tự xử lý navigation và filtering) |
 
 ### Trường hợp A′: Read-only nhưng muốn List Report full-screen (startup nhanh)
-> Ví dụ đã làm: **My Exports (`DrsFile`)**, **7 financial reports** — không nhúng macros trong `Main.view.xml`.
+> Ví dụ đã làm: **My Exports (`DrsFile`)**, **7 financial reports** — không nhúng macros trong `Main.view.xml`. Entity **`DrsFile`** trên backend có **`JobDate`** (từ `ZI_DRS_FILE`) và **`_JobHistory`**; `annotation.xml` local bổ sung **`JobDate`** vào LineItem, FilterBar và facet Admin — xem `implementation_plan_file.md`.
 
 | Bước | File | Việc phải làm |
 |------|------|---------------|

@@ -290,7 +290,7 @@ Filter bar, bảng, variant, export, P13n, drill-down Object Page do template `L
 |---|---|---|
 | `DrsJobConfig` | Cần định nghĩa đầy đủ | Backend không expose UI annotations ra frontend |
 | `JobHistoryAnalytics` | Cần định nghĩa + Aggregation | Backend có annotations nhưng Aggregation annotations thiếu |
-| `DrsFile` | Cần thêm `SelectionFields` | Backend thiếu `UI.SelectionFields` |
+| `DrsFile` | LineItem / SelectionFields / FieldGroups (override) | Backend có metadata extension (`JobDate`, …); local bổ sung **`JobDate`** trên list + Admin facet |
 | **7 Report entities** | **Không cần** | Backend DDLX đã định nghĩa đủ `LineItem` + `SelectionFields` + `HeaderInfo` + `Facets` |
 
 Các file DDLX backend liên quan:

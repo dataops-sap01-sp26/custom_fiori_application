@@ -27,11 +27,12 @@ Entity này được expose từ CDS Projection `ZC_DRS_FILE` (dựa trên Inter
 | `JobUuid` | UUID (16 bytes) | FK trỏ về Job cha | Ẩn |
 | `FileName` | CHAR 128 | Tên file đầy đủ | ✓ Hiển thị |
 | `FileContent` | RSTR (Large Object) | Nội dung file nhị phân | ✓ → Nút download |
-| `MimeType` | CHAR 128 | Kiểu MIME (vd: `application/pdf`) | ✓ Hiển thị |
+| `MimeType` | CHAR 128 | Kiểu MIME (vd: `application/pdf`) | ✓ (Object Page / ẩn list theo metadata) |
 | `FileSize` | INT4 | Kích thước file (bytes, raw) | Ẩn |
 | `FileSizeDisplay` | CHAR 20 | Kích thước đã format (vd: `1.2 MB`) | ✓ Hiển thị |
 | `CreatedBy` | SYUNAME | Người tạo file | ✓ Hiển thị |
 | `CreatedAt` | TIMESTAMPL | Thời điểm tạo file | ✓ Hiển thị |
+| `JobDate` | DATS | Ngày job (suy ra từ `created_at` trên `ZI_DRS_FILE`) | ✓ List / filter / Admin facet |
 
 ### Associations (Navigation trong OData)
 
@@ -77,14 +78,14 @@ Trước khi implement, cần hiểu rõ backend (`zc_drs_file.ddlx.asddlxs`) đ
 | Annotation | Backend (`zc_drs_file.ddlx`) | Local (`annotation.xml`) | Ghi chú |
 |---|---|---|---|
 | `UI.HeaderInfo` | **Có** ✓ | **Có** ✓ | Định nghĩa lại local để có full control |
-| `UI.LineItem` | **Có** ✓ | **Có** ✓ | Override để điều chỉnh columns theo nhu cầu dashboard |
+| `UI.LineItem` | **Có** ✓ | **Có** ✓ | Local thêm cột **`JobDate`** (bổ sung so với lineItem backend) |
 | `UI.Facets` | **Có** ✓ | **Có** ✓ | Định nghĩa lại local cho nhất quán |
-| `UI.FieldGroup` | **Có** ✓ | **Có** ✓ | Định nghĩa lại local |
-| `UI.SelectionFields` | **Không có** ✗ | **Thêm mới** ✓ | **Backend bỏ sót** — bắt buộc phải thêm local để FilterBar hiển thị field |
+| `UI.FieldGroup` | **Có** ✓ | **Có** ✓ | Local **AdminData** thêm **`JobDate`** |
+| `UI.SelectionFields` | **Có** ✓ (`JobDate` position 10, …) | **Có** ✓ | Local đặt **`JobDate` đầu tiên** trong FilterBar |
 
 > **Tại sao define lại những annotation backend đã có?** Hai lý do: (1) Local annotation **override** backend annotation — giúp kiểm soát chính xác những gì hiển thị trong dashboard mà không phụ thuộc vào thay đổi từ backend. (2) Nhất quán với cách tiếp cận của các module khác trong dự án (`DrsJobConfig`, `JobHistoryAnalytics`) — tất cả đều define đầy đủ annotation local.
 
-> **Tại sao backend không có `UI.SelectionFields`?** Đây không phải lỗi backend — `UI.SelectionFields` thường chỉ cần thiết khi có SmartFilterBar/FPM FilterBar. Backend `ZC_DRS_FILE` được thiết kế để dùng chủ yếu qua Object Page navigation (từ JobConfig hoặc JobHistory), không phải qua FilterBar độc lập. Dashboard cần FilterBar nên phải thêm vào local.
+> **Cập nhật CDS:** `ZI_DRS_FILE` bổ sung **`JobDate`** (suy ra từ `created_at`) và association **`_JobHistory`**; `ZC_DRS_FILE` expose `JobDate` và redirect `_JobHistory`. Metadata extension gắn **`JobDate`** vào **selectionField**; Fiori local thêm **`JobDate`** vào **LineItem** và **FieldGroup#AdminData** để list/Object Page đồng bộ.
 
 ---
 
@@ -212,6 +213,7 @@ Màn list file là **full-screen**; quay lại dashboard bằng **Back** / bread
 ```xml
 <Annotation Term="UI.SelectionFields">
     <Collection>
+        <PropertyPath>JobDate</PropertyPath>
         <PropertyPath>FileName</PropertyPath>
         <PropertyPath>CreatedBy</PropertyPath>
         <PropertyPath>CreatedAt</PropertyPath>
@@ -219,9 +221,9 @@ Màn list file là **full-screen**; quay lại dashboard bằng **Back** / bread
 </Annotation>
 ```
 
-> **Tại sao chọn 3 field này?** Đây là 3 tiêu chí user thực tế nhất cần để tìm file: (1) `FileName` — tìm theo tên file cụ thể; (2) `CreatedBy` — xem file của ai; (3) `CreatedAt` — lọc theo khoảng thời gian. `MimeType` và `FileSizeDisplay` ít khi được dùng để tìm kiếm.
+> **Filter fields:** (1) `JobDate` — lọc theo **ngày job** (backend: cast từ `created_at` trên `ZI_DRS_FILE`); (2) `FileName`; (3) `CreatedBy`; (4) `CreatedAt` — khoảng thời gian tạo file. `MimeType` / `FileSizeDisplay` không đưa vào FilterBar.
 
-> **Đây là annotation duy nhất không có trong backend.** Backend `zc_drs_file.ddlx` không định nghĩa `UI.SelectionFields` vì entity này thường được truy cập qua navigation từ JobConfig/JobHistory, không phải qua standalone FilterBar. Khi nhúng vào Dashboard, cần FilterBar độc lập, nên phải thêm vào local annotation.
+> **Local vs backend:** Metadata extension backend đã khai báo **`selectionField`** cho `JobDate` (và các field khác). File `annotation.xml` local **override** để đồng bộ List Report với **LineItem** và **FieldGroup#AdminData** (có `JobDate`).
 
 ### 6.3 `UI.HeaderInfo` — Tiêu đề Object Page
 
@@ -257,6 +259,7 @@ Object Page được chia thành 2 panel:
 - `MimeType`: Định dạng file
 
 **Panel 2 — Administrative Data:**
+- `JobDate`: Ngày job (gắn với lịch báo cáo)
 - `CreatedBy`: Ai tạo file
 - `CreatedAt`: Khi nào tạo file
 
@@ -290,7 +293,7 @@ Không cần handler riêng cho filter/table — List Report đảm nhiệm. Dow
 ```
 User chọn "My Exports (Files)" trên sidebar (hoặc quick action)
     → router.navTo("ExportsListPage")
-    → List Report: FilterBar (FileName / CreatedBy / CreatedAt) + table GET /DrsFile
+    → List Report: FilterBar (JobDate / FileName / CreatedBy / CreatedAt) + table GET /DrsFile
     → Cột FileContent → download (Semantics.largeObject)
 
 User nhấn "Go" trên FilterBar
@@ -304,7 +307,7 @@ User click Download / một dòng
 
 | File | Thay đổi |
 |---|---|
-| `annotation.xml` | Block `DrsFileType`: LineItem, SelectionFields, HeaderInfo, Facets, FieldGroups (giữ nguyên) |
+| `annotation.xml` | Block `DrsFileType`: LineItem (**+ JobDate**), SelectionFields (**JobDate** đầu tiên), HeaderInfo, Facets, FieldGroups (**AdminData + JobDate**) |
 | `manifest.json` | Route + target `DrsFileObjectPage`; thêm `ExportsListPage` (ListReport) + `navigation` |
 | `Main.view.xml` | **Không** còn `ScrollContainer` exports — chỉ menu item `key="exports"` |
 | `Main.controller.js` + `DashboardController.js` | Map `exports` → `router.navTo("ExportsListPage")` |

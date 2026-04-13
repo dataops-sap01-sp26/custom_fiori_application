@@ -92,6 +92,7 @@
                 <Property Name="FileSizeDisplay" Type="Edm.String" Nullable="false" MaxLength="20"/>
                 <Property Name="CreatedBy" Type="Edm.String" Nullable="false" MaxLength="12"/>
                 <Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="JobDate" Type="Edm.Date"/>
                 <Property Name="HasDraftEntity" Type="Edm.Boolean" Nullable="false"/>
                 <Property Name="DraftEntityCreationDateTime" Type="Edm.DateTimeOffset" Precision="7"/>
                 <Property Name="DraftEntityLastChangeDateTime" Type="Edm.DateTimeOffset" Precision="7"/>
@@ -1720,6 +1721,10 @@
                 <Annotation Term="SAP__core.Computed"/>
                 <Annotation Term="SAP__common.Heading" String="Time Stamp"/>
                 <Annotation Term="SAP__common.QuickInfo" String="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)"/>
+            </Annotations>
+            <Annotations Target="SAP__self.DrsFileType/JobDate">
+                <Annotation Term="SAP__common.Label" String="Job Date"/>
+                <Annotation Term="SAP__core.Computed"/>
             </Annotations>
             <Annotations Target="SAP__self.DrsFileType/HasDraftEntity">
                 <Annotation Term="SAP__core.Computed"/>
