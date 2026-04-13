@@ -4,9 +4,10 @@ sap.ui.define([
     "../controller/JobConfigController",
     "../controller/SubscriptionController",
     "../controller/CatalogController",
-    "../controller/JobHistoryController"
+    "../controller/JobHistoryController",
+    "../controller/UserController"
 ], function (PageController, DashboardController, JobConfigController,
-             SubscriptionController, CatalogController, JobHistoryController) {
+             SubscriptionController, CatalogController, JobHistoryController, UserController) {
     "use strict";
 
     /**
@@ -30,16 +31,22 @@ sap.ui.define([
             this._subscriptionController = new SubscriptionController();
             this._catalogController = new CatalogController();
             this._jobHistoryController = new JobHistoryController();
+            this._userController = new UserController();
             
             // Initialize dashboard and chart models
             this._dashboardController.init(this);
             this._jobHistoryController.init(this);
+            
+            // Initialize user session model (data loads after route match)
+            this._userController.init(this);
 
             // Setup router pattern match
             var that = this;
             try {
                 var oRouter = this.getAppComponent().getRouter();
                 oRouter.getRoute("DashboardMainPage").attachPatternMatched(function () {
+                    // Load user session (OData model ready here)
+                    that._userController.loadUserSession(that);
                     // Load dashboard data on initial page load
                     that._dashboardController.loadDashboardData(that);
                     setTimeout(function () {
@@ -59,6 +66,52 @@ sap.ui.define([
         onMenuButtonPress: function () {
             var oToolPage = this.byId("toolPage");
             oToolPage.setSideExpanded(!oToolPage.getSideExpanded());
+        },
+
+        onUserMenuPress: function (oEvent) {
+            var oButton = oEvent.getSource();
+            var oView = this.getView();
+            
+            if (!this._oUserPopover) {
+                this._oUserPopover = new sap.m.ResponsivePopover({
+                    title: "User Profile",
+                    contentWidth: "320px",
+                    placement: "Bottom",
+                    content: [
+                        new sap.m.VBox({
+                            items: [
+                                new sap.m.ObjectHeader({
+                                    title: "{userSession>/userFullName}",
+                                    intro: "{userSession>/userId}",
+                                    icon: "sap-icon://person-placeholder",
+                                    responsive: true
+                                }),
+                                new sap.m.List({
+                                    items: [
+                                        new sap.m.StandardListItem({ 
+                                            title: "Email", 
+                                            description: "{userSession>/email}",
+                                            icon: "sap-icon://email"
+                                        }),
+                                        new sap.m.StandardListItem({ 
+                                            title: "Role", 
+                                            description: "{userSession>/roleName}",
+                                            icon: "sap-icon://role"
+                                        }),
+                                        new sap.m.StandardListItem({ 
+                                            title: "Company Codes", 
+                                            description: "{userSession>/companyCodeList}",
+                                            icon: "sap-icon://factory"
+                                        })
+                                    ]
+                                })
+                            ]
+                        })
+                    ]
+                });
+                oView.addDependent(this._oUserPopover);
+            }
+            this._oUserPopover.openBy(oButton);
         },
 
         onItemSelect: function (oEvent) {

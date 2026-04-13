@@ -12,8 +12,8 @@
                 <Button id="sideNavigationToggleButton" icon="sap-icon://menu2" type="Transparent" press=".onMenuButtonPress" />
                 <Title text="SAP Job Operations Dashboard" />
                 <ToolbarSpacer />
-                <Button icon="sap-icon://bell" type="Transparent" />
-                <Button icon="sap-icon://customer" type="Transparent" />
+                <Button icon="sap-icon://bell" type="Transparent" tooltip="Notifications" />
+                <Button id="userMenuButton" icon="sap-icon://customer" type="Transparent" tooltip="User Profile" press=".onUserMenuPress" />
             </tnt:ToolHeader>
         </tnt:header>
         
@@ -72,6 +72,12 @@
                     <!-- ══════════════════════════════════════════════════════════════ -->
                     <ScrollContainer id="dashboard" horizontal="false" vertical="true" height="100%">
                         <VBox class="sapUiResponsiveMargin drsPageContent">
+                            
+                            <!-- WELCOME BANNER -->
+                            <HBox class="drsWelcomeBanner sapUiMediumMarginBottom" alignItems="Center" visible="{= ${userSession>/isLoaded} }">
+                                <core:Icon src="sap-icon://hello-world" size="2rem" class="sapUiSmallMarginEnd drsWelcomeIcon"/>
+                                <Text text="{i18n>welcomeBack} {userSession>/userFullName}, {i18n>loggedInAs} {userSession>/roleName}" class="drsWelcomeText"/>
+                            </HBox>
                             
                             <!-- SECTION 1: KPI Overview -->
                             <VBox class="sapUiMediumMarginBottom drsSection">
