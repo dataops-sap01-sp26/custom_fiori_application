@@ -4,7 +4,7 @@
     xmlns:viz.data="sap.viz.ui5.data"
     xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
     xmlns:l="sap.ui.layout"
-    controllerName="cfa.customfioriapplication.ext.view.Main">
+    controllerName="z.sap01.cfa.ext.view.Main">
     <tnt:ToolPage id="toolPage">
         <!-- HEADER -->
         <tnt:header>

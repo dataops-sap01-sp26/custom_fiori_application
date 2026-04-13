@@ -15,6 +15,8 @@ sap.ui.define([
 ], function (BaseController, JSONModel, Sorter,
     GenericTile, TileContent, ImageContent, Title, Text, HBox, VBox, FlexWrap,
     ActionSheet, Button) {
+    "use strict";
+
     var REPORT_PAGE_MAP = {
         "GL-01": "report_gl01",
         "AR-01": "report_ar01",
@@ -24,7 +26,6 @@ sap.ui.define([
         "AP-02": "report_ap02",
         "AP-03": "report_ap03"
     };
-    "use strict";
 
     /**
      * Module group metadata for tile grouping
@@ -78,7 +79,7 @@ sap.ui.define([
      * CatalogController - Handles Report Catalog tile-based view
      * Shows only active reports with ActionSheet for Preview/Create Subscription
      */
-    return BaseController.extend("cfa.customfioriapplication.ext.controller.CatalogController", {
+    return BaseController.extend("z.sap01.cfa.ext.controller.CatalogController", {
         
         _allReports: [],
         _oActionSheet: null,
@@ -255,19 +256,27 @@ sap.ui.define([
         },
 
         /**
-         * Navigate to report preview page
+         * Navigate to report preview page via router
          */
         _navigateToPreview: function (oController, sReportId) {
             var sPageKey = REPORT_PAGE_MAP[sReportId];
             
             if (sPageKey) {
-                var oNavContainer = oController.byId("pageContainer");
-                var oTargetPage = oController.byId(sPageKey);
-                
-                if (oTargetPage) {
-                    oNavContainer.to(oTargetPage);
+                // Report pages are router targets, use router.navTo
+                var mRouteMap = {
+                    "report_gl01": "GL01ListPage",
+                    "report_ar01": "AR01ListPage",
+                    "report_ar02": "AR02ListPage",
+                    "report_ar03": "AR03ListPage",
+                    "report_ap01": "AP01ListPage",
+                    "report_ap02": "AP02ListPage",
+                    "report_ap03": "AP03ListPage"
+                };
+                var sRouteName = mRouteMap[sPageKey];
+                if (sRouteName) {
+                    oController.getAppComponent().getRouter().navTo(sRouteName);
                 } else {
-                    this.showMessage("Preview page not found for " + sReportId);
+                    this.showMessage("Preview route not configured for " + sReportId);
                 }
             } else {
                 this.showMessage("Preview not available for " + sReportId);

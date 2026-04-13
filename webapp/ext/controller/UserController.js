@@ -8,7 +8,7 @@ sap.ui.define([
      * UserController - Handles user session data loading and management
      * Loads current user info from UserSession OData entity
      */
-    return BaseController.extend("cfa.customfioriapplication.ext.controller.UserController", {
+    return BaseController.extend("z.sap01.cfa.ext.controller.UserController", {
         
         /**
          * Initialize user session model on the controller's view

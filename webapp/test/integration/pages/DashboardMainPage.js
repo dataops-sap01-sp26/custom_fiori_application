@@ -7,7 +7,7 @@ sap.ui.define(['sap/fe/test/TemplatePage'], function(TemplatePage) {
     };
 
     return new TemplatePage(
-        'cfa.customfioriapplication::DashboardMainPage',
+        'z.sap01.cfa::DashboardMainPage',
         CustomPageDefinitions
     );
 });

@@ -25,7 +25,7 @@ sap.ui.define([
     /**
      * SubscriptionController - Handles Subscription CRUD operations
      */
-    return BaseController.extend("cfa.customfioriapplication.ext.controller.SubscriptionController", {
+    return BaseController.extend("z.sap01.cfa.ext.controller.SubscriptionController", {
         
         _oReportSelectDialog: null,
         

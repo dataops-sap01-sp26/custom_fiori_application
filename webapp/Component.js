@@ -3,7 +3,7 @@ sap.ui.define(
     function (Component) {
         "use strict";
 
-        return Component.extend("cfa.customfioriapplication.Component", {
+        return Component.extend("z.sap01.cfa.Component", {
             metadata: {
                 manifest: "json"
             }

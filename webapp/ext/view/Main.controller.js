@@ -20,7 +20,7 @@ sap.ui.define([
      * - CatalogController: Report catalog actions
      * - JobHistoryController: Chart loading/config
      */
-    return PageController.extend("cfa.customfioriapplication.ext.view.Main", {
+    return PageController.extend("z.sap01.cfa.ext.view.Main", {
 
         onInit: function () {
             PageController.prototype.onInit.apply(this, arguments);
@@ -156,11 +156,25 @@ sap.ui.define([
         onKpiTilePress: function (oEvent) {
             var sTargetPage = oEvent.getSource().data("targetPage");
             this._dashboardController.navigateToPage(this, sTargetPage);
+            
+            // Load data for target page after navigation
+            if (sTargetPage === "catalog") {
+                this._catalogController.initCatalog(this);
+            } else if (sTargetPage === "history") {
+                this._jobHistoryController.loadChartData(this);
+            }
         },
 
         onQuickActionPress: function (oEvent) {
             var sTargetPage = oEvent.getSource().data("targetPage");
             this._dashboardController.navigateToPage(this, sTargetPage);
+            
+            // Load data for target page after navigation
+            if (sTargetPage === "catalog") {
+                this._catalogController.initCatalog(this);
+            } else if (sTargetPage === "history") {
+                this._jobHistoryController.loadChartData(this);
+            }
         },
 
         onViewAllSubscriptions: function () {

@@ -9,7 +9,7 @@ sap.ui.define([
      * BaseController - Provides shared utility methods for domain controllers.
      * Domain controllers inherit from this class and receive the main controller reference.
      */
-    return BaseObject.extend("cfa.customfioriapplication.ext.controller.BaseController", {
+    return BaseObject.extend("z.sap01.cfa.ext.controller.BaseController", {
         
         /**
          * Display a toast message

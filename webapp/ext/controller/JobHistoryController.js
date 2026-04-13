@@ -7,7 +7,7 @@ sap.ui.define([
     /**
      * JobHistoryController - Handles Job History and Chart operations
      */
-    return BaseController.extend("cfa.customfioriapplication.ext.controller.JobHistoryController", {
+    return BaseController.extend("z.sap01.cfa.ext.controller.JobHistoryController", {
         
         _aHistoryData: [],
         

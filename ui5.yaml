@@ -2,8 +2,11 @@
 
 specVersion: "4.0"
 metadata:
-  name: cfa.customfioriapplication
+  name: z.sap01.cfa
 type: application
+framework:
+  name: OpenUI5
+  version: "1.146.0"
 server:
   customMiddleware:
     - name: fiori-tools-proxy

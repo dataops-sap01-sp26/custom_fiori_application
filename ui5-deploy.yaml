@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+
+specVersion: "4.0"
+metadata:
+  name: z.sap01.cfa
+type: application
+framework:
+  name: OpenUI5
+  version: "1.146.0"
+builder:
+  resources:
+    excludes:
+      - /test/**
+      - /localService/**
+  customTasks:
+    - name: deploy-to-abap
+      afterTask: generateCachebusterInfo
+      configuration:
+        target:
+          url: https://s40lp1.ucc.cit.tum.de:443
+          client: '324'
+        app:
+          name: Z_SAP01_CFA
+          description: Custom Fiori Application - DERS
+          package: ZPK_SP26_SAP01_DRS
+          transport: S40K917130
+        index: true
+        exclude:
+          - /test/

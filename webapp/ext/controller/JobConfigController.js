@@ -7,7 +7,7 @@ sap.ui.define([
     /**
      * JobConfigController - Handles Job Configuration CRUD operations
      */
-    return BaseController.extend("cfa.customfioriapplication.ext.controller.JobConfigController", {
+    return BaseController.extend("z.sap01.cfa.ext.controller.JobConfigController", {
         
         /**
          * Refresh the job config table by refreshing the model

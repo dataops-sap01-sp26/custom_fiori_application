@@ -10,7 +10,7 @@ sap.ui.define([
     /**
      * DashboardController - Handles dashboard data loading and KPI calculations
      */
-    return BaseController.extend("cfa.customfioriapplication.ext.controller.DashboardController", {
+    return BaseController.extend("z.sap01.cfa.ext.controller.DashboardController", {
         
         /**
          * Initialize dashboard model on the controller's view
