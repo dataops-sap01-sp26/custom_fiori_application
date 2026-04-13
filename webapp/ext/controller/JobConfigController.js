@@ -85,7 +85,7 @@ sap.ui.define([
 
             // Draft records → Discard action
             aDraftContexts.forEach(function (oContext) {
-                var sDiscardAction = oContext.getPath() + "/com.sap.gateway.srvd.zsd_drs_main_o4.v0001.Discard";
+                var sDiscardAction = oContext.getPath() + "/com.sap.gateway.srvd.zsd_drs_main.v0001.Discard";
                 var oDiscardOp = oModel.bindContext(sDiscardAction + "(...)");
                 aAllPromises.push(oDiscardOp.execute());
             });

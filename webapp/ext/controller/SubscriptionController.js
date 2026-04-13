@@ -9,7 +9,7 @@ sap.ui.define([
     "sap/ui/core/Item",
     "sap/m/MessageBox"
 ], function (BaseController, Dialog, Button, Select, VBox, Label, Text, Item, MessageBox) {
-    var ACTION_NS = "com.sap.gateway.srvd.zsd_drs_main_o4.v0001";
+    var ACTION_NS = "com.sap.gateway.srvd.zsd_drs_main.v0001";
     var REPORT_OPTIONS = [
         { key: "", text: "-- Select a Report --" },
         { key: "GL-01", text: "GL-01 - GL Account Balances" },

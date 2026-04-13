@@ -9,12 +9,12 @@
     <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Communication.xml">
         <edmx:Include Namespace="com.sap.vocabularies.Communication.v1" Alias="Communication"/>
     </edmx:Reference>
-    <edmx:Reference Uri="/sap/opu/odata4/sap/zui_drs_main_o4/srvd/sap/zsd_drs_main_o4/0001/$metadata">
-        <edmx:Include Namespace="com.sap.gateway.srvd.zsd_drs_main_o4.v0001" Alias="SAP__self"/>
+    <edmx:Reference Uri="/sap/opu/odata4/sap/zui_drs_main_o4/srvd/sap/zsd_drs_main/0001/$metadata">
+        <edmx:Include Namespace="com.sap.gateway.srvd.zsd_drs_main.v0001" Alias="SAP__self"/>
     </edmx:Reference>
     <edmx:DataServices>
         <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="local">
-            <Annotations Target="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsJobConfigType">
+            <Annotations Target="com.sap.gateway.srvd.zsd_drs_main.v0001.DrsJobConfigType">
                 <!-- ═══ LINE ITEM: Columns ═══ -->
                 <Annotation Term="UI.LineItem">
                     <Collection>
@@ -55,17 +55,17 @@
                         </Record>
                         <!-- ═══ ACTION BUTTONS trên Toolbar ═══ -->
                         <Record Type="UI.DataFieldForAction">
-                            <PropertyValue Property="Action" String="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.scheduleJob"/>
+                            <PropertyValue Property="Action" String="com.sap.gateway.srvd.zsd_drs_main.v0001.scheduleJob"/>
                             <PropertyValue Property="Label" String="Schedule Job"/>
                             <PropertyValue Property="InvocationGrouping" EnumMember="UI.OperationGroupingType/Isolated"/>
                         </Record>
                         <Record Type="UI.DataFieldForAction">
-                            <PropertyValue Property="Action" String="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.cancelJob"/>
+                            <PropertyValue Property="Action" String="com.sap.gateway.srvd.zsd_drs_main.v0001.cancelJob"/>
                             <PropertyValue Property="Label" String="Cancel Job"/>
                             <PropertyValue Property="InvocationGrouping" EnumMember="UI.OperationGroupingType/Isolated"/>
                         </Record>
                         <Record Type="UI.DataFieldForAction">
-                            <PropertyValue Property="Action" String="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.refreshStatus"/>
+                            <PropertyValue Property="Action" String="com.sap.gateway.srvd.zsd_drs_main.v0001.refreshStatus"/>
                             <PropertyValue Property="Label" String="Refresh Status"/>
                             <PropertyValue Property="InvocationGrouping" EnumMember="UI.OperationGroupingType/Isolated"/>
                         </Record>
@@ -312,7 +312,7 @@
                 </Annotation>
             </Annotations>
 
-            <Annotations Target="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.JobHistoryAnalyticsType">
+            <Annotations Target="com.sap.gateway.srvd.zsd_drs_main.v0001.JobHistoryAnalyticsType">
                 <!-- ═══ LINE ITEM: Columns ═══ -->
                 <Annotation Term="UI.LineItem">
                     <Collection>
@@ -594,7 +594,7 @@
         <!-- ═══════════════════════════════════════════════════════
              DRS FILE — My Exports / Report Files
         ════════════════════════════════════════════════════════ -->
-        <Annotations Target="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsFileType">
+        <Annotations Target="com.sap.gateway.srvd.zsd_drs_main.v0001.DrsFileType">
 
             <!-- ═══ LINE ITEM: Cột hiển thị trên bảng My Exports ═══ -->
             <Annotation Term="UI.LineItem">
@@ -714,7 +714,7 @@
         <!-- ═══════════════════════════════════════════════════════════════════════════ -->
         <!-- SUBSCRIPTION ENTITY: DrsSubscriptionType                                    -->
         <!-- ═══════════════════════════════════════════════════════════════════════════ -->
-        <Annotations Target="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsSubscriptionType">
+        <Annotations Target="com.sap.gateway.srvd.zsd_drs_main.v0001.DrsSubscriptionType">
             <!-- ═══ LINE ITEM: Columns cho Subscription Table ═══ -->
             <Annotation Term="UI.LineItem">
                 <Collection>
@@ -787,7 +787,7 @@
         <!-- ═══════════════════════════════════════════════════════════════════════ -->
         <!-- REPORT CATALOG ENTITY: ReportCatalogType                                -->
         <!-- ═══════════════════════════════════════════════════════════════════════ -->
-        <Annotations Target="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.ReportCatalogType">
+        <Annotations Target="com.sap.gateway.srvd.zsd_drs_main.v0001.ReportCatalogType">
             
             <!-- ═══ HEADER INFO ═══ -->
             <Annotation Term="UI.HeaderInfo">
