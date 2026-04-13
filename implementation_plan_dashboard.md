@@ -9,8 +9,8 @@ Transform the empty dashboard into a fully functional overview page with KPIs, q
 ┌──────────────────────────────────────────────────────────────┐
 │  Dashboard Overview                                          │
 ├──────────────────────────────────────────────────────────────┤
-│  SECTION 1: KPI Tiles (5 GenericTiles)                       │
-│  [Reports] [Total Subscr] [Active Subscr] [Running] [Failed] │
+│  SECTION 1: KPI Tiles (7 GenericTiles)                       │
+│  [Reports] [Total Subscr] [Active Subscr] [Scheduled] [Failed] [Finished] [Cancelled] │
 ├──────────────────────────────────────────────────────────────┤
 │  SECTION 2: Quick Actions (5 Navigation Tiles)               │
 │  [Browse Reports] [My Subscr] [Job Monitor] [History] [Files]│
@@ -50,6 +50,8 @@ Transform the empty dashboard into a fully functional overview page with KPIs, q
     activeSubscriptions: 0,
     scheduledJobs: 0,      // ← "Scheduled" (BTCSTATUS domain: 'S')
     failedJobs: 0,         // ← "Aborted" (BTCSTATUS domain: 'A')
+    finishedJobs: 0,       // ← "Finished" (BTCSTATUS domain: 'F')
+    cancelledJobs: 0,      // ← "Cancelled" (BTCSTATUS domain: 'C')
     
     // Chart Data
     chartData: [],
@@ -72,6 +74,8 @@ Transform the empty dashboard into a fully functional overview page with KPIs, q
 | Active Subscriptions | `DrsSubscription` | `$filter=Status eq 'A'` ← single char domain |
 | Scheduled Jobs | `DrsJobConfig` | `$filter=JobStatus eq 'S'` ← BTCSTATUS: S=Scheduled |
 | Aborted Jobs (Failed) | `DrsJobConfig` | `$filter=JobStatus eq 'A'` ← BTCSTATUS: A=Aborted |
+| Finished Jobs | `DrsJobConfig` | `$filter=JobStatus eq 'F'` ← BTCSTATUS: F=Finished |
+| Cancelled Jobs | `DrsJobConfig` | `$filter=JobStatus eq 'C'` ← BTCSTATUS: C=Cancelled |
 | Chart Data | `JobHistoryAnalytics` | `$orderby=JobDate desc`, top 100 |
 | Recent Subscriptions | `DrsSubscription` | `$orderby=CreatedAt desc`, top 5 |
 | Recent Jobs | `DrsJobConfig` | `$orderby=CreatedAt desc`, top 5 |
@@ -106,6 +110,8 @@ totalSubscriptions=Total Subscriptions
 activeSubscriptions=Active Subscriptions
 scheduledJobs=Scheduled Jobs    ← tên đúng (không phải runningJobs)
 failedJobs=Failed Jobs
+finishedJobs=Finished Jobs
+cancelJobs=Cancelled Jobs
 
 # Quick Action Tiles
 browseReports=Browse Reports
@@ -162,6 +168,8 @@ sap.ui.define([
                 activeSubscriptions: 0,
                 scheduledJobs: 0,      // ← "Scheduled" không phải "running"
                 failedJobs: 0,         // ← "Aborted" (JobStatus='A')
+                finishedJobs: 0,       // ← Finished (JobStatus='F')
+                cancelledJobs: 0,      // ← Cancelled (JobStatus='C')
                 chartData: [],
                 recentSubscriptions: [],
                 recentJobs: [],
@@ -190,6 +198,8 @@ sap.ui.define([
                 oDashboard.setProperty("/activeSubscriptions", aResults[1].active);
                 oDashboard.setProperty("/scheduledJobs", aResults[2].scheduled);  // ← scheduled
                 oDashboard.setProperty("/failedJobs", aResults[2].failed);
+                oDashboard.setProperty("/finishedJobs", aResults[2].finished);
+                oDashboard.setProperty("/cancelledJobs", aResults[2].cancelled);
                 oDashboard.setProperty("/chartData", aResults[3]);
                 oDashboard.setProperty("/recentSubscriptions", aResults[4]);
                 oDashboard.setProperty("/recentJobs", aResults[5]);
@@ -228,14 +238,25 @@ sap.ui.define([
                     [new Filter("JobStatus", FilterOperator.EQ, "S")]);  // ← 'S' không phải '2'
                 var oAbortedBinding = oModel.bindList("/DrsJobConfig", undefined, undefined,
                     [new Filter("JobStatus", FilterOperator.EQ, "A")]);  // ← 'A' không phải '4'
+                var oFinishedBinding = oModel.bindList("/DrsJobConfig", undefined, undefined,
+                    [new Filter("JobStatus", FilterOperator.EQ, "F")]);
+                var oCancelledBinding = oModel.bindList("/DrsJobConfig", undefined, undefined,
+                    [new Filter("JobStatus", FilterOperator.EQ, "C")]);
                 
                 Promise.all([
                     oScheduledBinding.requestContexts(0, 999),
-                    oAbortedBinding.requestContexts(0, 999)
+                    oAbortedBinding.requestContexts(0, 999),
+                    oFinishedBinding.requestContexts(0, 999),
+                    oCancelledBinding.requestContexts(0, 999)
                 ]).then(function (aResults) {
-                    resolve({ scheduled: aResults[0].length, failed: aResults[1].length });
+                    resolve({
+                        scheduled: aResults[0].length,
+                        failed: aResults[1].length,
+                        finished: aResults[2].length,
+                        cancelled: aResults[3].length
+                    });
                 }).catch(function () {
-                    resolve({ scheduled: 0, failed: 0 });
+                    resolve({ scheduled: 0, failed: 0, finished: 0, cancelled: 0 });
                 });
             });
         },
@@ -684,6 +705,15 @@ Add to `css/style.css`:
     border-radius: 4px;
 }
 ```
+
+---
+
+## 9. Cập nhật: KPI Finished & Cancelled (2026-04)
+
+- **System Overview** tăng từ 5 lên **7** tile KPI: thêm **Finished Jobs** (`JobStatus eq 'F'`) và **Cancelled Jobs** (`JobStatus eq 'C'`) trên entity `DrsJobConfig`, cùng pattern filter với Scheduled/Failed.
+- **i18n:** `finishedJobs`, `cancelJobs` (UI: "Cancelled Jobs").
+- **Điều hướng:** cả hai tile mới bấm vào mở **`jobconfigs`** (giống Scheduled Jobs) để xem danh sách cấu hình job; người dùng lọc theo status trên list nếu cần.
+- **File đã sửa:** `ext/view/Main.view.xml`, `ext/controller/DashboardController.js`, `i18n/i18n.properties`.
 
 ---
 

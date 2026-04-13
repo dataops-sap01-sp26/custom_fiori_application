@@ -23,6 +23,8 @@ sap.ui.define([
                 activeSubscriptions: 0,
                 scheduledJobs: 0,
                 failedJobs: 0,
+                finishedJobs: 0,
+                cancelledJobs: 0,
                 chartData: [],
                 recentSubscriptions: [],
                 recentJobs: [],
@@ -56,6 +58,8 @@ sap.ui.define([
                 oDashboard.setProperty("/activeSubscriptions", aResults[1].active);
                 oDashboard.setProperty("/scheduledJobs", aResults[2].scheduled);
                 oDashboard.setProperty("/failedJobs", aResults[2].failed);
+                oDashboard.setProperty("/finishedJobs", aResults[2].finished);
+                oDashboard.setProperty("/cancelledJobs", aResults[2].cancelled);
                 oDashboard.setProperty("/chartData", aResults[3]);
                 oDashboard.setProperty("/recentSubscriptions", aResults[4]);
                 oDashboard.setProperty("/recentJobs", aResults[5]);
@@ -139,7 +143,7 @@ sap.ui.define([
         },
         
         /**
-         * Load job counts (running and failed)
+         * Load job counts by DrsJobConfig.JobStatus (BTCSTATUS: S, F, C, A, …)
          * @private
          */
         _loadJobCounts: function (oModel) {
@@ -149,17 +153,25 @@ sap.ui.define([
                     [new Filter("JobStatus", FilterOperator.EQ, "S")]);
                 var oFailedBinding = oModel.bindList("/DrsJobConfig", undefined, undefined,
                     [new Filter("JobStatus", FilterOperator.EQ, "A")]);
+                var oFinishedBinding = oModel.bindList("/DrsJobConfig", undefined, undefined,
+                    [new Filter("JobStatus", FilterOperator.EQ, "F")]);
+                var oCancelledBinding = oModel.bindList("/DrsJobConfig", undefined, undefined,
+                    [new Filter("JobStatus", FilterOperator.EQ, "C")]);
                 
                 Promise.all([
                     oScheduledBinding.requestContexts(0, 999),
-                    oFailedBinding.requestContexts(0, 999)
+                    oFailedBinding.requestContexts(0, 999),
+                    oFinishedBinding.requestContexts(0, 999),
+                    oCancelledBinding.requestContexts(0, 999)
                 ]).then(function (aResults) {
                     resolve({
                         scheduled: aResults[0].length,
-                        failed: aResults[1].length
+                        failed: aResults[1].length,
+                        finished: aResults[2].length,
+                        cancelled: aResults[3].length
                     });
                 }).catch(function () {
-                    resolve({ scheduled: 0, failed: 0 });
+                    resolve({ scheduled: 0, failed: 0, finished: 0, cancelled: 0 });
                 });
             });
         },

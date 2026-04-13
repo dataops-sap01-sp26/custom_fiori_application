@@ -104,7 +104,7 @@ Main.view.xml ảnh hưởng: Layout menu, vị trí các control UI
 **Mục đích:** `Main.controller.js` đóng vai trò **orchestration** — chỉ nhận event từ view và delegate ngay sang domain controller tương ứng. Toàn bộ business logic nằm trong các domain controller chuyên biệt.
 
 **Domain Controllers hiện có:**
-- `DashboardController.js` — Dashboard KPIs, chart, recent data, navigate (gồm `router.navTo` cho exports/reports)
+- `DashboardController.js` — Dashboard KPIs (trong đó **System Overview** có 7 tile: Reports, Subscriptions tổng/chạy, Scheduled / Failed / **Finished** / **Cancelled** jobs), chart, recent data, navigate (gồm `router.navTo` cho exports/reports)
 - `JobConfigController.js` — Job Config CRUD (Create/Delete)
 - `SubscriptionController.js` — Subscription CRUD + dialog chọn Report
 - `CatalogController.js` — Report Catalog: load tiles, ActionSheet

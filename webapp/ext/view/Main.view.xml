@@ -167,6 +167,40 @@
                                                 valueColor="{= ${dashboard>/failedJobs} > 0 ? 'Error' : 'Neutral'}"/>
                                         </TileContent>
                                     </GenericTile>
+                                    
+                                    <!-- Finished Jobs (JobStatus F) -->
+                                    <GenericTile
+                                        id="tileFinishedJobs"
+                                        class="drsKpiTile"
+                                        header="{i18n>finishedJobs}"
+                                        press=".onKpiTilePress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="jobconfigs"/>
+                                        </customData>
+                                        <TileContent>
+                                            <NumericContent
+                                                value="{dashboard>/finishedJobs}"
+                                                icon="sap-icon://accept"
+                                                valueColor="{= ${dashboard>/finishedJobs} > 0 ? 'Good' : 'Neutral'}"/>
+                                        </TileContent>
+                                    </GenericTile>
+                                    
+                                    <!-- Cancelled Jobs (JobStatus C) -->
+                                    <GenericTile
+                                        id="tileCancelJobs"
+                                        class="drsKpiTile"
+                                        header="{i18n>cancelJobs}"
+                                        press=".onKpiTilePress">
+                                        <customData>
+                                            <core:CustomData key="targetPage" value="jobconfigs"/>
+                                        </customData>
+                                        <TileContent>
+                                            <NumericContent
+                                                value="{dashboard>/cancelledJobs}"
+                                                icon="sap-icon://cancel"
+                                                valueColor="Neutral"/>
+                                        </TileContent>
+                                    </GenericTile>
                                 </HBox>
                             </VBox>
                             
