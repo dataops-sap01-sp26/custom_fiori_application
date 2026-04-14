@@ -4,7 +4,7 @@
     "generatorPlatform": "Visual Studio Code",
     "serviceType": "SAP System (ABAP On-Premise)",
     "metadataFilename": "",
-    "serviceUrl": "https://s40lp1.ucc.cit.tum.de/sap/opu/odata4/sap/zui_drs_main_o4/srvd/sap/zsd_drs_main_o4/0001/",
+    "serviceUrl": "https://s40lp1.ucc.cit.tum.de/sap/opu/odata4/sap/zui_drs_main_o4/srvd/sap/zsd_drs_main/0001/",
     "appName": "customfioriapplication",
     "appTitle": "Custom Fiori Application",
     "appDescription": "An SAP Fiori application.",
