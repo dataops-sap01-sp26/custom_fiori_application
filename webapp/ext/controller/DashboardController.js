@@ -262,22 +262,6 @@ sap.ui.define([
          * @param {string} sKey - Page key (catalog, subscriptions, etc.)
          */
         navigateToPage: function (oController, sKey) {
-            var mReportRoutes = {
-                "exports":     "ExportsListPage",
-                "report_ap01": "AP01ListPage",
-                "report_ap02": "AP02ListPage",
-                "report_ap03": "AP03ListPage",
-                "report_ar01": "AR01ListPage",
-                "report_ar02": "AR02ListPage",
-                "report_ar03": "AR03ListPage",
-                "report_gl01": "GL01ListPage"
-            };
-
-            if (mReportRoutes[sKey]) {
-                oController.getAppComponent().getRouter().navTo(mReportRoutes[sKey]);
-                return;
-            }
-
             var oNavContainer = oController.byId("pageContainer");
             var oPage = oController.byId(sKey);
 

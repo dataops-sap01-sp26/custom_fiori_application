@@ -15,6 +15,10 @@
     <edmx:DataServices>
         <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="local">
             <Annotations Target="com.sap.gateway.srvd.zsd_drs_main.v0001.DrsJobConfigType">
+                <!-- Hide framework-generated Create/Delete buttons (custom actions in Main.view.xml) -->
+                <Annotation Term="UI.CreateHidden" Bool="true"/>
+                <Annotation Term="UI.DeleteHidden" Bool="true"/>
+
                 <!-- ═══ LINE ITEM: Columns ═══ -->
                 <Annotation Term="UI.LineItem">
                     <Collection>
@@ -724,6 +728,10 @@
         <!-- SUBSCRIPTION ENTITY: DrsSubscriptionType                                    -->
         <!-- ═══════════════════════════════════════════════════════════════════════════ -->
         <Annotations Target="com.sap.gateway.srvd.zsd_drs_main.v0001.DrsSubscriptionType">
+            <!-- Hide framework-generated Create/Delete buttons (custom actions in Main.view.xml) -->
+            <Annotation Term="UI.CreateHidden" Bool="true"/>
+            <Annotation Term="UI.DeleteHidden" Bool="true"/>
+
             <!-- ═══ LINE ITEM: Columns cho Subscription Table ═══ -->
             <Annotation Term="UI.LineItem">
                 <Collection>
@@ -932,6 +940,63 @@
                 </Record>
             </Annotation>
             
+        </Annotations>
+
+        <!-- ═══════════════════════════════════════════════════════════════════════ -->
+        <!-- GL-01: GL ACCOUNT BALANCES                                              -->
+        <!-- ═══════════════════════════════════════════════════════════════════════ -->
+        <Annotations Target="com.sap.gateway.srvd.zsd_drs_main.v0001.GLAccountBalancesType">
+
+            <Annotation Term="UI.LineItem">
+                <Collection>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="CompanyCode"/>
+                        <PropertyValue Property="Label" String="Company Code"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="GLAccount"/>
+                        <PropertyValue Property="Label" String="GL Account"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="GLAccountName"/>
+                        <PropertyValue Property="Label" String="Account Name"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="FiscalYear"/>
+                        <PropertyValue Property="Label" String="Fiscal Year"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="Period"/>
+                        <PropertyValue Property="Label" String="Period"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="DebitAmount"/>
+                        <PropertyValue Property="Label" String="Debit Amount"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="CreditAmount"/>
+                        <PropertyValue Property="Label" String="Credit Amount"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="BalanceAmount"/>
+                        <PropertyValue Property="Label" String="Balance"/>
+                    </Record>
+                    <Record Type="UI.DataField">
+                        <PropertyValue Property="Value" Path="LocalCurrency"/>
+                        <PropertyValue Property="Label" String="Currency"/>
+                    </Record>
+                </Collection>
+            </Annotation>
+
+            <Annotation Term="UI.SelectionFields">
+                <Collection>
+                    <PropertyPath>CompanyCode</PropertyPath>
+                    <PropertyPath>GLAccount</PropertyPath>
+                    <PropertyPath>FiscalYear</PropertyPath>
+                    <PropertyPath>Period</PropertyPath>
+                </Collection>
+            </Annotation>
+
         </Annotations>
 
         </Schema>

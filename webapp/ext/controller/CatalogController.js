@@ -256,27 +256,24 @@ sap.ui.define([
         },
 
         /**
-         * Navigate to report preview page via router
+         * Navigate to report preview page via NavContainer
          */
         _navigateToPreview: function (oController, sReportId) {
             var sPageKey = REPORT_PAGE_MAP[sReportId];
             
             if (sPageKey) {
-                // Report pages are router targets, use router.navTo
-                var mRouteMap = {
-                    "report_gl01": "GL01ListPage",
-                    "report_ar01": "AR01ListPage",
-                    "report_ar02": "AR02ListPage",
-                    "report_ar03": "AR03ListPage",
-                    "report_ap01": "AP01ListPage",
-                    "report_ap02": "AP02ListPage",
-                    "report_ap03": "AP03ListPage"
-                };
-                var sRouteName = mRouteMap[sPageKey];
-                if (sRouteName) {
-                    oController.getAppComponent().getRouter().navTo(sRouteName);
+                var oNavContainer = oController.byId("pageContainer");
+                var oPage = oController.byId(sPageKey);
+                
+                if (oNavContainer && oPage) {
+                    oNavContainer.to(oPage);
+                    
+                    var oSideNav = oController.byId("sideNavigation");
+                    if (oSideNav) {
+                        oSideNav.setSelectedKey(sPageKey);
+                    }
                 } else {
-                    this.showMessage("Preview route not configured for " + sReportId);
+                    this.showMessage("Preview page not found for " + sReportId);
                 }
             } else {
                 this.showMessage("Preview not available for " + sReportId);

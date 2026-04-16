@@ -120,23 +120,7 @@ sap.ui.define([
 
             if (!sKey) { return; }
 
-            // Report/export pages are proper router targets — navigate via router
-            var mReportRoutes = {
-                "exports":     "ExportsListPage",
-                "report_ap01": "AP01ListPage",
-                "report_ap02": "AP02ListPage",
-                "report_ap03": "AP03ListPage",
-                "report_ar01": "AR01ListPage",
-                "report_ar02": "AR02ListPage",
-                "report_ar03": "AR03ListPage",
-                "report_gl01": "GL01ListPage"
-            };
-
-            if (mReportRoutes[sKey]) {
-                this.getAppComponent().getRouter().navTo(mReportRoutes[sKey]);
-                return;
-            }
-
+            // All pages are inside NavContainer with inline macros
             this.byId("pageContainer").to(this.byId(sKey));
 
             // Load data based on target page

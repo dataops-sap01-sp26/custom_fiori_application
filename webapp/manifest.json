@@ -133,14 +133,6 @@
           "pattern": ":?query:",
           "target": "DashboardMainPage"
         },
-        { "name": "ExportsListPage", "pattern": "DrsFile:?query:",                   "target": "ExportsListPage" },
-        { "name": "AP01ListPage",    "pattern": "AP01_VendorOpenItems:?query:",       "target": "AP01ListPage" },
-        { "name": "AP02ListPage",    "pattern": "AP02_VendorBalances:?query:",        "target": "AP02ListPage" },
-        { "name": "AP03ListPage",    "pattern": "AP03_APAgingReport:?query:",         "target": "AP03ListPage" },
-        { "name": "AR01ListPage",    "pattern": "AR01_CustomerOpenItems:?query:",     "target": "AR01ListPage" },
-        { "name": "AR02ListPage",    "pattern": "AR02_CustomerBalances:?query:",      "target": "AR02ListPage" },
-        { "name": "AR03ListPage",    "pattern": "AR03_ARAgingReport:?query:",         "target": "AR03ListPage" },
-        { "name": "GL01ListPage",    "pattern": "GL01_GLAccountBalances:?query:",     "target": "GL01ListPage" },
         {
           "name": "DrsJobConfigObjectPage",
           "pattern": "DrsJobConfig({JobUuid}):?query:",
@@ -370,111 +362,8 @@
               "editableHeaderContent": false
             }
           }
-        },
-        "ExportsListPage": {
-          "type": "Component",
-          "id": "ExportsListPage",
-          "name": "sap.fe.templates.ListReport",
-          "options": {
-            "settings": {
-              "contextPath": "/DrsFile",
-              "navigation": {
-                "DrsFile": { "detail": { "route": "DrsFileObjectPage" } }
-              }
-            }
-          }
-        },
-        "AP01ListPage": {
-          "type": "Component",
-          "id": "AP01ListPage",
-          "name": "sap.fe.templates.ListReport",
-          "options": {
-            "settings": {
-              "contextPath": "/AP01_VendorOpenItems",
-              "navigation": {
-                "AP01_VendorOpenItems": { "detail": { "route": "AP01ObjectPage" } }
-              }
-            }
-          }
-        },
-        "AP02ListPage": {
-          "type": "Component",
-          "id": "AP02ListPage",
-          "name": "sap.fe.templates.ListReport",
-          "options": {
-            "settings": {
-              "contextPath": "/AP02_VendorBalances",
-              "navigation": {
-                "AP02_VendorBalances": { "detail": { "route": "AP02ObjectPage" } }
-              }
-            }
-          }
-        },
-        "AP03ListPage": {
-          "type": "Component",
-          "id": "AP03ListPage",
-          "name": "sap.fe.templates.ListReport",
-          "options": {
-            "settings": {
-              "contextPath": "/AP03_APAgingReport",
-              "navigation": {
-                "AP03_APAgingReport": { "detail": { "route": "AP03ObjectPage" } }
-              }
-            }
-          }
-        },
-        "AR01ListPage": {
-          "type": "Component",
-          "id": "AR01ListPage",
-          "name": "sap.fe.templates.ListReport",
-          "options": {
-            "settings": {
-              "contextPath": "/AR01_CustomerOpenItems",
-              "navigation": {
-                "AR01_CustomerOpenItems": { "detail": { "route": "AR01ObjectPage" } }
-              }
-            }
-          }
-        },
-        "AR02ListPage": {
-          "type": "Component",
-          "id": "AR02ListPage",
-          "name": "sap.fe.templates.ListReport",
-          "options": {
-            "settings": {
-              "contextPath": "/AR02_CustomerBalances",
-              "navigation": {
-                "AR02_CustomerBalances": { "detail": { "route": "AR02ObjectPage" } }
-              }
-            }
-          }
-        },
-        "AR03ListPage": {
-          "type": "Component",
-          "id": "AR03ListPage",
-          "name": "sap.fe.templates.ListReport",
-          "options": {
-            "settings": {
-              "contextPath": "/AR03_ARAgingReport",
-              "navigation": {
-                "AR03_ARAgingReport": { "detail": { "route": "AR03ObjectPage" } }
-              }
-            }
-          }
-        },
-        "GL01ListPage": {
-          "type": "Component",
-          "id": "GL01ListPage",
-          "name": "sap.fe.templates.ListReport",
-          "options": {
-            "settings": {
-              "contextPath": "/GL01_GLAccountBalances",
-              "navigation": {
-                "GL01_GLAccountBalances": { "detail": { "route": "GL01ObjectPage" } }
-              }
-            }
-          }
         }
+
       }
     }
   },
