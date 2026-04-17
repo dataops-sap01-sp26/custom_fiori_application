@@ -12,7 +12,6 @@
                 <Button id="sideNavigationToggleButton" icon="sap-icon://menu2" type="Transparent" press=".onMenuButtonPress" />
                 <Title text="SAP Job Operations Dashboard" />
                 <ToolbarSpacer />
-                <Button icon="sap-icon://bell" type="Transparent" tooltip="Notifications" />
                 <Button id="userMenuButton" icon="sap-icon://customer" type="Transparent" tooltip="User Profile" press=".onUserMenuPress" />
             </tnt:ToolHeader>
         </tnt:header>
@@ -53,13 +52,6 @@
                         <tnt:NavigationListItem text="Report GL-01" icon="sap-icon://accounting-document-verification" key="report_gl01" />
                     </tnt:NavigationListItem>
                 </tnt:NavigationList>
-                
-                <!-- Fixed Bottom Item -->
-                <tnt:fixedItem>
-                    <tnt:NavigationList>
-                        <tnt:NavigationListItem text="Settings &amp; Parameters" icon="sap-icon://settings" key="settings" />
-                    </tnt:NavigationList>
-                </tnt:fixedItem>
             </tnt:SideNavigation>
         </tnt:sideContent>
         
@@ -663,10 +655,6 @@
                                 growingThreshold="20">
                             </macros:Table>
                         </VBox>
-                    </ScrollContainer>
-
-                    <ScrollContainer id="settings" horizontal="false" vertical="true">
-                        <Title text="System Configuration &amp; Value Helps" class="sapUiMediumMargin"/>
                     </ScrollContainer>
                 </pages>
             </NavContainer>
