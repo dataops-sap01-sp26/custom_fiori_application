@@ -1,4 +1,4 @@
-# Tài liệu Triển khai: Job Configurations Dashboard
+﻿# Tài liệu Triển khai: Job Configurations Dashboard
 
 Tài liệu này ghi nhận lại toàn bộ quá trình thiết kế và mã hóa (implementation) để nhúng module **Job Configurations** vào Fiori Custom Dashboard, đảm bảo từ danh sách tĩnh chuyển thành giao diện read-only và cho phép drill-down vào trang chi tiết (Object Page) theo đúng chuẩn UI/UX từ backend.
 
@@ -215,7 +215,7 @@ _refreshJobConfigTable: function () {
 
 ### Khoản 3.1 - Các cột và Bộ Lọc (Table & FilterBar)
 *   **`@UI.LineItem`**: Thiết lập 8 cột hiển thị `JobId`, `JobText`, `RunType`, `SubscrId`, `JobName`, `JobStatus` (kèm Criticality sinh badge màu), `JobStatusText`, `CreatedAt`. Kèm theo 3 Action Buttons là **Schedule**, **Cancel** và **Refresh Status**.
-*   **`@UI.SelectionFields`**: Mở 5 filter parameters tại SmartFilterBar bao gồm `JobDate`, `CreatedBy`, `SubscrId`, `JobId`, `JobStatus`.
+*   **`@UI.SelectionFields`**: Mở 5 filter parameters tại SmartFilterBar bao gồm `ScheduledStartDate`, `CreatedBy`, `SubscrId`, `JobId`, `JobStatus`.
 
 ### Khoản 3.2 - Trang Chi Tiết (Object Page UX)
 Để Fiori Render được giao diện chi tiết đẹp khi User click vào record, chúng ta bổ sung các annotations:
@@ -242,3 +242,4 @@ Thông qua sự kết hợp của 5 elements:
 5. **Domain Controller Pattern** — Logic CRUD nằm trong `JobConfigController.js` riêng; `Main.controller.js` chỉ delegate. Action namespace `com.sap.gateway.srvd.zsd_drs_main_o4.v0001` được inline trực tiếp (không còn dùng `constants.js`).
 
 Chúng ta hoàn tất module **Job Configurations** đảm bảo ba trải nghiệm: List view nhanh chóng với xuất khẩu/lọc/phân trang; Detail view (Object Page) chuyên nghiệp; và CRUD operations (Create/Delete) hoạt động mượt mà với phản hồi UI tức thời — tất cả trên nền tảng Custom FPM Dashboard thay vì ListReport truyền thống.
+

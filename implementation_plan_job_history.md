@@ -1,4 +1,4 @@
-# Tài liệu Triển khai: Job History Analytics Dashboard
+﻿# Tài liệu Triển khai: Job History Analytics Dashboard
 
 Tài liệu này ghi nhận lại **toàn bộ quá trình thiết kế, triển khai và xử lý sự cố** của module **Job History & Logs** trên Fiori Custom Dashboard. Bao gồm: FilterBar, bảng danh sách (Table), biểu đồ thống kê (Chart), điều hướng Object Page và toàn bộ Annotations. Tài liệu giải thích rõ **tại sao** từng quyết định kỹ thuật được đưa ra, đặc biệt là những vấn đề phát sinh trong quá trình triển khai.
 
@@ -107,7 +107,7 @@ Do sử dụng `sap.viz` controls, cần bổ sung 3 namespace vào thẻ root `
     search=".onJobHistoryFilterSearch"/>
 ```
 
-- `metaPath` trỏ tới `UI.SelectionFields` annotation trong `annotation.xml` — FPM tự render đúng các field filter (`JobDate`, `CreatedBy`, `SubscrId`, `ReportId`, `JobId`, `JobStatus`).
+- `metaPath` trỏ tới `UI.SelectionFields` annotation trong `annotation.xml` — FPM tự render đúng các field filter (`ExecutionDate`, `CreatedBy`, `SubscrId`, `ReportId`, `JobId`, `JobStatus`).
 - `liveMode="false"` → user phải nhấn **"Go"** để trigger tìm kiếm (không tự tìm khi gõ).
 - `search=".onJobHistoryFilterSearch"` → **khi user nhấn "Go", controller được gọi để reload biểu đồ theo filter mới**. Đây là điểm khác so với `jobConfigFilterBar` (không cần reload chart).
 
@@ -123,7 +123,7 @@ Do sử dụng `sap.viz` controls, cần bổ sung 3 namespace vào thẻ root `
         <viz:dataset>
             <viz.data:FlattenedDataset data="{chartModel>/chartData}">
                 <viz.data:dimensions>
-                    <viz.data:DimensionDefinition name="Date"   value="{chartModel>JobDate}"/>
+                    <viz.data:DimensionDefinition name="Date"   value="{chartModel>ExecutionDate}"/>
                     <viz.data:DimensionDefinition name="Status" value="{chartModel>JobStatus}"/>
                 </viz.data:dimensions>
                 <viz.data:measures>
@@ -294,7 +294,7 @@ sap.ui.define([
             oVizFrame.setVizProperties({
                 plotArea: { dataLabel: { visible: false } },
                 valueAxis: { title: { visible: true, text: "Execution Count" } },
-                categoryAxis: { title: { visible: true, text: "Job Date" } },
+                categoryAxis: { title: { visible: true, text: "Execution Date" } },
                 title: { visible: false },
                 legend: { visible: true, title: { visible: true, text: "Job Status" } }
             });
@@ -311,7 +311,7 @@ sap.ui.define([
             
             var oModel = oController.getView().getModel();
             var oBinding = oModel.bindList("/JobHistoryAnalytics", undefined, undefined, undefined, {
-                $orderby: "JobDate desc"
+                $orderby: "ExecutionDate desc"
             });
             
             oBinding.requestContexts(0, 999).then(function (aContexts) {
@@ -324,25 +324,25 @@ sap.ui.define([
         },
         
         /**
-         * Aggregate data: group by (JobDate + JobStatus), sum JobCountTotal
+         * Aggregate data: group by (ExecutionDate + JobStatus), sum JobCountTotal
          * Kết quả set vào chartModel → VizFrame tự cập nhật
          */
         _aggregateChartData: function (oController, aData) {
             var mAggregated = {};
             
             aData.forEach(function (oItem) {
-                var sDate   = oItem.JobDate   || "";
+                var sDate   = oItem.ExecutionDate   || "";
                 var sStatus = oItem.JobStatus || "Unknown";
                 var sKey    = sDate + "|" + sStatus;
                 
                 if (!mAggregated[sKey]) {
-                    mAggregated[sKey] = { JobDate: sDate, JobStatus: sStatus, JobCountTotal: 0 };
+                    mAggregated[sKey] = { ExecutionDate: sDate, JobStatus: sStatus, JobCountTotal: 0 };
                 }
                 mAggregated[sKey].JobCountTotal += (oItem.JobCountTotal || 1);
             });
             
             var aChartData = Object.values(mAggregated).sort(function (a, b) {
-                return a.JobDate.localeCompare(b.JobDate);
+                return a.ExecutionDate.localeCompare(b.ExecutionDate);
             });
             
             oController.getView().getModel("chartModel").setProperty("/chartData", aChartData);
@@ -400,7 +400,7 @@ onJobHistoryFilterSearch: function () {
 
 | Cột | Field | Ghi chú |
 |---|---|---|
-| Job Date | `JobDate` | Ngày chạy job |
+| Execution Date | `ExecutionDate` | Ngày chạy job |
 | Report ID | `ReportId` | Mã báo cáo |
 | Job Description | `JobText` | Mô tả job |
 | Job Name | `JobName` | Tên kỹ thuật của job SAP |
@@ -419,7 +419,7 @@ onJobHistoryFilterSearch: function () {
 **`UI.SelectionFields`** — Các trường filter trên `macros:FilterBar`:
 
 ```xml
-<PropertyPath>JobDate</PropertyPath>
+<PropertyPath>ExecutionDate</PropertyPath>
 <PropertyPath>CreatedBy</PropertyPath>
 <PropertyPath>SubscrId</PropertyPath>
 <PropertyPath>ReportId</PropertyPath>
@@ -436,7 +436,7 @@ onJobHistoryFilterSearch: function () {
         <PropertyValue Property="Title" String="Job Executions by Date &amp; Status"/>
         <PropertyValue Property="Dimensions">
             <Collection>
-                <PropertyPath>JobDate</PropertyPath>   <!-- Trục X -->
+                <PropertyPath>ExecutionDate</PropertyPath>   <!-- Trục X -->
                 <PropertyPath>JobStatus</PropertyPath> <!-- Nhóm màu (stacking) -->
             </Collection>
         </PropertyValue>
@@ -562,7 +562,7 @@ User mở tab "Job History"
     → Main.onItemSelect() → _jobHistoryController.loadChartData(this)
     → JobHistoryController.configureChart() → set VizProperties
     → OData GET /JobHistoryAnalytics (999 records)
-    → JobHistoryController._aggregateChartData() → group by (JobDate + JobStatus) → count
+    → JobHistoryController._aggregateChartData() → group by (ExecutionDate + JobStatus) → count
     → JSONModel "chartModel" → VizFrame render stacked_column chart
 
 User nhấn "Go" trên FilterBar
@@ -572,3 +572,4 @@ User nhấn "Go" trên FilterBar
 User click dòng trên Table
     → FPM navigation → JobHistoryObjectPage (4 panels chi tiết)
 ```
+

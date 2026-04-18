@@ -1,4 +1,4 @@
-# Tài liệu Triển khai: Financial Reports Dashboard (AP / AR / GL)
+﻿# Tài liệu Triển khai: Financial Reports Dashboard (AP / AR / GL)
 
 Tài liệu này ghi nhận lại toàn bộ quá trình thiết kế và triển khai 7 module báo cáo tài chính trên Fiori Custom Dashboard. Sidebar "Reports" vẫn dùng các `key` cũ (`report_ap01` … `report_gl01`), nhưng **danh sách không còn nằm trong `Main.view.xml`**: mỗi report mở bằng route `sap.fe.templates.ListReport` (full-screen), dữ liệu từ các CDS View expose qua OData service `ZSD_DRS_MAIN_O4`.
 
@@ -290,7 +290,7 @@ Filter bar, bảng, variant, export, P13n, drill-down Object Page do template `L
 |---|---|---|
 | `DrsJobConfig` | Cần định nghĩa đầy đủ | Backend không expose UI annotations ra frontend |
 | `JobHistoryAnalytics` | Cần định nghĩa + Aggregation | Backend có annotations nhưng Aggregation annotations thiếu |
-| `DrsFile` | LineItem / SelectionFields / FieldGroups (override) | Backend có metadata extension (`JobDate`, …); local bổ sung **`JobDate`** trên list + Admin facet |
+| `DrsFile` | LineItem / SelectionFields / FieldGroups (override) | Backend có metadata extension (`FileCreationDate`, …); local bổ sung **`FileCreationDate`** trên list + Admin facet |
 | **7 Report entities** | **Không cần** | Backend DDLX đã định nghĩa đủ `LineItem` + `SelectionFields` + `HeaderInfo` + `Facets` |
 
 Các file DDLX backend liên quan:
@@ -385,3 +385,4 @@ User click vào một dòng
 | **7 Reports** | manifest + Main.view + 2 JS | **Không** | Chỉ map router |
 
 > **Ghi chú:** List Report là template chuẩn SAP — có auto-refresh / lifecycle tốt hơn so với `macros:Table` nhúng trong Custom FPM page; trade-off là màn list full-screen, không còn sidebar ToolPage.
+

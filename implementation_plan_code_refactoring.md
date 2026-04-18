@@ -1,4 +1,4 @@
-# Implementation Plan: Code Structure Refactoring
+﻿# Implementation Plan: Code Structure Refactoring
 
 ## 1. Overview
 
@@ -531,7 +531,7 @@ sap.ui.define([
                     title: { visible: true, text: "Execution Count" }
                 },
                 categoryAxis: {
-                    title: { visible: true, text: "Job Date" }
+                    title: { visible: true, text: "Execution Date" }
                 },
                 title: { visible: false },
                 legend: {
@@ -548,7 +548,7 @@ sap.ui.define([
             
             var oModel = oController.getModel();
             var oBinding = oModel.bindList("/JobHistoryAnalytics", undefined, undefined, undefined, {
-                $orderby: "JobDate desc"
+                $orderby: "ExecutionDate desc"
             });
             
             oBinding.requestContexts(0, 999).then(function (aContexts) {
@@ -567,13 +567,13 @@ sap.ui.define([
             var mAggregated = {};
             
             aData.forEach(function (oItem) {
-                var sDate = oItem.JobDate || "";
+                var sDate = oItem.ExecutionDate || "";
                 var sStatus = oItem.JobStatus || "Unknown";
                 var sKey = sDate + "|" + sStatus;
                 
                 if (!mAggregated[sKey]) {
                     mAggregated[sKey] = {
-                        JobDate: sDate,
+                        ExecutionDate: sDate,
                         JobStatus: sStatus,
                         JobCountTotal: 0
                     };
@@ -582,7 +582,7 @@ sap.ui.define([
             });
             
             var aChartData = Object.values(mAggregated).sort(function (a, b) {
-                return a.JobDate < b.JobDate ? -1 : 1;
+                return a.ExecutionDate < b.ExecutionDate ? -1 : 1;
             });
             
             oController.getModel("chartModel").setProperty("/chartData", aChartData);
@@ -620,7 +620,7 @@ sap.ui.define([], function () {
                     title: { visible: true, text: "Execution Count" }
                 },
                 categoryAxis: {
-                    title: { visible: true, text: "Job Date" }
+                    title: { visible: true, text: "Execution Date" }
                 },
                 title: { visible: false },
                 legend: {
@@ -1053,3 +1053,4 @@ webapp/
 ├── Component.js
 └── manifest.json
 ```
+

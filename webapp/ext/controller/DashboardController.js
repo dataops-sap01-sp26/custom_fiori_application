@@ -183,7 +183,7 @@ sap.ui.define([
         _loadChartData: function (oModel) {
             return new Promise(function (resolve) {
                 var oBinding = oModel.bindList("/DrsJobHistoryAnalytics", undefined,
-                    [new Sorter("JobDate", true)]); // descending
+                    [new Sorter("ExecutionDate", true)]); // descending
                 
                 oBinding.requestContexts(0, 100).then(function (aContexts) {
                     var aData = aContexts.map(function (oCtx) {
@@ -193,13 +193,13 @@ sap.ui.define([
                     // Aggregate by date and status
                     var mAggregated = {};
                     aData.forEach(function (oItem) {
-                        var sDate = oItem.JobDate || "";
+                        var sDate = oItem.ExecutionDate || "";
                         var sStatus = oItem.JobStatus || "Unknown";
                         var sKey = sDate + "|" + sStatus;
                         
                         if (!mAggregated[sKey]) {
                             mAggregated[sKey] = {
-                                JobDate: sDate,
+                                ExecutionDate: sDate,
                                 JobStatus: sStatus,
                                 JobCountTotal: 0
                             };
@@ -208,7 +208,7 @@ sap.ui.define([
                     });
                     
                     var aChartData = Object.values(mAggregated).sort(function (a, b) {
-                        return (a.JobDate || "").localeCompare(b.JobDate || "");
+                        return (a.ExecutionDate || "").localeCompare(b.ExecutionDate || "");
                     });
                     
                     resolve(aChartData);

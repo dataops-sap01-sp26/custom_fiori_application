@@ -1,4 +1,4 @@
-<!-- Deployment: 2026-04-13 — DrsFile: JobDate (ZI_DRS_FILE) + AdminData field group -->
+<!-- Deployment: 2026-04-13 — DrsFile: FileCreationDate (ZI_DRS_FILE) + AdminData field group -->
 <edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
     <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml">
         <edmx:Include Namespace="com.sap.vocabularies.Common.v1" Alias="Common"/>
@@ -79,7 +79,7 @@
                 <!-- ═══ SELECTION FIELDS: Filter Bar ═══ -->
                 <Annotation Term="UI.SelectionFields">
                     <Collection>
-                        <PropertyPath>JobDate</PropertyPath>
+                        <PropertyPath>ScheduledStartDate</PropertyPath>
                         <PropertyPath>CreatedBy</PropertyPath>
                         <PropertyPath>SubscrId</PropertyPath>
                         <PropertyPath>JobId</PropertyPath>
@@ -321,8 +321,8 @@
                 <Annotation Term="UI.LineItem">
                     <Collection>
                         <Record Type="UI.DataField">
-                            <PropertyValue Property="Value" Path="JobDate"/>
-                            <PropertyValue Property="Label" String="Job Date"/>
+                            <PropertyValue Property="Value" Path="ExecutionDate"/>
+                            <PropertyValue Property="Label" String="Execution Date"/>
                         </Record>
                         <Record Type="UI.DataField">
                             <PropertyValue Property="Value" Path="ReportId"/>
@@ -369,7 +369,7 @@
                 <!-- ═══ SELECTION FIELDS: Filter Bar ═══ -->
                 <Annotation Term="UI.SelectionFields">
                     <Collection>
-                        <PropertyPath>JobDate</PropertyPath>
+                        <PropertyPath>ExecutionDate</PropertyPath>
                         <PropertyPath>CreatedBy</PropertyPath>
                         <PropertyPath>SubscrId</PropertyPath>
                         <PropertyPath>ReportId</PropertyPath>
@@ -385,7 +385,7 @@
                         <PropertyValue Property="Title" String="Job Execution Statistics" />
                         <PropertyValue Property="Dimensions">
                             <Collection>
-                                <PropertyPath>JobDate</PropertyPath>
+                                <PropertyPath>ExecutionDate</PropertyPath>
                                 <PropertyPath>JobStatus</PropertyPath>
                             </Collection>
                         </PropertyValue>
@@ -405,7 +405,7 @@
                         <PropertyValue Property="DimensionAttributes">
                             <Collection>
                                 <Record Type="UI.ChartDimensionAttributeType">
-                                    <PropertyValue Property="Dimension" PropertyPath="JobDate" />
+                                    <PropertyValue Property="Dimension" PropertyPath="ExecutionDate" />
                                     <PropertyValue Property="Role" EnumMember="UI.ChartDimensionRoleType/Category" />
                                 </Record>
                                 <Record Type="UI.ChartDimensionAttributeType">
@@ -608,8 +608,8 @@
                         <PropertyValue Property="Label" String="File Name"/>
                     </Record>
                     <Record Type="UI.DataField">
-                        <PropertyValue Property="Value" Path="JobDate"/>
-                        <PropertyValue Property="Label" String="Job Date"/>
+                        <PropertyValue Property="Value" Path="FileCreationDate"/>
+                        <PropertyValue Property="Label" String="File Creation Date"/>
                     </Record>
                     <Record Type="UI.DataField">
                         <PropertyValue Property="Value" Path="FileContent"/>
@@ -630,10 +630,10 @@
                 </Collection>
             </Annotation>
 
-            <!-- ═══ SELECTION FIELDS: Filter Bar (JobDate first — align ZC_DRS_FILE metadata extension) ═══ -->
+            <!-- ═══ SELECTION FIELDS: Filter Bar (FileCreationDate first — align ZC_DRS_FILE metadata extension) ═══ -->
             <Annotation Term="UI.SelectionFields">
                 <Collection>
-                    <PropertyPath>JobDate</PropertyPath>
+                    <PropertyPath>FileCreationDate</PropertyPath>
                     <PropertyPath>FileName</PropertyPath>
                     <PropertyPath>CreatedBy</PropertyPath>
                     <PropertyPath>CreatedAt</PropertyPath>
@@ -706,8 +706,8 @@
                     <PropertyValue Property="Data">
                         <Collection>
                             <Record Type="UI.DataField">
-                                <PropertyValue Property="Value" Path="JobDate"/>
-                                <PropertyValue Property="Label" String="Job Date"/>
+                                <PropertyValue Property="Value" Path="FileCreationDate"/>
+                                <PropertyValue Property="Label" String="File Creation Date"/>
                             </Record>
                             <Record Type="UI.DataField">
                                 <PropertyValue Property="Value" Path="CreatedBy"/>

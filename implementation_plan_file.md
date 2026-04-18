@@ -1,4 +1,4 @@
-# Tài liệu Triển khai: My Exports (Report Files)
+﻿# Tài liệu Triển khai: My Exports (Report Files)
 
 Tài liệu này ghi nhận lại toàn bộ quá trình thiết kế và triển khai module **My Exports (Report Files)** trên Fiori Custom Dashboard — cho phép người dùng xem danh sách và tải về các file báo cáo được hệ thống sinh ra sau mỗi lần chạy job.
 
@@ -32,7 +32,7 @@ Entity này được expose từ CDS Projection `ZC_DRS_FILE` (dựa trên Inter
 | `FileSizeDisplay` | CHAR 20 | Kích thước đã format (vd: `1.2 MB`) | ✓ Hiển thị |
 | `CreatedBy` | SYUNAME | Người tạo file | ✓ Hiển thị |
 | `CreatedAt` | TIMESTAMPL | Thời điểm tạo file | ✓ Hiển thị |
-| `JobDate` | DATS | Ngày job (suy ra từ `created_at` trên `ZI_DRS_FILE`) | ✓ List / filter / Admin facet |
+| `FileCreationDate` | DATS | Ngày job (suy ra từ `created_at` trên `ZI_DRS_FILE`) | ✓ List / filter / Admin facet |
 
 ### Associations (Navigation trong OData)
 
@@ -78,14 +78,14 @@ Trước khi implement, cần hiểu rõ backend (`zc_drs_file.ddlx.asddlxs`) đ
 | Annotation | Backend (`zc_drs_file.ddlx`) | Local (`annotation.xml`) | Ghi chú |
 |---|---|---|---|
 | `UI.HeaderInfo` | **Có** ✓ | **Có** ✓ | Định nghĩa lại local để có full control |
-| `UI.LineItem` | **Có** ✓ | **Có** ✓ | Local thêm cột **`JobDate`** (bổ sung so với lineItem backend) |
+| `UI.LineItem` | **Có** ✓ | **Có** ✓ | Local thêm cột **`FileCreationDate`** (bổ sung so với lineItem backend) |
 | `UI.Facets` | **Có** ✓ | **Có** ✓ | Định nghĩa lại local cho nhất quán |
-| `UI.FieldGroup` | **Có** ✓ | **Có** ✓ | Local **AdminData** thêm **`JobDate`** |
-| `UI.SelectionFields` | **Có** ✓ (`JobDate` position 10, …) | **Có** ✓ | Local đặt **`JobDate` đầu tiên** trong FilterBar |
+| `UI.FieldGroup` | **Có** ✓ | **Có** ✓ | Local **AdminData** thêm **`FileCreationDate`** |
+| `UI.SelectionFields` | **Có** ✓ (`FileCreationDate` position 10, …) | **Có** ✓ | Local đặt **`FileCreationDate` đầu tiên** trong FilterBar |
 
 > **Tại sao define lại những annotation backend đã có?** Hai lý do: (1) Local annotation **override** backend annotation — giúp kiểm soát chính xác những gì hiển thị trong dashboard mà không phụ thuộc vào thay đổi từ backend. (2) Nhất quán với cách tiếp cận của các module khác trong dự án (`DrsJobConfig`, `JobHistoryAnalytics`) — tất cả đều define đầy đủ annotation local.
 
-> **Cập nhật CDS:** `ZI_DRS_FILE` bổ sung **`JobDate`** (suy ra từ `created_at`) và association **`_JobHistory`**; `ZC_DRS_FILE` expose `JobDate` và redirect `_JobHistory`. Metadata extension gắn **`JobDate`** vào **selectionField**; Fiori local thêm **`JobDate`** vào **LineItem** và **FieldGroup#AdminData** để list/Object Page đồng bộ.
+> **Cập nhật CDS:** `ZI_DRS_FILE` bổ sung **`FileCreationDate`** (suy ra từ `created_at`) và association **`_JobHistory`**; `ZC_DRS_FILE` expose `FileCreationDate` và redirect `_JobHistory`. Metadata extension gắn **`FileCreationDate`** vào **selectionField**; Fiori local thêm **`FileCreationDate`** vào **LineItem** và **FieldGroup#AdminData** để list/Object Page đồng bộ.
 
 ---
 
@@ -213,7 +213,7 @@ Màn list file là **full-screen**; quay lại dashboard bằng **Back** / bread
 ```xml
 <Annotation Term="UI.SelectionFields">
     <Collection>
-        <PropertyPath>JobDate</PropertyPath>
+        <PropertyPath>FileCreationDate</PropertyPath>
         <PropertyPath>FileName</PropertyPath>
         <PropertyPath>CreatedBy</PropertyPath>
         <PropertyPath>CreatedAt</PropertyPath>
@@ -221,9 +221,9 @@ Màn list file là **full-screen**; quay lại dashboard bằng **Back** / bread
 </Annotation>
 ```
 
-> **Filter fields:** (1) `JobDate` — lọc theo **ngày job** (backend: cast từ `created_at` trên `ZI_DRS_FILE`); (2) `FileName`; (3) `CreatedBy`; (4) `CreatedAt` — khoảng thời gian tạo file. `MimeType` / `FileSizeDisplay` không đưa vào FilterBar.
+> **Filter fields:** (1) `FileCreationDate` — lọc theo **ngày job** (backend: cast từ `created_at` trên `ZI_DRS_FILE`); (2) `FileName`; (3) `CreatedBy`; (4) `CreatedAt` — khoảng thời gian tạo file. `MimeType` / `FileSizeDisplay` không đưa vào FilterBar.
 
-> **Local vs backend:** Metadata extension backend đã khai báo **`selectionField`** cho `JobDate` (và các field khác). File `annotation.xml` local **override** để đồng bộ List Report với **LineItem** và **FieldGroup#AdminData** (có `JobDate`).
+> **Local vs backend:** Metadata extension backend đã khai báo **`selectionField`** cho `FileCreationDate` (và các field khác). File `annotation.xml` local **override** để đồng bộ List Report với **LineItem** và **FieldGroup#AdminData** (có `FileCreationDate`).
 
 ### 6.3 `UI.HeaderInfo` — Tiêu đề Object Page
 
@@ -259,7 +259,7 @@ Object Page được chia thành 2 panel:
 - `MimeType`: Định dạng file
 
 **Panel 2 — Administrative Data:**
-- `JobDate`: Ngày job (gắn với lịch báo cáo)
+- `FileCreationDate`: Ngày job (gắn với lịch báo cáo)
 - `CreatedBy`: Ai tạo file
 - `CreatedAt`: Khi nào tạo file
 
@@ -293,7 +293,7 @@ Không cần handler riêng cho filter/table — List Report đảm nhiệm. Dow
 ```
 User chọn "My Exports (Files)" trên sidebar (hoặc quick action)
     → router.navTo("ExportsListPage")
-    → List Report: FilterBar (JobDate / FileName / CreatedBy / CreatedAt) + table GET /DrsFile
+    → List Report: FilterBar (FileCreationDate / FileName / CreatedBy / CreatedAt) + table GET /DrsFile
     → Cột FileContent → download (Semantics.largeObject)
 
 User nhấn "Go" trên FilterBar
@@ -307,7 +307,8 @@ User click Download / một dòng
 
 | File | Thay đổi |
 |---|---|
-| `annotation.xml` | Block `DrsFileType`: LineItem (**+ JobDate**), SelectionFields (**JobDate** đầu tiên), HeaderInfo, Facets, FieldGroups (**AdminData + JobDate**) |
+| `annotation.xml` | Block `DrsFileType`: LineItem (**+ FileCreationDate**), SelectionFields (**FileCreationDate** đầu tiên), HeaderInfo, Facets, FieldGroups (**AdminData + FileCreationDate**) |
 | `manifest.json` | Route + target `DrsFileObjectPage`; thêm `ExportsListPage` (ListReport) + `navigation` |
 | `Main.view.xml` | **Không** còn `ScrollContainer` exports — chỉ menu item `key="exports"` |
 | `Main.controller.js` + `DashboardController.js` | Map `exports` → `router.navTo("ExportsListPage")` |
+

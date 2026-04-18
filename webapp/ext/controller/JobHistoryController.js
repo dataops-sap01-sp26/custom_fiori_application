@@ -57,7 +57,7 @@ sap.ui.define([
             
             var oModel = oController.getView().getModel();
             var oBinding = oModel.bindList("/DrsJobHistoryAnalytics", undefined, undefined, undefined, {
-                $orderby: "JobDate desc"
+                $orderby: "ExecutionDate desc"
             });
             
             oBinding.requestContexts(0, 999).then(function (aContexts) {
@@ -75,7 +75,7 @@ sap.ui.define([
         },
         
         /**
-         * Aggregate data by JobDate + JobStatus for chart visualization
+         * Aggregate data by ExecutionDate + JobStatus for chart visualization
          * @param {sap.fe.core.PageController} oController - Main controller reference
          * @param {Array} aData - Raw data from OData
          * @private
@@ -84,13 +84,13 @@ sap.ui.define([
             var mAggregated = {};
             
             aData.forEach(function (oItem) {
-                var sDate = oItem.JobDate || "";
+                var sDate = oItem.ExecutionDate || "";
                 var sStatus = oItem.JobStatus || "Unknown";
                 var sKey = sDate + "|" + sStatus;
                 
                 if (!mAggregated[sKey]) {
                     mAggregated[sKey] = {
-                        JobDate: sDate,
+                        ExecutionDate: sDate,
                         JobStatus: sStatus,
                         JobCountTotal: 0
                     };
@@ -99,7 +99,7 @@ sap.ui.define([
             });
             
             var aChartData = Object.values(mAggregated).sort(function (a, b) {
-                return a.JobDate.localeCompare(b.JobDate);
+                return a.ExecutionDate.localeCompare(b.ExecutionDate);
             });
             
             oController.getView().getModel("chartModel").setProperty("/chartData", aChartData);

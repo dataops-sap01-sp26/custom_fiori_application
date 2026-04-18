@@ -1,4 +1,4 @@
-# Implementation Plan: Dashboard Screen
+﻿# Implementation Plan: Dashboard Screen
 
 ## 1. Overview
 
@@ -76,7 +76,7 @@ Transform the empty dashboard into a fully functional overview page with KPIs, q
 | Aborted Jobs (Failed) | `DrsJobConfig` | `$filter=JobStatus eq 'A'` ← BTCSTATUS: A=Aborted |
 | Finished Jobs | `DrsJobConfig` | `$filter=JobStatus eq 'F'` ← BTCSTATUS: F=Finished |
 | Cancelled Jobs | `DrsJobConfig` | `$filter=JobStatus eq 'C'` ← BTCSTATUS: C=Cancelled |
-| Chart Data | `JobHistoryAnalytics` | `$orderby=JobDate desc`, top 100 |
+| Chart Data | `JobHistoryAnalytics` | `$orderby=ExecutionDate desc`, top 100 |
 | Recent Subscriptions | `DrsSubscription` | `$orderby=CreatedAt desc`, top 5 |
 | Recent Jobs | `DrsJobConfig` | `$orderby=CreatedAt desc`, top 5 |
 
@@ -463,7 +463,7 @@ Replace the empty dashboard `ScrollContainer` with full content:
                 <viz:dataset>
                     <viz.data:FlattenedDataset data="{dashboard>/chartData}">
                         <viz.data:dimensions>
-                            <viz.data:DimensionDefinition name="Date" value="{dashboard>JobDate}"/>
+                            <viz.data:DimensionDefinition name="Date" value="{dashboard>ExecutionDate}"/>
                             <viz.data:DimensionDefinition name="Status" value="{dashboard>JobStatus}"/>
                         </viz.data:dimensions>
                         <viz.data:measures>
@@ -747,3 +747,4 @@ webapp/
 ├── model/formatter.js    ← DELETED — không còn dùng
 └── ext/helper/ChartHelper.js  ← DELETED — logic nằm trong JobHistoryController
 ```
+

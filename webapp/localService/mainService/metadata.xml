@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" xmlns="http://docs.oasis-open.org/odata/ns/edm">
     <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_COMMUNICATION',Version='0001',SAP__Origin='LOCAL')/$value">
         <edmx:Include Namespace="com.sap.vocabularies.Communication.v1" Alias="Communication"/>
@@ -92,7 +92,7 @@
                 <Property Name="FileSizeDisplay" Type="Edm.String" Nullable="false" MaxLength="20"/>
                 <Property Name="CreatedBy" Type="Edm.String" Nullable="false" MaxLength="12"/>
                 <Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7"/>
-                <Property Name="JobDate" Type="Edm.Date"/>
+                <Property Name="FileCreationDate" Type="Edm.Date"/>
                 <Property Name="HasDraftEntity" Type="Edm.Boolean" Nullable="false"/>
                 <Property Name="DraftEntityCreationDateTime" Type="Edm.DateTimeOffset" Precision="7"/>
                 <Property Name="DraftEntityLastChangeDateTime" Type="Edm.DateTimeOffset" Precision="7"/>
@@ -130,7 +130,7 @@
                 <Property Name="LocalLastChangedAt" Type="Edm.DateTimeOffset" Precision="7"/>
                 <Property Name="JobStatusCriticality" Type="Edm.Byte" Nullable="false"/>
                 <Property Name="JobStatus" Type="Edm.String" Nullable="false" MaxLength="9"/>
-                <Property Name="JobDate" Type="Edm.Date"/>
+                <Property Name="ExecutionDate" Type="Edm.Date"/>
                 <Property Name="JobCountTotal" Type="Edm.Int32" Nullable="false"/>
                 <Property Name="JobId" Type="Edm.String" Nullable="false" MaxLength="12"/>
                 <Property Name="JobText" Type="Edm.String" Nullable="false" MaxLength="120"/>
@@ -638,7 +638,7 @@
                 <Property Name="ExceptionCalendarId" Type="Edm.String" Nullable="false" MaxLength="2"/>
                 <Property Name="EndInfoType" Type="Edm.String" Nullable="false" MaxLength="4"/>
                 <Property Name="ExceptionRestrictionCode" Type="Edm.String" Nullable="false" MaxLength="1"/>
-                <Property Name="JobDate" Type="Edm.Date"/>
+                <Property Name="ScheduledStartDate" Type="Edm.Date"/>
                 <Property Name="HasDraftEntity" Type="Edm.Boolean" Nullable="false"/>
                 <Property Name="DraftEntityCreationDateTime" Type="Edm.DateTimeOffset" Precision="7"/>
                 <Property Name="DraftEntityLastChangeDateTime" Type="Edm.DateTimeOffset" Precision="7"/>
@@ -1664,8 +1664,8 @@
                 <Annotation Term="SAP__common.Heading" String="Time Stamp"/>
                 <Annotation Term="SAP__common.QuickInfo" String="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)"/>
             </Annotations>
-            <Annotations Target="SAP__self.DrsFileType/JobDate">
-                <Annotation Term="SAP__common.Label" String="Job Date"/>
+            <Annotations Target="SAP__self.DrsFileType/FileCreationDate">
+                <Annotation Term="SAP__common.Label" String="File Creation Date"/>
                 <Annotation Term="SAP__core.Computed"/>
             </Annotations>
             <Annotations Target="SAP__self.DrsFileType/HasDraftEntity">
@@ -1962,7 +1962,7 @@
             <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/JobStatus">
                 <Annotation Term="SAP__common.Label" String="Job Status"/>
             </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/JobDate">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/ExecutionDate">
                 <Annotation Term="SAP__common.Label" String="Job Date"/>
             </Annotations>
             <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/JobCountTotal">
@@ -2017,7 +2017,7 @@
                         <PropertyValue Property="Dimensions">
                             <Collection>
                                 <PropertyPath>JobStatus</PropertyPath>
-                                <PropertyPath>JobDate</PropertyPath>
+                                <PropertyPath>ExecutionDate</PropertyPath>
                             </Collection>
                         </PropertyValue>
                         <PropertyValue Property="DimensionAttributes">
@@ -2027,7 +2027,7 @@
                                     <PropertyValue Property="Role" EnumMember="SAP__UI.ChartDimensionRoleType/Series"/>
                                 </Record>
                                 <Record Type="SAP__UI.ChartDimensionAttributeType">
-                                    <PropertyValue Property="Dimension" PropertyPath="JobDate"/>
+                                    <PropertyValue Property="Dimension" PropertyPath="ExecutionDate"/>
                                     <PropertyValue Property="Role" EnumMember="SAP__UI.ChartDimensionRoleType/Category"/>
                                 </Record>
                             </Collection>
@@ -2193,7 +2193,7 @@
                 <Annotation Term="SAP__UI.LineItem">
                     <Collection>
                         <Record Type="SAP__UI.DataField">
-                            <PropertyValue Property="Value" Path="JobDate"/>
+                            <PropertyValue Property="Value" Path="ExecutionDate"/>
                             <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/High"/>
                         </Record>
                         <Record Type="SAP__UI.DataField">
@@ -2316,7 +2316,7 @@
                 </Annotation>
                 <Annotation Term="SAP__UI.SelectionFields">
                     <Collection>
-                        <PropertyPath>JobDate</PropertyPath>
+                        <PropertyPath>ExecutionDate</PropertyPath>
                         <PropertyPath>CreatedBy</PropertyPath>
                         <PropertyPath>SubscrId</PropertyPath>
                         <PropertyPath>ReportId</PropertyPath>
@@ -6803,7 +6803,7 @@
                 <Annotation Term="SAP__common.ValueListWithFixedValues"/>
                 <Annotation Term="SAP__common.QuickInfo" String="Background Processing: Restriction of Start Condition"/>
             </Annotations>
-            <Annotations Target="SAP__self.DrsJobConfigType/JobDate">
+            <Annotations Target="SAP__self.DrsJobConfigType/ScheduledStartDate">
                 <Annotation Term="SAP__common.Label" String="Job Date"/>
             </Annotations>
             <Annotations Target="SAP__self.DrsJobConfigType/HasDraftEntity">
@@ -7260,7 +7260,7 @@
                 </Annotation>
                 <Annotation Term="SAP__UI.SelectionFields">
                     <Collection>
-                        <PropertyPath>JobDate</PropertyPath>
+                        <PropertyPath>ScheduledStartDate</PropertyPath>
                         <PropertyPath>CreatedBy</PropertyPath>
                         <PropertyPath>SubscrId</PropertyPath>
                         <PropertyPath>JobId</PropertyPath>
@@ -10477,4 +10477,5 @@
         </Schema>
     </edmx:DataServices>
 </edmx:Edmx>
+
 
