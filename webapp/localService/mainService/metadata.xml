@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" xmlns="http://docs.oasis-open.org/odata/ns/edm">
     <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_COMMUNICATION',Version='0001',SAP__Origin='LOCAL')/$value">
         <edmx:Include Namespace="com.sap.vocabularies.Communication.v1" Alias="Communication"/>
@@ -105,7 +105,7 @@
                 </NavigationProperty>
                 <NavigationProperty Name="_JobHistory" Type="Collection(com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsJobHistoryType)"/>
             </EntityType>
-            <EntityType Name="JobHistoryAnalyticsType">
+            <EntityType Name="DrsJobHistoryAnalyticsType">
                 <Key>
                     <PropertyRef Name="JobHistUuid"/>
                 </Key>
@@ -436,53 +436,6 @@
                 <Property Name="LocalCurrency" Type="Edm.String" Nullable="false" MaxLength="5"/>
                 <NavigationProperty Name="_Header" Type="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.CustomerBalancesType" Nullable="false"/>
             </EntityType>
-            <EntityType Name="DrsJobHistoryType">
-                <Key>
-                    <PropertyRef Name="JobHistUuid"/>
-                    <PropertyRef Name="IsActiveEntity"/>
-                </Key>
-                <Property Name="JobHistUuid" Type="Edm.Guid" Nullable="false"/>
-                <Property Name="JobUuid" Type="Edm.Guid" Nullable="false"/>
-                <Property Name="FileUuid" Type="Edm.Guid"/>
-                <Property Name="FileName" Type="Edm.String" Nullable="false" MaxLength="128"/>
-                <Property Name="MimeType" Type="Edm.String" Nullable="false" MaxLength="128"/>
-                <Property Name="FileContent" Type="Edm.Stream"/>
-                <Property Name="FileSize" Type="Edm.Int32" Nullable="false"/>
-                <Property Name="FileSizeDisplay" Type="Edm.String" Nullable="false" MaxLength="20"/>
-                <Property Name="FileCreatedAt" Type="Edm.DateTimeOffset" Precision="7"/>
-                <Property Name="FileCreatedBy" Type="Edm.String" Nullable="false" MaxLength="12"/>
-                <Property Name="ReportId" Type="Edm.String" Nullable="false" MaxLength="10"/>
-                <Property Name="JobName" Type="Edm.String" Nullable="false" MaxLength="32"/>
-                <Property Name="JobCount" Type="Edm.String" Nullable="false" MaxLength="8"/>
-                <Property Name="JobCatalogEntry" Type="Edm.String" Nullable="false" MaxLength="40"/>
-                <Property Name="JobTemplateName" Type="Edm.String" Nullable="false" MaxLength="40"/>
-                <Property Name="JobStatus" Type="Edm.String" Nullable="false" MaxLength="1"/>
-                <Property Name="JobStatusCriticality" Type="Edm.Byte" Nullable="false"/>
-                <Property Name="StartTimestamp" Type="Edm.DateTimeOffset" Precision="7"/>
-                <Property Name="EndTimestamp" Type="Edm.DateTimeOffset" Precision="7"/>
-                <Property Name="DurationMs" Type="Edm.Int32" Nullable="false"/>
-                <Property Name="OutputFormat" Type="Edm.String" Nullable="false" MaxLength="4"/>
-                <Property Name="Message" Type="Edm.String" Nullable="false" MaxLength="255"/>
-                <Property Name="RetryCount" Type="Edm.Byte" Nullable="false"/>
-                <Property Name="CreatedBy" Type="Edm.String" Nullable="false" MaxLength="12"/>
-                <Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7"/>
-                <Property Name="LastChangedBy" Type="Edm.String" Nullable="false" MaxLength="12"/>
-                <Property Name="LastChangedAt" Type="Edm.DateTimeOffset" Precision="7"/>
-                <Property Name="LocalLastChangedAt" Type="Edm.DateTimeOffset" Precision="7"/>
-                <Property Name="JobDate" Type="Edm.Date"/>
-                <Property Name="HasDraftEntity" Type="Edm.Boolean" Nullable="false"/>
-                <Property Name="DraftEntityCreationDateTime" Type="Edm.DateTimeOffset" Precision="7"/>
-                <Property Name="DraftEntityLastChangeDateTime" Type="Edm.DateTimeOffset" Precision="7"/>
-                <Property Name="HasActiveEntity" Type="Edm.Boolean" Nullable="false"/>
-                <Property Name="IsActiveEntity" Type="Edm.Boolean" Nullable="false"/>
-                <NavigationProperty Name="DraftAdministrativeData" Type="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.I_DraftAdministrativeDataType"/>
-                <NavigationProperty Name="SiblingEntity" Type="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsJobHistoryType"/>
-                <NavigationProperty Name="_Catalog" Type="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.ReportCatalogType"/>
-                <NavigationProperty Name="_File" Type="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsFileType"/>
-                <NavigationProperty Name="_JobConfig" Type="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsJobConfigType" Nullable="false" Partner="_JobHistory">
-                    <ReferentialConstraint Property="JobUuid" ReferencedProperty="JobUuid"/>
-                </NavigationProperty>
-            </EntityType>
             <EntityType Name="VendorBalancesType">
                 <Key>
                     <PropertyRef Name="CompanyCode"/>
@@ -700,8 +653,6 @@
                 <NavigationProperty Name="_File" Type="Collection(com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsFileType)" Partner="_JobConfig">
                     <OnDelete Action="Cascade"/>
                 </NavigationProperty>
-                <NavigationProperty Name="_JobHistory" Type="Collection(com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsJobHistoryType)" Partner="_JobConfig">
-                    <OnDelete Action="Cascade"/>
                 </NavigationProperty>
                 <NavigationProperty Name="_Subscription" Type="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsSubscriptionType"/>
             </EntityType>
@@ -1231,22 +1182,13 @@
                     <NavigationPropertyBinding Path="DraftAdministrativeData" Target="I_DraftAdministrativeData"/>
                     <NavigationPropertyBinding Path="SiblingEntity" Target="DrsFile"/>
                     <NavigationPropertyBinding Path="_JobConfig" Target="DrsJobConfig"/>
-                    <NavigationPropertyBinding Path="_JobHistory" Target="DrsJobHistory"/>
                 </EntitySet>
                 <EntitySet Name="DrsGL01Preview" EntityType="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsGL01PreviewType"/>
                 <EntitySet Name="DrsJobConfig" EntityType="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsJobConfigType">
                     <NavigationPropertyBinding Path="DraftAdministrativeData" Target="I_DraftAdministrativeData"/>
                     <NavigationPropertyBinding Path="SiblingEntity" Target="DrsJobConfig"/>
                     <NavigationPropertyBinding Path="_File" Target="DrsFile"/>
-                    <NavigationPropertyBinding Path="_JobHistory" Target="DrsJobHistory"/>
                     <NavigationPropertyBinding Path="_Subscription" Target="DrsSubscription"/>
-                </EntitySet>
-                <EntitySet Name="DrsJobHistory" EntityType="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsJobHistoryType">
-                    <NavigationPropertyBinding Path="DraftAdministrativeData" Target="I_DraftAdministrativeData"/>
-                    <NavigationPropertyBinding Path="SiblingEntity" Target="DrsJobHistory"/>
-                    <NavigationPropertyBinding Path="_Catalog" Target="ReportCatalog"/>
-                    <NavigationPropertyBinding Path="_File" Target="DrsFile"/>
-                    <NavigationPropertyBinding Path="_JobConfig" Target="DrsJobConfig"/>
                 </EntitySet>
                 <EntitySet Name="DrsParamAP01" EntityType="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsParamAP01Type">
                     <NavigationPropertyBinding Path="DraftAdministrativeData" Target="I_DraftAdministrativeData"/>
@@ -1314,7 +1256,7 @@
                 <EntitySet Name="I_FiscalYear" EntityType="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.I_FiscalYearType"/>
                 <EntitySet Name="I_GLAccountStdVH" EntityType="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.I_GLAccountStdVHType"/>
                 <EntitySet Name="I_Supplier_VH" EntityType="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.I_Supplier_VHType"/>
-                <EntitySet Name="JobHistoryAnalytics" EntityType="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.JobHistoryAnalyticsType"/>
+                <EntitySet Name="DrsJobHistoryAnalytics" EntityType="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.DrsJobHistoryAnalyticsType"/>
                 <EntitySet Name="ModuleVH" EntityType="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.ModuleVHType"/>
                 <EntitySet Name="ReportCatalog" EntityType="com.sap.gateway.srvd.zsd_drs_main_o4.v0001.ReportCatalogType">
                     <NavigationPropertyBinding Path="DraftAdministrativeData" Target="I_DraftAdministrativeData"/>
@@ -1932,141 +1874,141 @@
                     <Record/>
                 </Annotation>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/ReportId">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/ReportId">
                 <Annotation Term="SAP__common.Label" String="Report ID"/>
                 <Annotation Term="SAP__common.IsUpperCase"/>
                 <Annotation Term="SAP__common.QuickInfo" String="Report Identifier"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/JobName">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/JobName">
                 <Annotation Term="SAP__common.Label" String="Job Name"/>
                 <Annotation Term="SAP__common.IsUpperCase"/>
                 <Annotation Term="SAP__common.Heading" String="Background Job Name"/>
                 <Annotation Term="SAP__common.QuickInfo" String="Background Job Name"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/JobCount">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/JobCount">
                 <Annotation Term="SAP__common.Label" String="Job Count"/>
                 <Annotation Term="SAP__common.Heading" String="Batch Job ID Number"/>
                 <Annotation Term="SAP__common.QuickInfo" String="Job ID"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/JobCatalogEntry">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/JobCatalogEntry">
                 <Annotation Term="SAP__common.IsUpperCase"/>
                 <Annotation Term="SAP__UI.Hidden"/>
                 <Annotation Term="SAP__common.Label" String="Job Catalog"/>
                 <Annotation Term="SAP__common.Heading" String="Job Catalog Entry"/>
                 <Annotation Term="SAP__common.QuickInfo" String="Application Job Catalog Entry"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/JobTemplateName">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/JobTemplateName">
                 <Annotation Term="SAP__common.IsUpperCase"/>
                 <Annotation Term="SAP__UI.Hidden"/>
                 <Annotation Term="SAP__common.Label" String="Job Template Name"/>
                 <Annotation Term="SAP__common.Heading" String="Application Job Template Name"/>
                 <Annotation Term="SAP__common.QuickInfo" String="Application Job Template Name"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/StartTimestamp">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/StartTimestamp">
                 <Annotation Term="SAP__common.Label" String="Start Timestamp"/>
                 <Annotation Term="SAP__common.Heading" String="Time Stamp"/>
                 <Annotation Term="SAP__common.QuickInfo" String="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/EndTimestamp">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/EndTimestamp">
                 <Annotation Term="SAP__common.Label" String="End Timestamp"/>
                 <Annotation Term="SAP__common.Heading" String="Time Stamp"/>
                 <Annotation Term="SAP__common.QuickInfo" String="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/DurationMs">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/DurationMs">
                 <Annotation Term="SAP__common.Label" String="Duration (ms)"/>
                 <Annotation Term="SAP__common.Heading" String="INT4"/>
                 <Annotation Term="SAP__common.QuickInfo" String="4 Byte Signed Integer"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/OutputFormat">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/OutputFormat">
                 <Annotation Term="SAP__common.Label" String="Output Format"/>
                 <Annotation Term="SAP__common.IsUpperCase"/>
                 <Annotation Term="SAP__common.QuickInfo" String="Export Format"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/Message">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/Message">
                 <Annotation Term="SAP__common.Label" String="Message"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/RetryCount">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/RetryCount">
                 <Annotation Term="SAP__common.Label" String="Retry Count"/>
                 <Annotation Term="SAP__common.Heading" String="INT1"/>
                 <Annotation Term="SAP__common.QuickInfo" String="1 Byte Unsigned Integer"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/CreatedBy">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/CreatedBy">
                 <Annotation Term="SAP__common.Label" String="Created By"/>
                 <Annotation Term="SAP__common.IsUpperCase"/>
                 <Annotation Term="SAP__common.Heading" String="User"/>
                 <Annotation Term="SAP__common.QuickInfo" String="User Name"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/CreatedAt">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/CreatedAt">
                 <Annotation Term="SAP__common.Label" String="Created At"/>
                 <Annotation Term="SAP__common.Heading" String="Time Stamp"/>
                 <Annotation Term="SAP__common.QuickInfo" String="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/LastChangedBy">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/LastChangedBy">
                 <Annotation Term="SAP__common.Label" String="Last Changed By"/>
                 <Annotation Term="SAP__common.IsUpperCase"/>
                 <Annotation Term="SAP__common.Heading" String="User"/>
                 <Annotation Term="SAP__common.QuickInfo" String="User Name"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/LastChangedAt">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/LastChangedAt">
                 <Annotation Term="SAP__common.Label" String="Last Changed At"/>
                 <Annotation Term="SAP__common.Heading" String="Time Stamp"/>
                 <Annotation Term="SAP__common.QuickInfo" String="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/LocalLastChangedAt">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/LocalLastChangedAt">
                 <Annotation Term="SAP__common.Label" String="Local Last Changed At"/>
                 <Annotation Term="SAP__common.Heading" String="Time Stamp"/>
                 <Annotation Term="SAP__common.QuickInfo" String="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/JobStatus">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/JobStatus">
                 <Annotation Term="SAP__common.Label" String="Job Status"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/JobDate">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/JobDate">
                 <Annotation Term="SAP__common.Label" String="Job Date"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/JobCountTotal">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/JobCountTotal">
                 <Annotation Term="SAP__common.Label" String="Job Count Total"/>
                 <Annotation Term="SAP__aggregation.CustomAggregate" Qualifier="JobCountTotal" String="Edm.Int32"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/JobId">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/JobId">
                 <Annotation Term="SAP__common.Label" String="Job ID"/>
                 <Annotation Term="SAP__common.IsDigitSequence"/>
                 <Annotation Term="SAP__common.QuickInfo" String="Job ID Data Element"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/JobText">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/JobText">
                 <Annotation Term="SAP__common.Label" String="Job Text"/>
                 <Annotation Term="SAP__common.Heading" String="Description"/>
                 <Annotation Term="SAP__common.QuickInfo" String="Application Job Text"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/RunType">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/RunType">
                 <Annotation Term="SAP__common.Label" String="Run Type"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/SubscrId">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/SubscrId">
                 <Annotation Term="SAP__common.Label" String="Subscription ID"/>
                 <Annotation Term="SAP__common.IsDigitSequence"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/FileName">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/FileName">
                 <Annotation Term="SAP__common.Label" String="File Name"/>
                 <Annotation Term="SAP__common.IsUpperCase"/>
                 <Annotation Term="SAP__common.QuickInfo" String="File Name Data Element"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/FileDownloadUrl">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/FileDownloadUrl">
                 <Annotation Term="SAP__common.Label" String="File Download Url"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/FileSizeDisplay">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/FileSizeDisplay">
                 <Annotation Term="SAP__common.Label" String="File Size"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/FileCreatedAt">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/FileCreatedAt">
                 <Annotation Term="SAP__common.Label" String="Generated At"/>
                 <Annotation Term="SAP__common.Heading" String="Time Stamp"/>
                 <Annotation Term="SAP__common.QuickInfo" String="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/FileCreatedBy">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/FileCreatedBy">
                 <Annotation Term="SAP__common.Label" String="Generated By"/>
                 <Annotation Term="SAP__common.IsUpperCase"/>
                 <Annotation Term="SAP__common.Heading" String="User"/>
                 <Annotation Term="SAP__common.QuickInfo" String="User Name"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType">
                 <Annotation Term="SAP__common.Label" String="Job History Cube for Analytics"/>
                 <Annotation Term="SAP__UI.Chart" Qualifier="ChartDefault">
                     <Record Type="SAP__UI.ChartDefinitionType">
@@ -2386,7 +2328,7 @@
                     <Record/>
                 </Annotation>
             </Annotations>
-            <Annotations Target="SAP__self.Container/JobHistoryAnalytics">
+            <Annotations Target="SAP__self.Container/DrsJobHistoryAnalytics">
                 <Annotation Term="SAP__capabilities.SearchRestrictions">
                     <Record>
                         <PropertyValue Property="Searchable" Bool="false"/>
@@ -5113,214 +5055,6 @@
                     </Collection>
                 </Annotation>
             </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/JobHistUuid">
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__UI.Hidden"/>
-                <Annotation Term="SAP__common.Label" String="UUID"/>
-                <Annotation Term="SAP__common.QuickInfo" String="16 Byte UUID in 16 Bytes (Raw Format)"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/JobUuid">
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__UI.Hidden"/>
-                <Annotation Term="SAP__common.Label" String="UUID"/>
-                <Annotation Term="SAP__common.QuickInfo" String="16 Byte UUID in 16 Bytes (Raw Format)"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/FileUuid">
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__UI.Hidden"/>
-                <Annotation Term="SAP__common.Label" String="UUID"/>
-                <Annotation Term="SAP__common.QuickInfo" String="16 Byte UUID in 16 Bytes (Raw Format)"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/FileName">
-                <Annotation Term="SAP__common.Label" String="File Name"/>
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.IsUpperCase"/>
-                <Annotation Term="SAP__common.QuickInfo" String="File Name Data Element"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/MimeType">
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.IsUpperCase"/>
-                <Annotation Term="SAP__UI.Hidden"/>
-                <Annotation Term="SAP__common.Label" String="Mime Type Data Element"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/FileContent">
-                <Annotation Term="SAP__core.ContentDisposition">
-                    <Record>
-                        <PropertyValue Property="Filename" Path="FileName"/>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__core.MediaType" Path="MimeType"/>
-                <Annotation Term="SAP__common.Label" String="File Download"/>
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.QuickInfo" String="Attachment Data Element"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/FileSize">
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__UI.Hidden"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/FileSizeDisplay">
-                <Annotation Term="SAP__common.Label" String="File Size"/>
-                <Annotation Term="SAP__core.Computed"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/FileCreatedAt">
-                <Annotation Term="SAP__common.Label" String="Generated At"/>
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.Heading" String="Time Stamp"/>
-                <Annotation Term="SAP__common.QuickInfo" String="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/FileCreatedBy">
-                <Annotation Term="SAP__common.Label" String="Generated By"/>
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.IsUpperCase"/>
-                <Annotation Term="SAP__common.Heading" String="User"/>
-                <Annotation Term="SAP__common.QuickInfo" String="User Name"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/ReportId">
-                <Annotation Term="SAP__common.Label" String="Report ID"/>
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.IsUpperCase"/>
-                <Annotation Term="SAP__common.QuickInfo" String="Report Identifier"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/JobName">
-                <Annotation Term="SAP__common.Label" String="Job Name"/>
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.IsUpperCase"/>
-                <Annotation Term="SAP__common.Heading" String="Background Job Name"/>
-                <Annotation Term="SAP__common.QuickInfo" String="Background Job Name"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/JobCount">
-                <Annotation Term="SAP__common.Label" String="Job Count"/>
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.Heading" String="Batch Job ID Number"/>
-                <Annotation Term="SAP__common.QuickInfo" String="Job ID"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/JobCatalogEntry">
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.IsUpperCase"/>
-                <Annotation Term="SAP__UI.Hidden"/>
-                <Annotation Term="SAP__common.Label" String="Job Catalog"/>
-                <Annotation Term="SAP__common.Heading" String="Job Catalog Entry"/>
-                <Annotation Term="SAP__common.QuickInfo" String="Application Job Catalog Entry"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/JobTemplateName">
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.IsUpperCase"/>
-                <Annotation Term="SAP__UI.Hidden"/>
-                <Annotation Term="SAP__common.Label" String="Job Template Name"/>
-                <Annotation Term="SAP__common.Heading" String="Application Job Template Name"/>
-                <Annotation Term="SAP__common.QuickInfo" String="Application Job Template Name"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/JobStatus">
-                <Annotation Term="SAP__common.Label" String="Job Status"/>
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.IsUpperCase"/>
-                <Annotation Term="SAP__common.Heading" String="Job status"/>
-                <Annotation Term="SAP__common.QuickInfo" String="State of Background Job"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/StartTimestamp">
-                <Annotation Term="SAP__common.Label" String="Start Timestamp"/>
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.Heading" String="Time Stamp"/>
-                <Annotation Term="SAP__common.QuickInfo" String="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/EndTimestamp">
-                <Annotation Term="SAP__common.Label" String="End Timestamp"/>
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.Heading" String="Time Stamp"/>
-                <Annotation Term="SAP__common.QuickInfo" String="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/DurationMs">
-                <Annotation Term="SAP__common.Label" String="Duration (ms)"/>
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.Heading" String="INT4"/>
-                <Annotation Term="SAP__common.QuickInfo" String="4 Byte Signed Integer"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/OutputFormat">
-                <Annotation Term="SAP__common.Label" String="Output Format"/>
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.IsUpperCase"/>
-                <Annotation Term="SAP__common.QuickInfo" String="Export Format"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/Message">
-                <Annotation Term="SAP__common.Label" String="Message"/>
-                <Annotation Term="SAP__core.Computed"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/RetryCount">
-                <Annotation Term="SAP__common.Label" String="Retry Count"/>
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.Heading" String="INT1"/>
-                <Annotation Term="SAP__common.QuickInfo" String="1 Byte Unsigned Integer"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/CreatedBy">
-                <Annotation Term="SAP__common.Label" String="Created By"/>
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.IsUpperCase"/>
-                <Annotation Term="SAP__common.Heading" String="User"/>
-                <Annotation Term="SAP__common.QuickInfo" String="User Name"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/CreatedAt">
-                <Annotation Term="SAP__common.Label" String="Created At"/>
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.Heading" String="Time Stamp"/>
-                <Annotation Term="SAP__common.QuickInfo" String="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/LastChangedBy">
-                <Annotation Term="SAP__common.Label" String="Last Changed By"/>
-                <Annotation Term="SAP__common.IsUpperCase"/>
-                <Annotation Term="SAP__common.Heading" String="User"/>
-                <Annotation Term="SAP__common.QuickInfo" String="User Name"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/LastChangedAt">
-                <Annotation Term="SAP__common.Label" String="Last Changed At"/>
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.Heading" String="Time Stamp"/>
-                <Annotation Term="SAP__common.QuickInfo" String="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/LocalLastChangedAt">
-                <Annotation Term="SAP__common.Label" String="Local Last Changed At"/>
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.Heading" String="Time Stamp"/>
-                <Annotation Term="SAP__common.QuickInfo" String="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/JobDate">
-                <Annotation Term="SAP__common.Label" String="Job Date"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/HasDraftEntity">
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.IsUpperCase"/>
-                <Annotation Term="SAP__UI.HiddenFilter"/>
-                <Annotation Term="SAP__UI.Hidden"/>
-                <Annotation Term="SAP__common.Label" String="Has Draft"/>
-                <Annotation Term="SAP__common.QuickInfo" String="Draft - Indicator - Has draft document"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/DraftEntityCreationDateTime">
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__UI.HiddenFilter"/>
-                <Annotation Term="SAP__UI.Hidden"/>
-                <Annotation Term="SAP__common.Label" String="Draft Created On"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/DraftEntityLastChangeDateTime">
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__UI.HiddenFilter"/>
-                <Annotation Term="SAP__UI.Hidden"/>
-                <Annotation Term="SAP__common.Label" String="Draft Last Changed On"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/HasActiveEntity">
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.IsUpperCase"/>
-                <Annotation Term="SAP__UI.HiddenFilter"/>
-                <Annotation Term="SAP__UI.Hidden"/>
-                <Annotation Term="SAP__common.Label" String="Has active"/>
-                <Annotation Term="SAP__common.QuickInfo" String="Draft - Indicator - Has active document"/>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/IsActiveEntity">
-                <Annotation Term="SAP__core.Computed"/>
-                <Annotation Term="SAP__common.IsUpperCase"/>
-                <Annotation Term="SAP__UI.HiddenFilter"/>
-                <Annotation Term="SAP__UI.Hidden"/>
-                <Annotation Term="SAP__common.Label" String="Is active"/>
-                <Annotation Term="SAP__common.QuickInfo" String="Draft - Indicator - Is active document"/>
-            </Annotations>
             <Annotations Target="SAP__self.Container/DrsJobHistory">
                 <Annotation Term="SAP__capabilities.NavigationRestrictions">
                     <Record>
@@ -5406,191 +5140,6 @@
                 </Annotation>
                 <Annotation Term="SAP__core.OptimisticConcurrency">
                     <Collection/>
-                </Annotation>
-            </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType">
-                <Annotation Term="SAP__common.Label" String="Job History Projection"/>
-                <Annotation Term="SAP__UI.Facets">
-                    <Collection>
-                        <Record Type="SAP__UI.ReferenceFacet">
-                            <PropertyValue Property="Label" String="General Information"/>
-                            <PropertyValue Property="ID" String="GeneralInfo"/>
-                            <PropertyValue Property="Target" AnnotationPath="@SAP__UI.FieldGroup#GeneralInfo"/>
-                        </Record>
-                        <Record Type="SAP__UI.ReferenceFacet">
-                            <PropertyValue Property="Label" String="Execution Details"/>
-                            <PropertyValue Property="ID" String="ExecutionDetails"/>
-                            <PropertyValue Property="Target" AnnotationPath="@SAP__UI.FieldGroup#ExecutionDetails"/>
-                        </Record>
-                        <Record Type="SAP__UI.ReferenceFacet">
-                            <PropertyValue Property="Label" String="Report File"/>
-                            <PropertyValue Property="ID" String="ReportFileDetails"/>
-                            <PropertyValue Property="Target" AnnotationPath="@SAP__UI.FieldGroup#ReportFileDetails"/>
-                        </Record>
-                        <Record Type="SAP__UI.ReferenceFacet">
-                            <PropertyValue Property="Label" String="Administrative Data"/>
-                            <PropertyValue Property="ID" String="AdminData"/>
-                            <PropertyValue Property="Target" AnnotationPath="@SAP__UI.FieldGroup#AdminData"/>
-                        </Record>
-                    </Collection>
-                </Annotation>
-                <Annotation Term="SAP__UI.FieldGroup" Qualifier="AdminData">
-                    <Record>
-                        <PropertyValue Property="Data">
-                            <Collection>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="CreatedBy"/>
-                                </Record>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="CreatedAt"/>
-                                </Record>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="LastChangedBy"/>
-                                </Record>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="LastChangedAt"/>
-                                </Record>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="LocalLastChangedAt"/>
-                                </Record>
-                            </Collection>
-                        </PropertyValue>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__UI.FieldGroup" Qualifier="ExecutionDetails">
-                    <Record>
-                        <PropertyValue Property="Data">
-                            <Collection>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Criticality" Path="JobStatusCriticality"/>
-                                    <PropertyValue Property="Value" Path="JobStatus"/>
-                                </Record>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="StartTimestamp"/>
-                                </Record>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="EndTimestamp"/>
-                                </Record>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="DurationMs"/>
-                                </Record>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="OutputFormat"/>
-                                </Record>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="Message"/>
-                                </Record>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="RetryCount"/>
-                                </Record>
-                            </Collection>
-                        </PropertyValue>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__UI.FieldGroup" Qualifier="GeneralInfo">
-                    <Record>
-                        <PropertyValue Property="Data">
-                            <Collection>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="ReportId"/>
-                                </Record>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="JobName"/>
-                                </Record>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="JobCount"/>
-                                </Record>
-                            </Collection>
-                        </PropertyValue>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__UI.FieldGroup" Qualifier="ReportFileDetails">
-                    <Record>
-                        <PropertyValue Property="Data">
-                            <Collection>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="FileName"/>
-                                </Record>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="FileContent"/>
-                                </Record>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="FileSizeDisplay"/>
-                                </Record>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="FileCreatedBy"/>
-                                </Record>
-                                <Record Type="SAP__UI.DataField">
-                                    <PropertyValue Property="Value" Path="FileCreatedAt"/>
-                                </Record>
-                            </Collection>
-                        </PropertyValue>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__UI.HeaderInfo">
-                    <Record>
-                        <PropertyValue Property="TypeName" String="Job History"/>
-                        <PropertyValue Property="TypeNamePlural" String="Job Histories"/>
-                        <PropertyValue Property="Title">
-                            <Record Type="SAP__UI.DataField">
-                                <PropertyValue Property="Value" Path="JobName"/>
-                            </Record>
-                        </PropertyValue>
-                        <PropertyValue Property="Description">
-                            <Record Type="SAP__UI.DataField">
-                                <PropertyValue Property="Value" Path="Message"/>
-                            </Record>
-                        </PropertyValue>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__UI.LineItem">
-                    <Collection>
-                        <Record Type="SAP__UI.DataField">
-                            <PropertyValue Property="Value" Path="ReportId"/>
-                            <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/High"/>
-                        </Record>
-                        <Record Type="SAP__UI.DataField">
-                            <PropertyValue Property="Value" Path="JobName"/>
-                            <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/High"/>
-                        </Record>
-                        <Record Type="SAP__UI.DataField">
-                            <PropertyValue Property="Criticality" Path="JobStatusCriticality"/>
-                            <PropertyValue Property="Value" Path="JobStatus"/>
-                            <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/High"/>
-                        </Record>
-                        <Record Type="SAP__UI.DataField">
-                            <PropertyValue Property="Value" Path="StartTimestamp"/>
-                            <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/High"/>
-                        </Record>
-                        <Record Type="SAP__UI.DataField">
-                            <PropertyValue Property="Value" Path="EndTimestamp"/>
-                            <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/High"/>
-                        </Record>
-                        <Record Type="SAP__UI.DataField">
-                            <PropertyValue Property="Value" Path="DurationMs"/>
-                            <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/Medium"/>
-                        </Record>
-                        <Record Type="SAP__UI.DataField">
-                            <PropertyValue Property="Value" Path="Message"/>
-                            <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/Medium"/>
-                        </Record>
-                        <Record Type="SAP__UI.DataField">
-                            <PropertyValue Property="Value" Path="CreatedAt"/>
-                            <Annotation Term="SAP__UI.Importance" EnumMember="SAP__UI.ImportanceType/Medium"/>
-                        </Record>
-                    </Collection>
-                </Annotation>
-                <Annotation Term="SAP__UI.SelectionFields">
-                    <Collection>
-                        <PropertyPath>JobDate</PropertyPath>
-                        <PropertyPath>CreatedBy</PropertyPath>
-                        <PropertyPath>ReportId</PropertyPath>
-                        <PropertyPath>OutputFormat</PropertyPath>
-                        <PropertyPath>FileName</PropertyPath>
-                    </Collection>
-                </Annotation>
-                <Annotation Term="Communication.Contact">
-                    <Record/>
                 </Annotation>
             </Annotations>
             <Annotations Target="SAP__self.VendorBalancesType/CompanyCode">
@@ -10839,25 +10388,22 @@
             <Annotations Target="SAP__self.DrsJobConfigType/JobStatusCriticality">
                 <Annotation Term="SAP__UI.Hidden"/>
             </Annotations>
-            <Annotations Target="SAP__self.DrsJobHistoryType/JobStatusCriticality">
-                <Annotation Term="SAP__UI.Hidden"/>
-            </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/JobHistUuid">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/JobHistUuid">
                 <Annotation Term="SAP__UI.Hidden"/>
                 <Annotation Term="SAP__common.Label" String="UUID"/>
                 <Annotation Term="SAP__common.QuickInfo" String="16 Byte UUID in 16 Bytes (Raw Format)"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/JobUuid">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/JobUuid">
                 <Annotation Term="SAP__UI.Hidden"/>
                 <Annotation Term="SAP__common.Label" String="UUID"/>
                 <Annotation Term="SAP__common.QuickInfo" String="16 Byte UUID in 16 Bytes (Raw Format)"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/FileUuid">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/FileUuid">
                 <Annotation Term="SAP__UI.Hidden"/>
                 <Annotation Term="SAP__common.Label" String="UUID"/>
                 <Annotation Term="SAP__common.QuickInfo" String="16 Byte UUID in 16 Bytes (Raw Format)"/>
             </Annotations>
-            <Annotations Target="SAP__self.JobHistoryAnalyticsType/JobStatusCriticality">
+            <Annotations Target="SAP__self.DrsJobHistoryAnalyticsType/JobStatusCriticality">
                 <Annotation Term="SAP__UI.Hidden"/>
             </Annotations>
             <Annotations Target="SAP__self.APAgingReportType/NetDueDate">
@@ -10931,3 +10477,4 @@
         </Schema>
     </edmx:DataServices>
 </edmx:Edmx>
+

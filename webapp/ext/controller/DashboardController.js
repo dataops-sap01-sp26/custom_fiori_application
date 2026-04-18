@@ -177,12 +177,12 @@ sap.ui.define([
         },
         
         /**
-         * Load chart data from JobHistoryAnalytics
+         * Load chart data from DrsJobHistoryAnalytics
          * @private
          */
         _loadChartData: function (oModel) {
             return new Promise(function (resolve) {
-                var oBinding = oModel.bindList("/JobHistoryAnalytics", undefined,
+                var oBinding = oModel.bindList("/DrsJobHistoryAnalytics", undefined,
                     [new Sorter("JobDate", true)]); // descending
                 
                 oBinding.requestContexts(0, 100).then(function (aContexts) {

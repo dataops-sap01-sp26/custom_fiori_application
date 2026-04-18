@@ -316,7 +316,7 @@
                 </Annotation>
             </Annotations>
 
-            <Annotations Target="com.sap.gateway.srvd.zsd_drs_main.v0001.JobHistoryAnalyticsType">
+            <Annotations Target="com.sap.gateway.srvd.zsd_drs_main.v0001.DrsJobHistoryAnalyticsType">
                 <!-- ═══ LINE ITEM: Columns ═══ -->
                 <Annotation Term="UI.LineItem">
                     <Collection>

@@ -436,7 +436,7 @@
                         <VBox class="sapUiResponsiveMargin drsPageContent">
                             <macros:FilterBar
                                 id="jobHistoryFilterBar"
-                                metaPath="/JobHistoryAnalytics/@com.sap.vocabularies.UI.v1.SelectionFields"
+                                metaPath="/DrsJobHistoryAnalytics/@com.sap.vocabularies.UI.v1.SelectionFields"
                                 liveMode="false"
                                 search=".onJobHistoryFilterSearch"/>
 
@@ -468,7 +468,7 @@
 
                             <macros:Table
                                 id="jobHistoryTable"
-                                metaPath="/JobHistoryAnalytics/@com.sap.vocabularies.UI.v1.LineItem"
+                                metaPath="/DrsJobHistoryAnalytics/@com.sap.vocabularies.UI.v1.LineItem"
                                 readOnly="true"
                                 enableExport="true"
                                 enableAutoColumnWidth="true"

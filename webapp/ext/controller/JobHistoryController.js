@@ -46,7 +46,7 @@ sap.ui.define([
         },
         
         /**
-         * Load chart data from JobHistoryAnalytics entity
+         * Load chart data from DrsJobHistoryAnalytics entity
          * @param {sap.fe.core.PageController} oController - Main controller reference
          */
         loadChartData: function (oController) {
@@ -56,7 +56,7 @@ sap.ui.define([
             this.configureChart(oController);
             
             var oModel = oController.getView().getModel();
-            var oBinding = oModel.bindList("/JobHistoryAnalytics", undefined, undefined, undefined, {
+            var oBinding = oModel.bindList("/DrsJobHistoryAnalytics", undefined, undefined, undefined, {
                 $orderby: "JobDate desc"
             });
             
