@@ -325,6 +325,10 @@
                             <PropertyValue Property="Label" String="Execution Date"/>
                         </Record>
                         <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="JobId"/>
+                            <PropertyValue Property="Label" String="Job ID"/>
+                        </Record>
+                        <Record Type="UI.DataField">
                             <PropertyValue Property="Value" Path="ReportId"/>
                             <PropertyValue Property="Label" String="Report ID"/>
                         </Record>
