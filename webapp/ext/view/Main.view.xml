@@ -390,7 +390,7 @@
                                 liveMode="false"/>
                             <macros:Table
                                 id="subscrTable"
-                                metaPath="/DrsSubscription/@com.sap.vocabularies.UI.v1.LineItem"
+                                metaPath="/DrsSubscription/@com.sap.vocabularies.UI.v1.PresentationVariant"
                                 readOnly="true"
                                 enableExport="true"
                                 enableAutoColumnWidth="true"
@@ -415,7 +415,7 @@
                                 liveMode="false"/>
                             <macros:Table
                                 id="jobConfigTable"
-                                metaPath="/DrsJobConfig/@com.sap.vocabularies.UI.v1.LineItem"
+                                metaPath="/DrsJobConfig/@com.sap.vocabularies.UI.v1.PresentationVariant"
                                 readOnly="true"
                                 enableExport="true"
                                 enableAutoColumnWidth="true"
@@ -468,7 +468,7 @@
 
                             <macros:Table
                                 id="jobHistoryTable"
-                                metaPath="/DrsJobHistoryAnalytics/@com.sap.vocabularies.UI.v1.LineItem"
+                                metaPath="/DrsJobHistoryAnalytics/@com.sap.vocabularies.UI.v1.PresentationVariant"
                                 readOnly="true"
                                 enableExport="true"
                                 enableAutoColumnWidth="true"
@@ -490,7 +490,7 @@
                                 liveMode="false"/>
                             <macros:Table
                                 id="exportsTable"
-                                metaPath="/DrsFile/@com.sap.vocabularies.UI.v1.LineItem"
+                                metaPath="/DrsFile/@com.sap.vocabularies.UI.v1.PresentationVariant"
                                 readOnly="true"
                                 enableExport="true"
                                 enableAutoColumnWidth="true"

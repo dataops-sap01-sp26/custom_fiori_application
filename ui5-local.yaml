@@ -40,7 +40,7 @@ server:
       configuration:
         mountPath: /
         services:
-          - urlPath: /sap/opu/odata4/sap/zui_drs_main_o4/srvd/sap/zsd_drs_main_o4/0001
+          - urlPath: /sap/opu/odata4/sap/zui_drs_main_o4/srvd/sap/zsd_drs_main/0001
             metadataPath: ./webapp/localService/mainService/metadata.xml
             mockdataPath: ./webapp/localService/mainService/data
             generateMockData: true
