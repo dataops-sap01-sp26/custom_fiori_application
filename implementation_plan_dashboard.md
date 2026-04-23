@@ -1,4 +1,4 @@
-﻿# Implementation Plan: Dashboard Screen
+# Implementation Plan: Dashboard Screen
 
 ## 1. Overview
 
@@ -159,7 +159,7 @@ sap.ui.define([
 ], function (BaseController, JSONModel, Filter, FilterOperator, Sorter) {
     "use strict";
 
-    return BaseController.extend("cfa.customfioriapplication.ext.controller.DashboardController", {
+    return BaseController.extend("z.sap01.cfa.ext.controller.DashboardController", {
         
         init: function (oController) {
             var oModel = new JSONModel({
@@ -263,25 +263,18 @@ sap.ui.define([
         
         /**
          * Navigate to a page by key
+         * Tất cả tab đều dùng NavContainer.to(). Chỉ Object Page mới dùng router.
          * CHÚ Ý: tham số (oController, sKey) — oController đứng TRƯỚC sKey
          */
-        navigateToPage: function (oController, sKey) {  // ← thứ tự tham số khác plan ban đầu
-            var mReportRoutes = {
-                exports: "ExportsListPage",
-                report_ap01: "AP01ListPage", report_ap02: "AP02ListPage", report_ap03: "AP03ListPage",
-                report_ar01: "AR01ListPage", report_ar02: "AR02ListPage", report_ar03: "AR03ListPage",
-                report_gl01: "GL01ListPage"
-            };
-            if (mReportRoutes[sKey]) {
-                oController.getAppComponent().getRouter().navTo(mReportRoutes[sKey]);
-                return;
-            }
+        navigateToPage: function (oController, sKey) {
             var oNavContainer = oController.byId("pageContainer");
             var oPage = oController.byId(sKey);
             if (oPage) {
                 oNavContainer.to(oPage);
                 var oSideNav = oController.byId("sideNavigation");
                 if (oSideNav) { oSideNav.setSelectedKey(sKey); }
+            } else {
+                console.warn("DashboardController: Page not found for key:", sKey);
             }
         }
         
@@ -290,7 +283,7 @@ sap.ui.define([
 });
 ```
 
-> **Cập nhật (List Report — My Exports + 7 reports):** Các key `exports` và `report_ap01` … `report_gl01` không còn `ScrollContainer` tương ứng trong `Main.view.xml`. `navigateToPage` (và `Main.controller.js` / `onItemSelect`) phải gọi `router.navTo("ExportsListPage")` hoặc `AP01ListPage` … `GL01ListPage` trước khi fallback `NavContainer.to`. Quick action "My Exports" (`targetPage="exports"`) cũng đi qua map này. Màn list là full-screen; quay lại dashboard bằng Back / breadcrumb.
+> **Lưu ý (kiến trúc hiện tại):** Tất cả tab (kể cả `exports` và `report_ap01`…`report_gl01`) đều có `ScrollContainer` riêng trong `Main.view.xml` và điều hướng qua `NavContainer.to()`. Không sử dụng `router.navTo()` hay `ListReport` route cho bất kỳ tab nào.
 
 ---
 
@@ -504,8 +497,8 @@ Replace the empty dashboard `ScrollContainer` with full content:
                         <Text text="{dashboard>SubscrName}"/>
                         <ObjectStatus
                             text="{dashboard>Status}"
-                            state="{= ${dashboard>Status} === 'ACTIVE' ? 'Success' : 'Warning'}"
-                            icon="{= ${dashboard>Status} === 'ACTIVE' ? 'sap-icon://accept' : 'sap-icon://pause'}"/>
+                            state="{= ${dashboard>Status} === 'A' ? 'Success' : 'Warning'}"
+                            icon="{= ${dashboard>Status} === 'A' ? 'sap-icon://accept' : 'sap-icon://pause'}"/>
                         <Text text="{dashboard>OutputFormat}"/>
                         <Text text="{dashboard>EmailTo}"/>
                     </ColumnListItem>
@@ -536,8 +529,8 @@ Replace the empty dashboard `ScrollContainer` with full content:
                         <Text text="{dashboard>JobText}"/>
                         <ObjectStatus
                             text="{dashboard>JobStatusText}"
-                            state="{= ${dashboard>JobStatus} === '3' ? 'Success' : (${dashboard>JobStatus} === '4' ? 'Error' : 'Warning')}"
-                            icon="{= ${dashboard>JobStatus} === '3' ? 'sap-icon://accept' : (${dashboard>JobStatus} === '4' ? 'sap-icon://error' : 'sap-icon://process')}"/>
+                            state="{= ${dashboard>JobStatus} === 'F' ? 'Success' : (${dashboard>JobStatus} === 'A' ? 'Error' : 'Warning')}"
+                            icon="{= ${dashboard>JobStatus} === 'F' ? 'sap-icon://accept' : (${dashboard>JobStatus} === 'A' ? 'sap-icon://error' : 'sap-icon://process')}"/>
                         <Text text="{dashboard>CreatedAt}"/>
                         <Text text="{dashboard>SubscrId}"/>
                     </ColumnListItem>
@@ -563,12 +556,13 @@ sap.ui.define([
     "../controller/JobConfigController",
     "../controller/SubscriptionController",
     "../controller/CatalogController",
-    "../controller/JobHistoryController"
+    "../controller/JobHistoryController",
+    "../controller/UserController"
 ], function (PageController, DashboardController, JobConfigController,
-             SubscriptionController, CatalogController, JobHistoryController) {
+             SubscriptionController, CatalogController, JobHistoryController, UserController) {
     "use strict";
 
-    return PageController.extend("cfa.customfioriapplication.ext.view.Main", {
+    return PageController.extend("z.sap01.cfa.ext.view.Main", {
 
         onInit: function () {
             PageController.prototype.onInit.apply(this, arguments);
@@ -578,14 +572,19 @@ sap.ui.define([
             this._subscriptionController = new SubscriptionController();
             this._catalogController = new CatalogController();
             this._jobHistoryController = new JobHistoryController();
+            this._userController = new UserController();
             
             this._dashboardController.init(this);
             this._jobHistoryController.init(this);
+            
+            // Initialize user session model
+            this._userController.init(this);
 
             var that = this;
             try {
                 var oRouter = this.getAppComponent().getRouter();
                 oRouter.getRoute("DashboardMainPage").attachPatternMatched(function () {
+                    that._userController.loadUserSession(that);
                     that._dashboardController.loadDashboardData(that);
                     setTimeout(function () {
                         that._jobConfigController.refreshTable(that);
@@ -617,11 +616,17 @@ sap.ui.define([
         onKpiTilePress: function (oEvent) {
             var sTargetPage = oEvent.getSource().data("targetPage");
             this._dashboardController.navigateToPage(this, sTargetPage);
+            // Trigger data load for pages that need it
+            if (sTargetPage === "catalog") { this._catalogController.initCatalog(this); }
+            else if (sTargetPage === "history") { this._jobHistoryController.loadChartData(this); }
         },
 
         onQuickActionPress: function (oEvent) {
             var sTargetPage = oEvent.getSource().data("targetPage");
             this._dashboardController.navigateToPage(this, sTargetPage);
+            // Trigger data load for pages that need it
+            if (sTargetPage === "catalog") { this._catalogController.initCatalog(this); }
+            else if (sTargetPage === "history") { this._jobHistoryController.loadChartData(this); }
         },
 
         onViewAllSubscriptions: function () {
@@ -639,6 +644,11 @@ sap.ui.define([
 
         onJobRowPress: function () {
             this._dashboardController.navigateToPage(this, "jobconfigs");
+        },
+
+        // Job History filter search — delegate sang JobHistoryController
+        onJobHistoryFilterSearch: function () {
+            this._jobHistoryController.onFilterSearch(this);
         }
     });
 });
