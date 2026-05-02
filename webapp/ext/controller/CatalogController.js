@@ -218,34 +218,48 @@ sap.ui.define([
 
         /**
          * Handle tile press - show ActionSheet with Preview and Create Subscription
+         * Authorization: HEAD_ACCT role cannot create subscriptions (monitoring only)
          */
         _onTilePress: function (oController, sReportId, oSource) {
             var that = this;
+            
+            // Check user role for authorization
+            var oUserModel = oController.getView().getModel("userSession");
+            var bIsHeadAcct = oUserModel ? oUserModel.getProperty("/isHeadAcct") : false;
+            var sRoleId = oUserModel ? oUserModel.getProperty("/roleId") : "";
             
             // Destroy previous ActionSheet if exists
             if (this._oActionSheet) {
                 this._oActionSheet.destroy();
             }
             
+            // Build button list based on role
+            var aButtons = [
+                new Button({
+                    text: "Preview Report",
+                    icon: "sap-icon://display",
+                    press: function () {
+                        that._navigateToPreview(oController, sReportId);
+                    }
+                })
+            ];
+            
+            // Only add "Create Subscription" button if NOT HEAD_ACCT
+            // HEAD_ACCT can only monitor (view Job History/Files), not create subscriptions
+            if (!bIsHeadAcct && sRoleId !== "ZDRS_HEAD_ACCT") {
+                aButtons.push(new Button({
+                    text: "Create Subscription",
+                    icon: "sap-icon://add-activity",
+                    press: function () {
+                        that._createSubscription(oController, sReportId);
+                    }
+                }));
+            }
+            
             this._oActionSheet = new ActionSheet({
                 title: sReportId,
                 showCancelButton: true,
-                buttons: [
-                    new Button({
-                        text: "Preview Report",
-                        icon: "sap-icon://display",
-                        press: function () {
-                            that._navigateToPreview(oController, sReportId);
-                        }
-                    }),
-                    new Button({
-                        text: "Create Subscription",
-                        icon: "sap-icon://add-activity",
-                        press: function () {
-                            that._createSubscription(oController, sReportId);
-                        }
-                    })
-                ],
+                buttons: aButtons,
                 afterClose: function () {
                     that._oActionSheet.destroy();
                     that._oActionSheet = null;
@@ -332,8 +346,19 @@ sap.ui.define([
         
         /**
          * Create subscription with selected report pre-filled
+         * Authorization: HEAD_ACCT role cannot create subscriptions (monitoring only)
          */
         onCreateSubscription: function (oController, oSubscriptionController) {
+            // Check authorization - HEAD_ACCT cannot create subscriptions
+            var oUserModel = oController.getView().getModel("userSession");
+            var bIsHeadAcct = oUserModel ? oUserModel.getProperty("/isHeadAcct") : false;
+            var sRoleId = oUserModel ? oUserModel.getProperty("/roleId") : "";
+            
+            if (bIsHeadAcct || sRoleId === "ZDRS_HEAD_ACCT") {
+                this.showWarning("You are not authorized to create subscriptions. HEAD_ACCT role has monitoring access only.");
+                return;
+            }
+            
             var aContexts = this.getTableSelectedContexts(oController, "catalogTable");
             
             if (!aContexts || aContexts.length === 0) {

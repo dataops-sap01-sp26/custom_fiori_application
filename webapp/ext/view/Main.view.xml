@@ -27,12 +27,12 @@
                     <!-- Nhóm 2: Core Master Data -->
                     <tnt:NavigationListItem text="Master Data" icon="sap-icon://database">
                         <tnt:NavigationListItem text="Report Catalog" icon="sap-icon://education" key="catalog" />
-                        <tnt:NavigationListItem text="Subscriptions" icon="sap-icon://form" key="subscriptions" />
+                        <tnt:NavigationListItem id="navItemSubscriptions" text="Subscriptions" icon="sap-icon://form" key="subscriptions" />
                     </tnt:NavigationListItem>
 
                     <!-- Nhóm 3: Operations & Monitoring -->
                     <tnt:NavigationListItem text="Job Operations" icon="sap-icon://process">
-                        <tnt:NavigationListItem text="Job Configurations" icon="sap-icon://action-settings" key="jobconfigs" />
+                        <tnt:NavigationListItem id="navItemJobConfig" text="Job Configurations" icon="sap-icon://action-settings" key="jobconfigs" />
                         <tnt:NavigationListItem text="Job History &amp; Logs" icon="sap-icon://history" key="history" />
                     </tnt:NavigationListItem>
 
@@ -41,15 +41,9 @@
                         <tnt:NavigationListItem text="My Exports (Files)" icon="sap-icon://download" key="exports" />
                     </tnt:NavigationListItem>
 
-                    <!-- Nhóm 5: Reports -->
-                    <tnt:NavigationListItem text="Reports" icon="sap-icon://manager-insight">
-                        <tnt:NavigationListItem text="Report AP-01" icon="sap-icon://money-bills" key="report_ap01" />
-                        <tnt:NavigationListItem text="Report AP-02" icon="sap-icon://supplier" key="report_ap02" />
-                        <tnt:NavigationListItem text="Report AP-03" icon="sap-icon://payment-approval" key="report_ap03" />
-                        <tnt:NavigationListItem text="Report AR-01" icon="sap-icon://customer-financial-fact-sheet" key="report_ar01" />
-                        <tnt:NavigationListItem text="Report AR-02" icon="sap-icon://receipt" key="report_ar02" />
-                        <tnt:NavigationListItem text="Report AR-03" icon="sap-icon://sales-document" key="report_ar03" />
-                        <tnt:NavigationListItem text="Report GL-01" icon="sap-icon://accounting-document-verification" key="report_gl01" />
+                    <!-- Nhóm 5: Reports - DYNAMICALLY LOADED by SidebarController -->
+                    <tnt:NavigationListItem id="reportsNavigationGroup" text="Reports" icon="sap-icon://manager-insight" visible="false">
+                        <!-- Child items loaded dynamically based on user's ZDRS_REP authorization -->
                     </tnt:NavigationListItem>
                 </tnt:NavigationList>
             </tnt:SideNavigation>

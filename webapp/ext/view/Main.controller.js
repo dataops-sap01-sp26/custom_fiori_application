@@ -5,9 +5,10 @@ sap.ui.define([
     "../controller/SubscriptionController",
     "../controller/CatalogController",
     "../controller/JobHistoryController",
-    "../controller/UserController"
+    "../controller/UserController",
+    "../controller/SidebarController"
 ], function (PageController, DashboardController, JobConfigController,
-             SubscriptionController, CatalogController, JobHistoryController, UserController) {
+             SubscriptionController, CatalogController, JobHistoryController, UserController, SidebarController) {
     "use strict";
 
     /**
@@ -25,6 +26,13 @@ sap.ui.define([
         onInit: function () {
             PageController.prototype.onInit.apply(this, arguments);
 
+            // ═══════════════════════════════════════════════════════════════
+            // BLOCK UI until authorization is verified
+            // ═══════════════════════════════════════════════════════════════
+            var oView = this.getView();
+            oView.setBusy(true);
+            oView.setBusyIndicatorDelay(0); // Show immediately
+
             // Initialize domain controllers
             this._dashboardController = new DashboardController();
             this._jobConfigController = new JobConfigController();
@@ -32,6 +40,7 @@ sap.ui.define([
             this._catalogController = new CatalogController();
             this._jobHistoryController = new JobHistoryController();
             this._userController = new UserController();
+            this._sidebarController = new SidebarController();
             
             // Initialize dashboard and chart models
             this._dashboardController.init(this);
@@ -46,7 +55,16 @@ sap.ui.define([
                 var oRouter = this.getAppComponent().getRouter();
                 oRouter.getRoute("DashboardMainPage").attachPatternMatched(function () {
                     // Load user session (OData model ready here)
-                    that._userController.loadUserSession(that);
+                    // Authorization check happens inside loadUserSession()
+                    // Pass callback to update navigation visibility after user data loads
+                    that._userController.loadUserSession(that, function() {
+                        that._updateNavigationVisibility();
+                    });
+                    
+                    // Load sidebar reports AFTER user session loaded
+                    // Only authorized reports will be shown (DCL filtering)
+                    that._sidebarController.loadReportMenu(that);
+                    
                     // Load dashboard data on initial page load
                     that._dashboardController.loadDashboardData(that);
                     setTimeout(function () {
@@ -56,6 +74,45 @@ sap.ui.define([
             } catch (e) {
                 // Router not ready - load dashboard data directly
                 this._dashboardController.loadDashboardData(this);
+            }
+        },
+
+        // ═══════════════════════════════════════════════════════════════
+        // ROLE-BASED UI VISIBILITY CONTROL
+        // ═══════════════════════════════════════════════════════════════
+
+        /**
+         * Hide Subscription and Job Config navigation items for HEAD_ACCT role
+         * HEAD_ACCT should only monitor Job History/Files, not create/manage subscriptions
+         * 
+         * Implementation: Phase 4 - Frontend Updates (Authorization v2.1)
+         */
+        _updateNavigationVisibility: function() {
+            var oUserModel = this.getView().getModel("userSession");
+            
+            // Wait for user session to load
+            if (!oUserModel || !oUserModel.getProperty("/isLoaded")) {
+                console.warn("Main.controller: User session not loaded yet, skipping navigation visibility update");
+                return;
+            }
+            
+            var sRoleId = oUserModel.getProperty("/roleId");
+            var bIsHeadAcct = oUserModel.getProperty("/isHeadAcct");
+            
+            // Hide subscription and job config menu for HEAD_ACCT
+            if (bIsHeadAcct || sRoleId === "ZDRS_HEAD_ACCT") {
+                var oSubscrItem = this.byId("navItemSubscriptions");
+                var oJobConfigItem = this.byId("navItemJobConfig");
+                
+                if (oSubscrItem) {
+                    oSubscrItem.setVisible(false);
+                    console.log("Main.controller: Hidden Subscriptions menu for HEAD_ACCT role");
+                }
+                
+                if (oJobConfigItem) {
+                    oJobConfigItem.setVisible(false);
+                    console.log("Main.controller: Hidden Job Config menu for HEAD_ACCT role");
+                }
             }
         },
 

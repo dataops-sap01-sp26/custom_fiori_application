@@ -7,19 +7,14 @@ sap.ui.define([
     "sap/m/Label",
     "sap/m/Text",
     "sap/ui/core/Item",
-    "sap/m/MessageBox"
-], function (BaseController, Dialog, Button, Select, VBox, Label, Text, Item, MessageBox) {
+    "sap/m/MessageBox",
+    "sap/ui/model/Sorter"
+], function (BaseController, Dialog, Button, Select, VBox, Label, Text, Item, MessageBox, Sorter) {
     var ACTION_NS = "com.sap.gateway.srvd.zsd_drs_main.v0001";
-    var REPORT_OPTIONS = [
-        { key: "", text: "-- Select a Report --" },
-        { key: "GL-01", text: "GL-01 - GL Account Balances" },
-        { key: "AR-01", text: "AR-01 - Customer Open Items" },
-        { key: "AR-02", text: "AR-02 - Customer Balances" },
-        { key: "AR-03", text: "AR-03 - AR Aging Report" },
-        { key: "AP-01", text: "AP-01 - Vendor Open Items" },
-        { key: "AP-02", text: "AP-02 - Vendor Balances" },
-        { key: "AP-03", text: "AP-03 - AP Aging Report" }
-    ];
+    
+    // REMOVED: Hardcoded REPORT_OPTIONS array
+    // Reports are now loaded dynamically from /ReportCatalog with DCL filtering
+    
     "use strict";
 
     /**
@@ -31,21 +26,22 @@ sap.ui.define([
         
         /**
          * Show dialog to select Report ID before creating subscription
+         * Loads authorized reports from /ReportCatalog (DCL filtered by ZDRS_REP)
          * @param {sap.fe.core.PageController} oController - Main controller reference
          */
         showCreateDialog: function (oController) {
             var that = this;
+            var oModel = oController.getView().getModel();
             
             // Create dialog if not exists
             if (!this._oReportSelectDialog) {
-                var aItems = REPORT_OPTIONS.map(function (oOpt) {
-                    return new Item({ key: oOpt.key, text: oOpt.text });
-                });
-                
+                // Create empty Select - items will be loaded dynamically
                 var oSelect = new Select({
                     id: "reportIdSelect_" + Date.now(), // Unique ID
                     width: "100%",
-                    items: aItems
+                    items: [
+                        new Item({ key: "", text: "-- Loading reports... --" })
+                    ]
                 });
                 this._oReportSelect = oSelect;
                 
@@ -58,7 +54,7 @@ sap.ui.define([
                                 new Label({ text: "Select Report Type", required: true }),
                                 oSelect,
                                 new Text({
-                                    text: "Note: Parameters will be auto-created based on report type.",
+                                    text: "Note: Only reports you are authorized to access are shown.",
                                     wrapping: true
                                 }).addStyleClass("sapUiTinyMarginTop sapUiTinyMarginBottom")
                             ]
@@ -86,6 +82,56 @@ sap.ui.define([
                 });
                 oController.getView().addDependent(this._oReportSelectDialog);
             }
+            
+            // Load authorized reports from ReportCatalog (DCL filtered)
+            this._oReportSelectDialog.setBusy(true);
+            var oBinding = oModel.bindList("/ReportCatalog", undefined, [
+                new Sorter("ModuleId", false),
+                new Sorter("SortOrder", false)
+            ]);
+            
+            oBinding.requestContexts(0, 999).then(function (aContexts) {
+                var aReports = aContexts.map(function (oCtx) {
+                    return oCtx.getObject();
+                });
+                
+                // Filter to active reports only
+                var aActiveReports = aReports.filter(function (r) {
+                    return r.IsActive === "X" || r.IsActive === true;
+                });
+                
+                console.log("SubscriptionController: Loaded " + aActiveReports.length + " authorized reports");
+                
+                // Build Select items
+                var aItems = [
+                    new Item({ key: "", text: "-- Select a Report --" })
+                ];
+                
+                aActiveReports.forEach(function (oReport) {
+                    aItems.push(new Item({
+                        key: oReport.ReportId,
+                        text: oReport.ReportId + " - " + oReport.ReportName
+                    }));
+                });
+                
+                // Update Select control
+                that._oReportSelect.destroyItems();
+                aItems.forEach(function (oItem) {
+                    that._oReportSelect.addItem(oItem);
+                });
+                
+                that._oReportSelectDialog.setBusy(false);
+                
+                // Show warning if no reports found
+                if (aActiveReports.length === 0) {
+                    that.showWarning("No reports available. You may not have authorization to create subscriptions.");
+                }
+                
+            }).catch(function (oError) {
+                console.error("SubscriptionController: Failed to load reports", oError);
+                that._oReportSelectDialog.setBusy(false);
+                that.showError("Unable to load reports. Please try again.");
+            });
             
             // Reset selection and open dialog
             this._oReportSelect.setSelectedKey("");

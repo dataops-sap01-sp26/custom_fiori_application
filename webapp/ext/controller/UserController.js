@@ -1,7 +1,8 @@
 sap.ui.define([
     "./BaseController",
-    "sap/ui/model/json/JSONModel"
-], function (BaseController, JSONModel) {
+    "sap/ui/model/json/JSONModel",
+    "sap/m/MessageBox"
+], function (BaseController, JSONModel, MessageBox) {
     "use strict";
 
     /**
@@ -36,8 +37,9 @@ sap.ui.define([
         /**
          * Load current user session from OData service
          * @param {sap.fe.core.PageController} oController - Main controller reference
+         * @param {Function} fnCallback - Optional callback executed after successful load
          */
-        loadUserSession: function (oController) {
+        loadUserSession: function (oController, fnCallback) {
             var oODataModel = oController.getView().getModel();
             var oUserModel = oController.getView().getModel("userSession");
             
@@ -49,6 +51,10 @@ sap.ui.define([
             
             // Prevent duplicate loading
             if (oUserModel.getProperty("/isLoaded")) {
+                // Already loaded - execute callback if provided
+                if (fnCallback && typeof fnCallback === "function") {
+                    fnCallback();
+                }
                 return;
             }
             
@@ -58,6 +64,41 @@ sap.ui.define([
             
             oBinding.requestObject().then(function (oData) {
                 if (oData) {
+                    // ═══════════════════════════════════════════════════════════
+                    // AUTHORIZATION CHECK - Block unauthorized users
+                    // ═══════════════════════════════════════════════════════════
+                    var bIsAuthorized = oData.RoleId && 
+                                       oData.RoleId.startsWith('ZDRS_') &&
+                                       oData.RoleId !== 'NO_ROLE';
+                    
+                    if (!bIsAuthorized) {
+                        // User does not have DRS role - BLOCK ACCESS
+                        MessageBox.error(
+                            "You are not authorized to access this application.\n\n" +
+                            "Required: ZDRS role assignment (ZDRS_ADMIN, ZDRS_FI_AR_STAFF, etc.)\n\n" +
+                            "Please contact IT Support to request access.",
+                            {
+                                title: "Access Denied",
+                                styleClass: "sapUiSizeCompact",
+                                onClose: function() {
+                                    // Navigate back to launchpad or close window
+                                    if (window.history.length > 1) {
+                                        window.history.back();
+                                    } else {
+                                        window.close();
+                                    }
+                                }
+                            }
+                        );
+                        
+                        // Keep busy indicator to block UI
+                        // Do NOT call setBusy(false)
+                        return; // Stop processing
+                    }
+                    
+                    // ═══════════════════════════════════════════════════════════
+                    // User is AUTHORIZED - Proceed with normal flow
+                    // ═══════════════════════════════════════════════════════════
                     oUserModel.setData({
                         userId: oData.UserId,
                         userFullName: oData.UserFullName,
@@ -73,13 +114,34 @@ sap.ui.define([
                         companyCodeList: oData.CompanyCodeList,
                         isLoaded: true
                     });
+                    
+                    // Remove busy indicator - user is authorized
+                    oController.getView().setBusy(false);
+                    
+                    // Execute callback if provided (for role-based UI updates)
+                    if (fnCallback && typeof fnCallback === "function") {
+                        fnCallback();
+                    }
                 }
             }).catch(function (oError) {
                 console.error("Failed to load user session:", oError);
-                // Set fallback values for graceful degradation
-                oUserModel.setProperty("/userFullName", "User");
-                oUserModel.setProperty("/roleName", "Unknown Role");
-                oUserModel.setProperty("/isLoaded", true);
+                
+                // Show error dialog for service failure
+                MessageBox.error(
+                    "Unable to verify your authorization. Please try again.\n\n" +
+                    "If the problem persists, contact IT Support.",
+                    {
+                        title: "Authentication Error",
+                        styleClass: "sapUiSizeCompact",
+                        onClose: function() {
+                            if (window.history.length > 1) {
+                                window.history.back();
+                            } else {
+                                window.close();
+                            }
+                        }
+                    }
+                );
             });
         }
     });
