@@ -60,7 +60,7 @@ sap.ui.define([
                     that._userController.loadUserSession(that, function() {
                         that._updateNavigationVisibility();
                     });
-                    
+                     
                     // Load sidebar reports AFTER user session loaded
                     // Only authorized reports will be shown (DCL filtering)
                     that._sidebarController.loadReportMenu(that);

@@ -316,65 +316,6 @@ sap.ui.define([
         onRefreshCatalog: function (oController) {
             this.loadCatalog(oController);
             this.showMessage("Reports refreshed");
-        },
-
-        // ═══════════════════════════════════════════════════════════════
-        // LEGACY METHODS (kept for backwards compatibility)
-        // ═══════════════════════════════════════════════════════════════
-        
-        /**
-         * Preview selected report - kept for macros:Table compatibility
-         */
-        onPreview: function (oController) {
-            var aContexts = this.getTableSelectedContexts(oController, "catalogTable");
-            
-            if (!aContexts || aContexts.length === 0) {
-                this.showMessage("Please select a report to preview");
-                return;
-            }
-            
-            var sReportId = aContexts[0].getProperty("ReportId");
-            var bIsActive = aContexts[0].getProperty("IsActive");
-            
-            if (!bIsActive) {
-                this.showMessage("Cannot preview inactive report");
-                return;
-            }
-            
-            this._onTilePress(oController, sReportId);
-        },
-        
-        /**
-         * Create subscription with selected report pre-filled
-         * Authorization: HEAD_ACCT role cannot create subscriptions (monitoring only)
-         */
-        onCreateSubscription: function (oController, oSubscriptionController) {
-            // Check authorization - HEAD_ACCT cannot create subscriptions
-            var oUserModel = oController.getView().getModel("userSession");
-            var bIsHeadAcct = oUserModel ? oUserModel.getProperty("/isHeadAcct") : false;
-            var sRoleId = oUserModel ? oUserModel.getProperty("/roleId") : "";
-            
-            if (bIsHeadAcct || sRoleId === "ZDRS_HEAD_ACCT") {
-                this.showWarning("You are not authorized to create subscriptions. HEAD_ACCT role has monitoring access only.");
-                return;
-            }
-            
-            var aContexts = this.getTableSelectedContexts(oController, "catalogTable");
-            
-            if (!aContexts || aContexts.length === 0) {
-                this.showMessage("Please select a report");
-                return;
-            }
-            
-            var sReportId = aContexts[0].getProperty("ReportId");
-            var bIsActive = aContexts[0].getProperty("IsActive");
-            
-            if (!bIsActive) {
-                this.showMessage("Cannot create subscription for inactive report");
-                return;
-            }
-            
-            oSubscriptionController.createWithReportId(oController, sReportId);
         }
     });
 });
