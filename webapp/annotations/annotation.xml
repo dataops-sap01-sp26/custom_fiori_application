@@ -1003,6 +1003,28 @@
 
         </Annotations>
 
+        <!-- ═══════════════════════════════════════════════════════════════════════════ -->
+        <!-- INSERT RESTRICTIONS: Hide framework-generated Create button at metadata    -->
+        <!-- layer (more reliable than UI.CreateHidden, avoids race condition where     -->
+        <!-- both the default Create and the custom Create button render together).     -->
+        <!-- Custom Create actions in Main.view.xml remain unaffected.                  -->
+        <!-- ═══════════════════════════════════════════════════════════════════════════ -->
+        <Annotations Target="com.sap.gateway.srvd.zsd_drs_main.v0001.Container/DrsJobConfig">
+            <Annotation Term="Capabilities.InsertRestrictions">
+                <Record Type="Capabilities.InsertRestrictionsType">
+                    <PropertyValue Property="Insertable" Bool="false"/>
+                </Record>
+            </Annotation>
+        </Annotations>
+
+        <Annotations Target="com.sap.gateway.srvd.zsd_drs_main.v0001.Container/DrsSubscription">
+            <Annotation Term="Capabilities.InsertRestrictions">
+                <Record Type="Capabilities.InsertRestrictionsType">
+                    <PropertyValue Property="Insertable" Bool="false"/>
+                </Record>
+            </Annotation>
+        </Annotations>
+
         </Schema>
     </edmx:DataServices>
 </edmx:Edmx>
