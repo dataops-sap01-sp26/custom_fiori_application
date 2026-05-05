@@ -1951,7 +1951,7 @@
                 <Annotation Term="SAP__common.Label" String="Job History Cube for Analytics" />
                 <Annotation Term="SAP__UI.Chart" Qualifier="ChartDefault">
                     <Record Type="SAP__UI.ChartDefinitionType">
-                        <PropertyValue Property="Title" String="Job Executions by Date & Status" />
+                        <PropertyValue Property="Title" String="Job Executions by Date &amp; Status" />
                         <PropertyValue Property="ChartType" EnumMember="SAP__UI.ChartType/ColumnStacked" />
                         <PropertyValue Property="Dimensions">
                             <Collection>
@@ -7054,7 +7054,7 @@
                             <PropertyValue Property="Target" AnnotationPath="@SAP__UI.FieldGroup#PeriodicSettings" />
                         </Record>
                         <Record Type="SAP__UI.ReferenceFacet">
-                            <PropertyValue Property="Label" String="Weekday & Week-of-Month (W, WM)" />
+                            <PropertyValue Property="Label" String="Weekday &amp; Week-of-Month (W, WM)" />
                             <PropertyValue Property="ID" String="WeekdaySettings" />
                             <PropertyValue Property="Target" AnnotationPath="@SAP__UI.FieldGroup#WeekdaySettings" />
                         </Record>
@@ -8674,7 +8674,7 @@
                             <PropertyValue Property="Target" AnnotationPath="@SAP__UI.FieldGroup#GeneralInfo" />
                         </Record>
                         <Record Type="SAP__UI.ReferenceFacet">
-                            <PropertyValue Property="Label" String="Output & Delivery" />
+                            <PropertyValue Property="Label" String="Output &amp; Delivery" />
                             <PropertyValue Property="ID" String="DeliverySettings" />
                             <PropertyValue Property="Target" AnnotationPath="@SAP__UI.FieldGroup#DeliverySettings" />
                         </Record>
